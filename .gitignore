@@ -1,0 +1,186 @@
+##########################
+# Secrets / Credentials #
+##########################
+**/*service-account*.json
+**/*service_account*.json
+**/*gcp*.json
+**/google-credentials*.json
+**/*-credentials*.json
+**/credentials.json
+**/appsettings.Development.json
+**/appsettings.*.json
+**/appsettings.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+###################
+# .NET / C# / VS  #
+###################
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+
+########################
+# Node.js / JavaScript #
+########################
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Cache
+.npm
+.eslintcache
+.cache/
+.parcel-cache/
+.vite/
+
+# Testing
+coverage/
+
+######################
+# React Native       #
+######################
+# Metro bundler
+.metro-health-check*
+
+# Expo
+.expo/
+.expo-shared/
+
+# Android
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+local.properties
+.gradle/
+captures/
+*.iml
+.externalNativeBuild
+.cxx/
+
+# iOS
+ios/Pods/
+ios/build/
+*.xcworkspace
+!default.xcworkspace
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+
+# Keystore files (IMPORTANT: Keep these secure!)
+*.jks
+*.keystore
+*.p12
+
+###################
+# Docker          #
+###################
+docker-compose.override.yml
+.dockerignore
+
+###################
+# OS Files        #
+###################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+###################
+# IDEs            #
+###################
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+###################
+# Logs            #
+###################
+*.log
+logs/
+*.log.*

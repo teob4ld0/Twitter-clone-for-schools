@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generador de Iconos - Twittetec</title>
+</head>
+<body>
+    <h1>Generador de Iconos Placeholder para Twittetec</h1>
+    <p>Abre la consola del navegador (F12) y ejecuta esta página para generar los iconos.</p>
+    <p>Los iconos se descargarán automáticamente.</p>
+    
+    <script>
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo azul Twitter-like
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#1da1f2');
+            gradient.addColorStop(1, '#0d8bd9');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Letra T en blanco
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${size * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('T', size / 2, size / 2);
+            
+            return canvas;
+        }
+        
+        function downloadIcon(canvas, filename) {
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Generar y descargar iconos
+        console.log('Generando iconos...');
+        
+        setTimeout(() => {
+            const icon72 = createIcon(72);
+            downloadIcon(icon72, 'badge-72.png');
+        }, 100);
+        
+        setTimeout(() => {
+            const icon192 = createIcon(192);
+            downloadIcon(icon192, 'icon-192.png');
+        }, 500);
+        
+        setTimeout(() => {
+            const icon512 = createIcon(512);
+            downloadIcon(icon512, 'icon-512.png');
+        }, 1000);
+        
+        setTimeout(() => {
+            document.body.innerHTML += '<p style="color: green; font-weight: bold;">✓ Iconos generados! Revisa tus descargas y muévelos a la carpeta /public/</p>';
+        }, 1500);
+    </script>
+</body>
+</html>

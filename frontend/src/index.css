@@ -1,0 +1,74 @@
+/* Reset y configuración base para mobile-first */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Previene zoom en iOS cuando se hace focus en inputs */
+  -webkit-text-size-adjust: 100%;
+  /* Mejora el scroll en iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  background-color: #f5f8fa;
+  margin: 0;
+  padding: 0;
+  /* Previene bounce scrolling en iOS */
+  overscroll-behavior-y: none;
+  /* Mejora el touch */
+  touch-action: manipulation;
+}
+
+/* Animación para el spinner de carga */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mejoras para formularios */
+input, textarea {
+  font-family: inherit;
+  /* Previene zoom en iOS cuando se hace focus */
+  font-size: 16px;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #1da1f2;
+}
+
+button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Clases de utilidad responsive */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  /* Mejoras para touch en mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
