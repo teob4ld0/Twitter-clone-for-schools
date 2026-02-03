@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PushSubscription> PushSubscriptions { get; set; }
+    public DbSet<ExpoPushToken> ExpoPushTokens { get; set; }
     public DbSet<InterestSignal> InterestSignals { get; set; }
 
 
