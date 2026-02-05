@@ -28,7 +28,6 @@ export default ({ config }) => {
         backgroundColor: "#ffffff"
       },
       package: "com.twittetec.mobile",
-      googleServicesFile: "./android/app/google-services.json",
       permissions: [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -37,7 +36,8 @@ export default ({ config }) => {
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.RECORD_AUDIO",
         "android.permission.POST_NOTIFICATIONS"
-      ]
+      ],
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json"
     },
     web: {
       favicon: "./assets/favicon.png"
