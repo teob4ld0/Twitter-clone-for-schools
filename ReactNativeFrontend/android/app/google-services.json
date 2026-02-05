@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "681726792868",
+    "project_id": "twittetec",
+    "storage_bucket": "twittetec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681726792868:android:71792990e48696930a4231",
+        "android_client_info": {
+          "package_name": "com.twittetec.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "681726792868-5i26ubkn8i3ajl0211lh6a64gk7rbbp4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr9zy7zXDEg4hAaIGUDIm2lnLE8XQ3G9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "681726792868-5i26ubkn8i3ajl0211lh6a64gk7rbbp4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
