@@ -236,15 +236,17 @@ const ProfileScreen = ({ route, navigation }) => {
     try {
       setUploadingProfilePicture(true);
 
-      // Preparar el archivo para enviar
-      const uriParts = asset.uri.split('.');
-      const fileType = uriParts[uriParts.length - 1];
+      // Preparar el archivo para enviar (ahora con mejor compatibilidad Android)
+      const mimeType = asset.mimeType || asset.type || 'image/jpeg';
+      const fileName = asset.fileName || `profile_${Date.now()}.jpg`;
 
       const file = {
         uri: asset.uri,
-        name: `profile.${fileType}`,
-        type: `image/${fileType}`,
+        name: fileName,
+        type: mimeType,
       };
+
+      console.log('📤 Subiendo foto de perfil:', { uri: file.uri, type: file.type, name: file.name });
 
       const resp = await usersAPI.updateProfilePicture(file);
       const newUrl = resp.data?.profilePictureUrl;
@@ -255,8 +257,8 @@ const ProfileScreen = ({ route, navigation }) => {
       setAvatarVersion(v => v + 1);
       Alert.alert('Éxito', 'Foto de perfil actualizada');
     } catch (err) {
-      console.error('Error updating profile picture:', err);
-      Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
+      console.error('❌ Error updating profile picture:', err);
+      Alert.alert('Error', `No se pudo actualizar la foto de perfil: ${err.message}`);
     } finally {
       setUploadingProfilePicture(false);
     }

@@ -149,17 +149,19 @@ export default function FeedScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#f7f9fa',
   },
   listContent: {
     flexGrow: 1,
+    paddingTop: 8,
     paddingBottom: 80,
+    paddingHorizontal: 12,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: '#f7f9fa',
   },
   loadingText: {
     marginTop: 12,
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: '#f7f9fa',
     padding: 20,
   },
   errorText: {
@@ -217,16 +219,16 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary,
+    backgroundColor: '#1da1f2',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: '#1da1f2',
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
   },
 });

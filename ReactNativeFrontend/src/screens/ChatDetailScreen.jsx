@@ -12,6 +12,7 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
@@ -29,6 +30,7 @@ export default function ChatDetailScreen({ route, navigation }) {
   const { chatId, otherUser } = route.params;
   const dispatch = useDispatch();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const { messages, loading, error, chats, selectedChatId } = useSelector((state) => state.chat);
   const chatMessages = messages[chatId] || [];
   
@@ -89,16 +91,23 @@ export default function ChatDetailScreen({ route, navigation }) {
           return;
         }
 
+        // Usar el mimeType normalizado del imagePicker
+        const mimeType = asset.mimeType || asset.type || 'image/jpeg';
+        const fileName = asset.fileName || `media_${Date.now()}.${mimeType.split('/')[1] || 'jpg'}`;
+
         setFileError('');
         setMediaFile({
           uri: asset.uri,
-          type: asset.type === 'video' ? 'video/mp4' : 'image/jpeg',
-          name: asset.fileName || `media_${Date.now()}.${asset.type === 'video' ? 'mp4' : 'jpg'}`,
+          type: mimeType,
+          name: fileName,
+          fileName: fileName,
           fileSize: asset.fileSize,
         });
+        
+        console.log('📎 Archivo seleccionado:', { uri: asset.uri, type: mimeType, name: fileName });
       }
     } catch (error) {
-      console.error('Error picking media:', error);
+      console.error('❌ Error picking media:', error);
       Alert.alert('Error', 'No se pudo seleccionar el archivo');
     }
   };
@@ -219,7 +228,7 @@ export default function ChatDetailScreen({ route, navigation }) {
         renderItem={({ item }) => (
           <MessageItem
             message={item}
-            isOwn={item.senderId === user?.id}
+            currentUserId={user?.id}
             onDelete={item.senderId === user?.id ? () => handleDeleteMessage(item.id) : undefined}
           />
         )}
@@ -240,7 +249,7 @@ export default function ChatDetailScreen({ route, navigation }) {
       />
 
       {/* Input Container */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 10) }]}>
         {/* File Error */}
         {fileError ? (
           <View style={styles.fileErrorContainer}>
@@ -321,13 +330,13 @@ export default function ChatDetailScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: '#fff',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: '#f7f9fa',
     padding: 20,
   },
   loadingText: {
@@ -363,7 +372,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   messagesList: {
-    padding: 10,
+    padding: 12,
     flexGrow: 1,
   },
   emptyContainer: {
@@ -381,10 +390,12 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderTopColor: '#e1e8ed',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    elevation: 10,
+    zIndex: 9999,
   },
   fileErrorContainer: {
     flexDirection: 'row',
@@ -405,7 +416,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
-    backgroundColor: colors.background,
+    backgroundColor: '#f7f9fa',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -419,7 +430,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 6,
-    backgroundColor: colors.border,
+    backgroundColor: '#e1e8ed',
   },
   videoPlaceholder: {
     width: 50,
@@ -432,17 +443,17 @@ const styles = StyleSheet.create({
   mediaFileName: {
     flex: 1,
     fontSize: 13,
-    color: '#000',
+    color: '#14171a',
   },
   removeMediaButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.white,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#e1e8ed',
   },
   inputRow: {
     flexDirection: 'row',
@@ -455,29 +466,29 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#e1e8ed',
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
     maxHeight: 100,
     fontSize: 15,
-    color: '#000',
-    backgroundColor: colors.background,
+    color: '#14171a',
+    backgroundColor: '#fff',
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primary,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#0084ff',
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
 });

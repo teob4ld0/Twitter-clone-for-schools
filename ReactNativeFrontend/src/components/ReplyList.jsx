@@ -54,15 +54,8 @@ function ReplyList({
 
       let mediaUrl = null;
       if (file) {
-        // Preparar FormData para el archivo
-        const formData = new FormData();
-        formData.append('file', {
-          uri: file.uri,
-          name: file.name,
-          type: file.type,
-        });
-
-        const uploadRes = await mediaAPI.upload(formData);
+        // Usar el nuevo mediaAPI simplificado
+        const uploadRes = await mediaAPI.upload(file);
         mediaUrl = uploadRes?.data?.publicUrl || null;
       }
 

@@ -158,9 +158,25 @@ export const mediaAPI = {
       formData = formDataOrFile;
       if (prefix) formData.append('prefix', prefix);
     } else {
-      // Si es un archivo, crear FormData
+      // Si es un archivo, crear FormData con formato correcto para Android
       formData = new FormData();
-      formData.append('file', formDataOrFile);
+      
+      // Normalizar el objeto file para React Native
+      const file = {
+        uri: formDataOrFile.uri,
+        type: formDataOrFile.type || formDataOrFile.mimeType || 'image/jpeg',
+        name: formDataOrFile.name || formDataOrFile.fileName || `upload_${Date.now()}.jpg`,
+      };
+      
+      console.log('📤 Preparando upload:', { 
+        uri: file.uri, 
+        type: file.type, 
+        name: file.name, 
+        prefix,
+        platform: Platform.OS 
+      });
+      
+      formData.append('file', file);
       if (prefix) formData.append('prefix', prefix);
     }
     

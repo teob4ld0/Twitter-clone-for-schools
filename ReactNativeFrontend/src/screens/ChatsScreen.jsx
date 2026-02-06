@@ -195,13 +195,13 @@ export default function ChatsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#fff',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: '#fff',
   },
   loadingText: {
     marginTop: 10,
@@ -210,14 +210,9 @@ const styles = StyleSheet.create({
   },
   createChatContainer: {
     padding: 16,
-    backgroundColor: colors.white,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    borderBottomColor: '#e1e8ed',
   },
   inputRow: {
     flexDirection: 'row',
@@ -228,17 +223,17 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#e1e8ed',
     borderRadius: 22,
     paddingHorizontal: 16,
     fontSize: 15,
-    color: '#000',
-    backgroundColor: colors.background,
+    color: '#14171a',
+    backgroundColor: '#fff',
   },
   createButton: {
     height: 44,
     paddingHorizontal: 20,
-    backgroundColor: colors.primary,
+    backgroundColor: '#0084ff',
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
@@ -248,7 +243,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   createButtonText: {
-    color: colors.white,
+    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -265,7 +260,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
+    color: '#14171a',
     marginTop: 16,
   },
   emptySubtext: {
