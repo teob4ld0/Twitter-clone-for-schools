@@ -241,25 +241,25 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
 
       if (quoteMediaUri) {
         try {
-          const filename = quoteMediaUri.split('/').pop();
+          const filename = quoteMediaUri.split('/').pop() || `quote_${Date.now()}.jpg`;
           const match = /\.(\w+)$/.exec(filename);
-          const type = match ? `image/${match[1]}` : 'image/jpeg';
+          const extension = match ? match[1] : 'jpg';
+          const type = `image/${extension}`;
 
-          const formData = new FormData();
-          formData.append('file', {
+          const file = {
             uri: quoteMediaUri,
             name: filename,
             type: type,
-          });
-          formData.append('folderName', 'quotes');
+          };
 
-          const uploadRes = await mediaAPI.upload(formData);
+          console.log('📤 Subiendo media para reply quote:', file);
+          const uploadRes = await mediaAPI.upload(file, 'quotes');
           mediaUrl = uploadRes?.data?.publicUrl || null;
           if (!mediaUrl) {
             throw new Error('No se obtuvo URL del archivo subido');
           }
         } catch (uploadError) {
-          console.error('Error al subir media:', uploadError);
+          console.error('❌ Error al subir media:', uploadError);
           Alert.alert('Error', 'Error al subir el archivo. Intenta de nuevo.');
           setIsLoadingQuote(false);
           return;

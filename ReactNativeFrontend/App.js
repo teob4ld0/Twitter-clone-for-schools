@@ -99,13 +99,15 @@ function MainTabs() {
 }
 
 function AppNavigator() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isRehydrating } = useAuth();
   const navigationRef = useNavigationContainerRef();
 
-  if (loading) {
+  // Mostrar loading mientras se verifica la autenticación o se rehidrata el estado
+  if (loading || isRehydrating) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Cargando...</Text>
       </View>
     );
   }
@@ -186,6 +188,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.textSecondary,
   },
   header: {
     backgroundColor: colors.primary,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,22 +6,19 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import ImageViewer from './ImageViewer';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '../styles/colors';
 
 export default function MessageItem({ message, currentUserId, onDelete }) {
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  
   if (!message) return null;
 
   // Determine if message is from current user
   const senderId = message.senderId;
   const isOwn = currentUserId != null && senderId != null && senderId == currentUserId;
   const sender = message.sender || {};
-
-  const formatTime = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
 
   const hasMedia = message.mediaUrl;
   const isVideo = hasMedia && message.mediaUrl.match(/\.(mp4|webm|mov|m4v)$/i);
@@ -48,51 +45,51 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
       )}
 
       <View style={[styles.bubble, isOwn ? styles.ownBubble : styles.otherBubble]}>
-        {/* Media */}
-        {hasMedia && (
-          <View style={styles.mediaContainer}>
-            {isImage ? (
-              <Image
-                source={{ uri: message.mediaUrl }}
-                style={styles.mediaImage}
-                resizeMode="cover"
-              />
-            ) : isVideo ? (
-              <View style={styles.videoPlaceholder}>
-                <Feather name="video" size={32} color={isOwn ? colors.white : colors.textSecondary} />
-                <Text style={[styles.videoText, isOwn ? styles.videoTextOwn : styles.videoTextOther]}>
-                  Video
-                </Text>
-              </View>
+        <View style={styles.contentWrapper}>
+          <View style={styles.messageContent}>
+            {/* Content */}
+            {message.content ? (
+              <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>
+                {message.content}
+              </Text>
             ) : null}
+
+            {/* Media */}
+            {hasMedia && (
+              <View style={styles.mediaContainer}>
+                {isImage ? (
+                  <TouchableOpacity onPress={() => setImageViewerVisible(true)}>
+                    <Image
+                      source={{ uri: message.mediaUrl }}
+                      style={styles.mediaImage}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                ) : isVideo ? (
+                  <View style={styles.videoPlaceholder}>
+                    <Feather name="video" size={32} color={isOwn ? colors.white : colors.textSecondary} />
+                    <Text style={[styles.videoText, isOwn ? styles.videoTextOwn : styles.videoTextOther]}>
+                      Video
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
+
+            {/* Meta Info */}
+            <Text style={[styles.metaText, isOwn ? styles.ownMeta : styles.otherMeta]}>
+              {isOwn ? (message.isRead ? 'Leído' : 'Enviado') : (sender?.username || 'Desconocido')}
+            </Text>
           </View>
-        )}
 
-        {/* Content */}
-        {message.content ? (
-          <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>
-            {message.content}
-          </Text>
-        ) : null}
-
-        {/* Footer Row */}
-        <View style={styles.footer}>
-          <Text style={[styles.timestamp, isOwn ? styles.ownTimestamp : styles.otherTimestamp]}>
-            {formatTime(message.createdAt)}
-          </Text>
-
-          {/* Delete Button (solo para mensajes propios) */}
+          {/* Delete Button - discreto como en web */}
           {isOwn && onDelete && (
             <TouchableOpacity
               onPress={onDelete}
               style={styles.deleteButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Feather 
-                name="trash-2" 
-                size={14} 
-                color="rgba(255, 255, 255, 0.7)"
-              />
+              <Text style={styles.deleteButtonText}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -103,8 +100,7 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 5,
-    maxWidth: '75%',
+    marginVertical: 4,
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
@@ -127,87 +123,90 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.textSecondary,
+    backgroundColor: '#0084ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: colors.white,
+    color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
   },
   bubble: {
-    borderRadius: 18,
-    padding: 12,
-    paddingBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    flex: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    maxWidth: '85%',
   },
   ownBubble: {
-    backgroundColor: '#1da1f2',
+    backgroundColor: '#0084ff',
   },
   otherBubble: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f1f1f1',
+  },
+  contentWrapper: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  messageContent: {
+    flexShrink: 1,
+  },
+  text: {
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  ownText: {
+    color: '#fff',
+  },
+  otherText: {
+    color: '#111',
   },
   mediaContainer: {
-    marginBottom: 8,
-    borderRadius: 12,
+    marginTop: 8,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   mediaImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
+    width: 240,
+    height: 240,
+    borderRadius: 10,
   },
   videoPlaceholder: {
-    width: '100%',
-    height: 200,
+    width: 240,
+    height: 240,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 10,
   },
   videoText: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 12,
   },
   videoTextOwn: {
-    color: colors.white,
+    color: '#fff',
   },
   videoTextOther: {
     color: '#666',
   },
-  text: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  ownText: {
-    color: colors.white,
-  },
-  otherText: {
-    color: '#000',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  timestamp: {
+  metaText: {
     fontSize: 11,
+    marginTop: 6,
   },
-  ownTimestamp: {
-    color: 'rgba(255, 255, 255, 0.8)',
+  ownMeta: {
+    color: 'rgba(255, 255, 255, 0.85)',
   },
-  otherTimestamp: {
+  otherMeta: {
     color: '#666',
   },
   deleteButton: {
-    marginLeft: 8,
-    padding: 4,
+    paddingTop: 2,
+    paddingLeft: 4,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.7)',
+    lineHeight: 16,
   },
 });

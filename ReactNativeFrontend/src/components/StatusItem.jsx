@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { statusAPI, interestSignalsAPI, mediaAPI } from '../services/api';
 import ReplyList from './ReplyList';
+import ImageViewer from './ImageViewer';
 import colors from '../styles/colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -79,6 +80,10 @@ function StatusItem({
 
   // Estado para avatar
   const [avatarFailed, setAvatarFailed] = useState(false);
+
+  // Estado para ImageViewer
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
 
   // Referencias para tracking de tiempo de visualización
   const viewStartTimeRef = useRef(null);
@@ -318,25 +323,24 @@ function StatusItem({
       // Subir media si hay archivo
       if (quoteMediaFile) {
         try {
-          // Crear FormData para upload
-          const formData = new FormData();
-          const fileType = quoteMediaFile.mimeType || quoteMediaFile.type || 'image/jpeg';
-          const fileName = quoteMediaFile.fileName || quoteMediaFile.uri.split('/').pop();
+          // Usar el mimeType normalizado
+          const mimeType = quoteMediaFile.mimeType || quoteMediaFile.type || 'image/jpeg';
+          const fileName = quoteMediaFile.fileName || quoteMediaFile.uri.split('/').pop() || `quote_${Date.now()}.jpg`;
 
-          formData.append('file', {
+          const file = {
             uri: quoteMediaFile.uri,
-            type: fileType,
+            type: mimeType,
             name: fileName
-          });
-          formData.append('category', 'quotes');
+          };
 
-          const uploadRes = await mediaAPI.upload(formData);
+          console.log('📤 Subiendo media para quote:', file);
+          const uploadRes = await mediaAPI.upload(file, 'quotes');
           mediaUrl = uploadRes?.data?.publicUrl || null;
           if (!mediaUrl) {
             throw new Error('No se obtuvo URL del archivo subido');
           }
         } catch (uploadError) {
-          console.error('Error al subir media:', uploadError);
+          console.error('❌ Error al subir media:', uploadError);
           Alert.alert('Error', 'Error al subir el archivo. Intenta de nuevo.');
           setIsLoadingQuote(false);
           return;
@@ -466,7 +470,14 @@ function StatusItem({
       );
     }
     if (isImage) {
-      return <Image source={{ uri: url }} style={styles.media} resizeMode="cover" />;
+      return (
+        <TouchableOpacity onPress={() => {
+          setSelectedImageUrl(url);
+          setImageViewerVisible(true);
+        }}>
+          <Image source={{ uri: url }} style={styles.media} resizeMode="cover" />
+        </TouchableOpacity>
+      );
     }
 
     return <Text style={styles.mediaLink}>{url}</Text>;
@@ -858,27 +869,43 @@ function StatusItem({
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Image Viewer for fullscreen display */}
+      <ImageViewer
+        visible={imageViewerVisible}
+        imageUri={selectedImageUrl}
+        onClose={() => {
+          setImageViewerVisible(false);
+          setSelectedImageUrl(null);
+        }}
+      />
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   postCard: {
-    backgroundColor: colors.backgroundPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   repostBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 12
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   repostText: {
-    color: '#666',
+    color: '#657786',
     fontSize: 13,
     fontWeight: '600'
   },
@@ -886,7 +913,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12
+    marginBottom: 16
   },
   authorInfo: {
     flexDirection: 'row',
@@ -898,34 +925,32 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.primary,
+    backgroundColor: '#1da1f2',
     alignItems: 'center',
     justifyContent: 'center'
   },
   avatarText: {
     color: '#fff',
     fontSize: 20,
-    fontWeight: 'bold'
+    fontWeight: '700'
   },
   avatarImg: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.backgroundSecondary
+    backgroundColor: '#f0f0f0'
   },
   authorTextContainer: {
     flex: 1
   },
   authorName: {
     fontSize: 16,
-    color: '#000',
-    fontWeight: 'bold'
+    color: '#14171a',
+    fontWeight: '700'
   },
   date: {
     fontSize: 14,
-    color: '#666',
+    color: '#657786',
     marginTop: 2
   },
   deleteButton: {
@@ -933,31 +958,30 @@ const styles = StyleSheet.create({
     minWidth: 40,
     minHeight: 40,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    borderRadius: 20
   },
   content: {
-    marginBottom: 12
+    marginBottom: 16
   },
   contentText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#000'
+    color: '#14171a'
   },
   mention: {
     color: colors.primary,
     fontWeight: '600'
   },
   mediaWrapper: {
-    marginTop: 8,
-    marginBottom: 12
+    marginTop: 12,
+    marginBottom: 16
   },
   media: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.backgroundSecondary
+    height: 240,
+    borderRadius: 16,
+    backgroundColor: '#f0f0f0'
   },
   mediaLink: {
     color: colors.primary,
@@ -965,11 +989,11 @@ const styles = StyleSheet.create({
   },
   quoteCard: {
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: colors.backgroundSecondary
+    borderColor: '#e1e8ed',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    backgroundColor: '#f7f9fa'
   },
   deletedQuoteCard: {
     borderWidth: 1,
@@ -1020,10 +1044,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    gap: 16,
-    paddingTop: 12,
+    gap: 20,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: '#f0f0f0',
     alignItems: 'center'
   },
   actionButton: {
@@ -1031,14 +1055,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 8,
-    borderRadius: 4,
-    minWidth: 60,
+    borderRadius: 8,
+    minWidth: 64,
     minHeight: 40
   },
   actionButtonText: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '500'
+    color: '#657786',
+    fontWeight: '600'
   },
   repostMenuContainer: {
     position: 'relative'
@@ -1054,7 +1078,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16
+    padding: 16,
+    zIndex: 9999
   },
   deleteModal: {
     backgroundColor: '#ffffff',
@@ -1114,7 +1139,8 @@ const styles = StyleSheet.create({
   },
   quoteModalContainer: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary
+    backgroundColor: colors.backgroundPrimary,
+    zIndex: 9999
   },
   quoteModalHeader: {
     flexDirection: 'row',
@@ -1260,7 +1286,7 @@ const styles = StyleSheet.create({
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -1269,7 +1295,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     minWidth: 180,
     overflow: 'hidden',
-    elevation: 5,
+    elevation: 10,
+    zIndex: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,

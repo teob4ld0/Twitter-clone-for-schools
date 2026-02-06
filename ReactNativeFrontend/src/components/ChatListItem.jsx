@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 import { colors } from '../styles/colors';
 
 export default function ChatListItem({ chat, onPress, selected, currentUserId }) {
@@ -20,14 +19,14 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
   const userInitial = username.charAt(0).toUpperCase();
   
   // Mensaje
-  let messageText = 'Sin mensajes';
+  let messageText = 'No messages yet';
   if (chat.lastMessage) {
     if (typeof chat.lastMessage === 'string') {
       messageText = chat.lastMessage;
     } else if (chat.lastMessage.content) {
       messageText = chat.lastMessage.content;
     } else if (chat.lastMessage.mediaUrl) {
-      messageText = '📷 Media';
+      messageText = 'Media adjunta';
     }
   }
   messageText = String(messageText);
@@ -39,16 +38,12 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
     try {
       const date = new Date(timestamp);
       if (!isNaN(date.getTime())) {
-        const diff = Date.now() - date.getTime();
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-        
-        if (minutes < 1) timeText = 'ahora';
-        else if (minutes < 60) timeText = `${minutes}m`;
-        else if (hours < 24) timeText = `${hours}h`;
-        else if (days < 7) timeText = `${days}d`;
-        else timeText = date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+        timeText = date.toLocaleString('es-ES', { 
+          day: '2-digit', 
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
       }
     } catch (e) {
       timeText = '';
@@ -57,14 +52,12 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
   timeText = String(timeText || '');
   
   const hasUnread = Boolean(chat.unreadCount > 0);
-  const badgeText = chat.unreadCount > 99 ? '99+' : String(chat.unreadCount || '');
 
   return (
     <TouchableOpacity 
       style={[
         styles.container, 
-        selected && styles.selected,
-        hasUnread && styles.unread
+        selected && styles.selected
       ]} 
       onPress={onPress}
       activeOpacity={0.7}
@@ -80,33 +73,29 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
             <Text style={styles.avatarText}>{userInitial}</Text>
           </View>
         )}
-        {hasUnread ? <View style={styles.onlineDot} /> : null}
       </View>
 
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.username} numberOfLines={1}>
-            {'@' + username}
+            {username}
           </Text>
-          <Text style={styles.timestamp}>{timeText}</Text>
+          {hasUnread && <View style={styles.unreadBadge} />}
         </View>
         
         <View style={styles.messageRow}>
           <Text 
-            style={[styles.lastMessage, hasUnread && styles.lastMessageUnread]} 
+            style={styles.lastMessage} 
             numberOfLines={1}
           >
             {messageText}
           </Text>
-          {hasUnread ? (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{badgeText}</Text>
-            </View>
-          ) : null}
         </View>
       </View>
 
-      <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+      <View style={styles.rightSection}>
+        <Text style={styles.timestamp}>{timeText}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -114,51 +103,36 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 15,
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.white,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
     alignItems: 'center',
   },
   selected: {
-    backgroundColor: '#e8f5fe',
-  },
-  unread: {
     backgroundColor: '#f0f8ff',
   },
   avatarContainer: {
-    position: 'relative',
     marginRight: 12,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.backgroundSecondary,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#e1e8ed',
   },
   avatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0084ff',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: colors.white,
-    fontSize: 20,
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
-  },
-  onlineDot: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.success,
-    borderWidth: 2,
-    borderColor: colors.white,
   },
   content: {
     flex: 1,
@@ -171,14 +145,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   username: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#14171a',
     flex: 1,
   },
-  timestamp: {
-    fontSize: 12,
-    color: '#666',
+  unreadBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#e33',
     marginLeft: 8,
   },
   messageRow: {
@@ -186,27 +162,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lastMessage: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
     flex: 1,
   },
-  lastMessageUnread: {
-    fontWeight: '600',
-    color: '#000',
-  },
-  badge: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
+  rightSection: {
+    alignItems: 'flex-end',
     marginLeft: 8,
   },
-  badgeText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: 'bold',
+  timestamp: {
+    fontSize: 11,
+    color: '#999',
   },
 });

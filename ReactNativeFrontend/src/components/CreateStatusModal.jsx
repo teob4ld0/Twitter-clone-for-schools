@@ -63,12 +63,17 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
 
       let mediaUrl = null;
       if (mediaFile) {
+        // Usar el mimeType normalizado del imagePicker
+        const mimeType = mediaFile.mimeType || mediaFile.type || 'image/jpeg';
+        const fileName = mediaFile.fileName || `upload_${Date.now()}.${mimeType.split('/')[1] || 'jpg'}`;
+        
         const file = {
           uri: mediaFile.uri,
-          type: mediaFile.type === 'video' ? 'video/mp4' : 'image/jpeg',
-          name: mediaFile.fileName || `upload_${Date.now()}.${mediaFile.type === 'video' ? 'mp4' : 'jpg'}`
+          type: mimeType,
+          name: fileName
         };
 
+        console.log('📤 Subiendo media para status:', file);
         const uploadRes = await mediaAPI.upload(file);
         mediaUrl = uploadRes?.data?.publicUrl || null;
       }
@@ -86,7 +91,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
     } catch (err) {
       const serverMsg = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.error;
       setError(serverMsg || err.message || 'Error al crear estado');
-      console.error(err);
+      console.error('❌ Error al crear status:', err);
     } finally {
       setLoading(false);
     }
@@ -185,12 +190,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    zIndex: 9999,
   },
   modalContainer: {
     backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
+    elevation: 10,
+    zIndex: 9999,
   },
   modalHeader: {
     flexDirection: 'row',
