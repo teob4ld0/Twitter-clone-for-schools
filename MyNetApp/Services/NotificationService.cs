@@ -10,15 +10,18 @@ public class NotificationService
     private readonly IHubContext<NotificationHub> _notificationHub;
     private readonly AppDbContext _context;
     private readonly WebPushService _webPushService;
+    private readonly ExpoPushService _expoPushService;
 
     public NotificationService(
         IHubContext<NotificationHub> notificationHub, 
         AppDbContext context,
-        WebPushService webPushService)
+        WebPushService webPushService,
+        ExpoPushService expoPushService)
     {
         _notificationHub = notificationHub;
         _context = context;
         _webPushService = webPushService;
+        _expoPushService = expoPushService;
     }
 
     public async Task<Notification> SendNotificationAsync(
@@ -68,23 +71,37 @@ public class NotificationService
 
         // Enviar notificación push si el usuario tiene suscripciones
         // (útil si el usuario no está conectado por SignalR)
+        var pushPayload = new
+        {
+            title = GetNotificationTitle(type, notification.Actor.Username),
+            body = GetNotificationBody(type, notification.Actor.Username),
+            icon = "/icon-192.png",
+            badge = "/badge-72.png",
+            data = notificationPayload,
+            tag = $"notification-{notification.Id}",
+            requireInteraction = false
+        };
+
+        // Intentar enviar por Web Push (navegadores)
         try
         {
-            await _webPushService.SendNotificationToUserAsync(targetUserId, new
-            {
-                title = GetNotificationTitle(type, notification.Actor.Username),
-                body = GetNotificationBody(type, notification.Actor.Username),
-                icon = "/icon-192.png",
-                badge = "/badge-72.png",
-                data = notificationPayload,
-                tag = $"notification-{notification.Id}",
-                requireInteraction = false
-            });
+            await _webPushService.SendNotificationToUserAsync(targetUserId, pushPayload);
         }
         catch (Exception ex)
         {
             // Log pero no fallar si push falla
-            Console.WriteLine($"Failed to send push notification: {ex.Message}");
+            Console.WriteLine($"Failed to send Web Push notification: {ex.Message}");
+        }
+
+        // Intentar enviar por Expo Push (mobile apps)
+        try
+        {
+            await _expoPushService.SendNotificationToUserAsync(targetUserId, pushPayload);
+        }
+        catch (Exception ex)
+        {
+            // Log pero no fallar si push falla
+            Console.WriteLine($"Failed to send Expo Push notification: {ex.Message}");
         }
 
         return notification;

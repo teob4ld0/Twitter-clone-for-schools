@@ -98,6 +98,8 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<WebPushService>();
+builder.Services.AddScoped<ExpoPushService>();
+builder.Services.AddScoped<FcmService>();
 builder.Services.AddHttpClient();
 builder.Services.Configure<GoogleCloudStorageOptions>(
     builder.Configuration.GetSection("GoogleCloudStorage")
@@ -153,6 +155,13 @@ app.UseMiddleware<BannedUserMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Root endpoint for GKE Ingress health checks
+app.MapGet("/", () => Results.Ok(new { status = "ok", service = "twittetec-backend", version = "0.0.81" }));
+
+// Health check endpoint for diagnostics
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapHub<ChatHub>("/hubs/chat");
 app.MapHub<NotificationHub>("/hubs/notifications");
 

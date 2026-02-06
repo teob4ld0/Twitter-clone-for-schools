@@ -61,7 +61,7 @@ function Layout({ children }) {
                   minWidth: '20px',
                   textAlign: 'center'
                 }}>
-                  {unreadCount}
+                  {"!"}
                 </span>
               )}
             </Link>

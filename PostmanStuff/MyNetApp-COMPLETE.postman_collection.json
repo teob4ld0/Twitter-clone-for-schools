@@ -1,0 +1,1224 @@
+{
+  "info": {
+    "_postman_id": "mynetapp-complete-collection",
+    "name": "MyNetApp API - COMPLETE",
+    "description": "Colección COMPLETA de todos los endpoints de MyNetApp (Auth, Users, Status, Followers, Chats, Notifications, Media, Push, InterestSignals). Usa {{base_url}} y almacena JWT en {{jwt_token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "POST /api/auth/register - Registro con email/password"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (stores jwt_token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.token) {",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "POST /api/auth/login - Login con email/password"
+          },
+          "response": []
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"{{google_id_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/google",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google"]
+            },
+            "description": "POST /api/auth/google - Login con Google ID Token"
+          },
+          "response": []
+        },
+        {
+          "name": "Google OAuth Start",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/google/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google", "start"]
+            },
+            "description": "GET /api/auth/google/start - Iniciar flujo OAuth de Google"
+          },
+          "response": []
+        },
+        {
+          "name": "Google OAuth Exchange",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{google_code}}\",\n  \"state\": \"{{google_state}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/google/exchange",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google", "exchange"]
+            },
+            "description": "POST /api/auth/google/exchange - Intercambiar código OAuth por token"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-email?token={{verification_token}}&uid={{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "verify-email"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{verification_token}}"
+                },
+                {
+                  "key": "uid",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "GET /api/auth/verify-email - Verificar email del usuario"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            },
+            "description": "GET /api/users - Listar todos los usuarios (requiere auth, no alumnos)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}"]
+            },
+            "description": "GET /api/users/{id} - Obtener usuario por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile Picture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{profile_picture_path}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/me/profile-picture",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me", "profile-picture"]
+            },
+            "description": "POST /api/users/me/profile-picture - Subir foto de perfil (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Statuses + Reposts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}/statuses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}", "statuses"]
+            },
+            "description": "GET /api/users/{id}/statuses - Obtener statuses del usuario (propios + reposts)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Likes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}/likes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}", "likes"]
+            },
+            "description": "GET /api/users/{id}/likes - Obtener likes del usuario"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Replies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}/replies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}", "replies"]
+            },
+            "description": "GET /api/users/{id}/replies - Obtener respuestas del usuario"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}"]
+            },
+            "description": "DELETE /api/users/{id} - Eliminar usuario (requiere auth, no alumnos)"
+          },
+          "response": []
+        },
+        {
+          "name": "Ban/Unban User (admin only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{user_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}/ban",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}", "ban"]
+            },
+            "description": "PUT /api/users/{id}/ban - Banear/desbanear usuario (requiere auth, no alumnos)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Status",
+      "item": [
+        {
+          "name": "Get All Root Statuses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status"]
+            },
+            "description": "GET /api/status - Obtener todos los statuses (solo root)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Status (stores status_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('status_id', String(jsonData.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from Postman (root status)\",\n  \"mediaUrl\": null,\n  \"parentStatusId\": null,\n  \"quotedStatusId\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status"]
+            },
+            "description": "POST /api/status - Crear status (root, reply o quote) (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Reply (stores reply_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('reply_id', String(jsonData.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Reply from Postman\",\n  \"parentStatusId\": {{status_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status"]
+            },
+            "description": "POST /api/status - Crear reply vía parentStatusId (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Quote Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Quoting this status from Postman\",\n  \"quotedStatusId\": {{status_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status"]
+            },
+            "description": "POST /api/status - Crear quote status vía quotedStatusId (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status Thread By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/{{status_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "{{status_id}}"]
+            },
+            "description": "GET /api/status/{statusId} - Obtener status con replies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Direct Replies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/{{status_id}}/replies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "{{status_id}}", "replies"]
+            },
+            "description": "GET /api/status/{statusId}/replies - Obtener respuestas directas"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Like",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/{{status_id}}/like",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "{{status_id}}", "like"]
+            },
+            "description": "POST /api/status/{statusId}/like - Toggle like (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Repost",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/{{status_id}}/repost",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "{{status_id}}", "repost"]
+            },
+            "description": "POST /api/status/{statusId}/repost - Toggle repost (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Status",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/{{status_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "{{status_id}}"]
+            },
+            "description": "DELETE /api/status/{id} - Eliminar status (requiere auth, solo dueño)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Followers",
+      "item": [
+        {
+          "name": "Get Followers For User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/followers/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "followers", "{{user_id}}"]
+            },
+            "description": "GET /api/users/followers/{userId} - Listar seguidores de un usuario"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Follow Status (me -> other)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/followers/{{other_user_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "followers", "{{other_user_id}}", "status"]
+            },
+            "description": "GET /api/users/followers/{userId}/status - Verificar si sigo a un usuario (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Mutual Followers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/followers/{{other_user_id}}/mutual",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "followers", "{{other_user_id}}", "mutual"]
+            },
+            "description": "GET /api/users/followers/{userId}/mutual - Obtener seguidores mutuos (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Follow (me -> other)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/followers/{{other_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "followers", "{{other_user_id}}"]
+            },
+            "description": "POST /api/users/followers/{userId} - Toggle follow/unfollow (requiere auth)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chats",
+      "item": [
+        {
+          "name": "Get My Chats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "GET /api/chats - Listar mis chats (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Or Get Chat (stores chat_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('chat_id', String(jsonData.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{other_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{other_user_id}}"]
+            },
+            "description": "POST /api/chats/{otherUserId} - Crear o recuperar chat (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chat By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}"]
+            },
+            "description": "GET /api/chats/{id} - Obtener chat específico (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}", "messages"]
+            },
+            "description": "GET /api/chats/{chatId}/messages - Ver mensajes de un chat (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message (stores message_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('message_id', String(jsonData.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from Postman (chat message)\",\n  \"mediaUrl\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}", "messages"]
+            },
+            "description": "POST /api/chats/{chatId}/messages - Enviar mensaje (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Message By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}/messages/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}", "messages", "{{message_id}}"]
+            },
+            "description": "GET /api/chats/{chatId}/messages/{messageId} - Obtener mensaje específico (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Message As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}/messages/{{message_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}", "messages", "{{message_id}}", "read"]
+            },
+            "description": "PATCH /api/chats/{chatId}/messages/{messageId}/read - Marcar mensaje como leído (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}/messages/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}", "messages", "{{message_id}}"]
+            },
+            "description": "DELETE /api/chats/{chatId}/messages/{messageId} - Eliminar mensaje (requiere auth, solo sender)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Chat",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{chat_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{chat_id}}"]
+            },
+            "description": "DELETE /api/chats/{id} - Eliminar chat (requiere auth)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications (stores notification_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (Array.isArray(jsonData) && jsonData.length > 0 && jsonData[0].id) {",
+                  "    pm.environment.set('notification_id', String(jsonData[0].id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications"]
+            },
+            "description": "GET /api/notifications - Obtener notificaciones del usuario (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "{{notification_id}}", "read"]
+            },
+            "description": "PATCH /api/notifications/{id}/read - Marcar notificación como leída (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Notifications As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "read-all"]
+            },
+            "description": "PATCH /api/notifications/read-all - Marcar todas las notificaciones como leídas (requiere auth)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Upload Media (stores media URLs)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.objectName) {",
+                  "    pm.environment.set('media_object_name', String(jsonData.objectName));",
+                  "    pm.collectionVariables.set('media_object_name', String(jsonData.objectName));",
+                  "  }",
+                  "  if (jsonData && jsonData.publicUrl) {",
+                  "    pm.environment.set('media_public_url', String(jsonData.publicUrl));",
+                  "    pm.collectionVariables.set('media_public_url', String(jsonData.publicUrl));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{media_file_path}}"
+                },
+                {
+                  "key": "prefix",
+                  "value": "{{media_prefix}}",
+                  "type": "text",
+                  "description": "Optional: folder prefix (e.g., 'statuses', 'chats', 'profile-pictures')"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", "upload"]
+            },
+            "description": "POST /api/media/upload - Subir media a Google Cloud Storage (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/media?objectName={{media_object_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media"],
+              "query": [
+                {
+                  "key": "objectName",
+                  "value": "{{media_object_name}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/media?objectName=... - Eliminar media del storage (requiere auth)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Push Notifications",
+      "item": [
+        {
+          "name": "Web Push (VAPID)",
+          "item": [
+            {
+              "name": "Get VAPID Public Key",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/public-key",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "public-key"]
+                },
+                "description": "GET /api/push/public-key - Obtener clave pública VAPID"
+              },
+              "response": []
+            },
+            {
+              "name": "Subscribe Web Push",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endpoint\": \"https://fcm.googleapis.com/fcm/send/...\",\n  \"expirationTime\": null,\n  \"keys\": {\n    \"p256dh\": \"BASE64_P256DH_KEY\",\n    \"auth\": \"BASE64_AUTH_KEY\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/push/subscribe",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "subscribe"]
+                },
+                "description": "POST /api/push/subscribe - Registrar suscripción push web (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Unsubscribe Web Push",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endpoint\": \"https://fcm.googleapis.com/fcm/send/...\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/push/unsubscribe",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "unsubscribe"]
+                },
+                "description": "POST /api/push/unsubscribe - Eliminar suscripción push web (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Unsubscribe All Web Push",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/unsubscribe-all",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "unsubscribe-all"]
+                },
+                "description": "DELETE /api/push/unsubscribe-all - Eliminar todas las suscripciones push web (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Get My Web Push Subscriptions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/subscriptions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "subscriptions"]
+                },
+                "description": "GET /api/push/subscriptions - Obtener suscripciones del usuario (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Send Test Web Push",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/test",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "test"]
+                },
+                "description": "POST /api/push/test - Enviar notificación de prueba web (requiere auth)"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Expo Push",
+          "item": [
+            {
+              "name": "Register Expo Push Token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\",\n  \"deviceType\": \"android\",\n  \"deviceName\": \"Samsung Galaxy S21\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/push/expo/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "expo", "register"]
+                },
+                "description": "POST /api/push/expo/register - Registrar Expo Push Token (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Unregister Expo Push Token",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/push/expo/unregister",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "expo", "unregister"]
+                },
+                "description": "DELETE /api/push/expo/unregister - Eliminar Expo Push Token (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Unregister All Expo Tokens",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/expo/unregister-all",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "expo", "unregister-all"]
+                },
+                "description": "DELETE /api/push/expo/unregister-all - Eliminar todos los Expo tokens (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Get My Expo Tokens",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/expo/tokens",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "expo", "tokens"]
+                },
+                "description": "GET /api/push/expo/tokens - Obtener tokens Expo del usuario (requiere auth)"
+              },
+              "response": []
+            },
+            {
+              "name": "Send Test Expo Push",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/push/expo/test",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "push", "expo", "test"]
+                },
+                "description": "POST /api/push/expo/test - Enviar notificación de prueba Expo (requiere auth)"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Interest Signals",
+      "item": [
+        {
+          "name": "Record Interest Signal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusId\": {{status_id}},\n  \"signalType\": \"view_time\",\n  \"value\": 5000,\n  \"metadata\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/interestsignals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "interestsignals"]
+            },
+            "description": "POST /api/interestsignals - Registrar señal de interés (view_time, follow, unfollow, etc.) (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/interestsignals/status/{{status_id}}/analytics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "interestsignals", "status", "{{status_id}}", "analytics"]
+            },
+            "description": "GET /api/interestsignals/status/{statusId}/analytics - Obtener analytics de un status (requiere auth)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://io.twittetec.com",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "testuser",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "test@example.com",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "Test123456",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "other_user_id",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "status_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reply_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chat_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notification_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "media_object_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "media_public_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "media_file_path",
+      "value": "/path/to/file.jpg",
+      "type": "string"
+    },
+    {
+      "key": "media_prefix",
+      "value": "statuses",
+      "type": "string"
+    },
+    {
+      "key": "profile_picture_path",
+      "value": "/path/to/profile.jpg",
+      "type": "string"
+    },
+    {
+      "key": "google_id_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "google_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "google_state",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "verification_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

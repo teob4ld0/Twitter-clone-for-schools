@@ -15,12 +15,18 @@ public class PushController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly WebPushService _webPushService;
+    private readonly ExpoPushService _expoPushService;
     private readonly ILogger<PushController> _logger;
 
-    public PushController(AppDbContext context, WebPushService webPushService, ILogger<PushController> logger)
+    public PushController(
+        AppDbContext context, 
+        WebPushService webPushService,
+        ExpoPushService expoPushService,
+        ILogger<PushController> logger)
     {
         _context = context;
         _webPushService = webPushService;
+        _expoPushService = expoPushService;
         _logger = logger;
     }
 
@@ -229,6 +235,203 @@ public class PushController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error sending test notification: {ex.Message}");
+            return StatusCode(500, new { 
+                message = "Error sending test notification", 
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
+        }
+    }
+
+    // ==================== EXPO PUSH NOTIFICATIONS ====================
+
+    // POST /api/push/expo/register - Registrar Expo Push Token
+    [Authorize]
+    [HttpPost("expo/register")]
+    public async Task<IActionResult> RegisterExpoToken([FromBody] ExpoPushTokenDto tokenDto)
+    {
+        try
+        {
+            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            _logger.LogInformation($"Expo token registration request from user {currentUserId}");
+            _logger.LogInformation($"Token: {tokenDto.Token}");
+
+            // Validar token
+            if (string.IsNullOrEmpty(tokenDto.Token))
+            {
+                _logger.LogWarning("Invalid Expo token received");
+                return BadRequest(new { message = "Invalid token" });
+            }
+
+            // Verificar si ya existe este token
+            var existingToken = await _context.ExpoPushTokens
+                .FirstOrDefaultAsync(t => t.Token == tokenDto.Token);
+
+            if (existingToken != null)
+            {
+                _logger.LogInformation($"Expo token already exists for user {existingToken.UserId}");
+                
+                // Si existe pero es de otro usuario, actualizarlo
+                if (existingToken.UserId != currentUserId)
+                {
+                    existingToken.UserId = currentUserId;
+                    existingToken.DeviceType = tokenDto.DeviceType;
+                    existingToken.DeviceName = tokenDto.DeviceName;
+                    existingToken.IsActive = true;
+                    existingToken.LastUsedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Updated Expo token for user {currentUserId}");
+                }
+                else
+                {
+                    // Actualizar última vez usado
+                    existingToken.LastUsedAt = DateTime.UtcNow;
+                    existingToken.IsActive = true;
+                    await _context.SaveChangesAsync();
+                }
+                
+                return Ok(new { message = "Token already registered", id = existingToken.Id });
+            }
+
+            // Crear nuevo token
+            var expoPushToken = new ExpoPushToken
+            {
+                UserId = currentUserId,
+                Token = tokenDto.Token,
+                DeviceType = tokenDto.DeviceType,
+                DeviceName = tokenDto.DeviceName,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow
+            };
+
+            _context.ExpoPushTokens.Add(expoPushToken);
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation($"Expo token registered successfully for user {currentUserId}, id: {expoPushToken.Id}");
+
+            return Ok(new { message = "Token registered successfully", id = expoPushToken.Id });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error registering Expo token: {ex.Message}");
+            return StatusCode(500, new { 
+                message = "Internal server error", 
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
+        }
+    }
+
+    // DELETE /api/push/expo/unregister - Eliminar Expo Push Token
+    [Authorize]
+    [HttpDelete("expo/unregister")]
+    public async Task<IActionResult> UnregisterExpoToken([FromBody] ExpoPushTokenDto tokenDto)
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var token = await _context.ExpoPushTokens
+            .FirstOrDefaultAsync(t => t.Token == tokenDto.Token && t.UserId == currentUserId);
+
+        if (token == null)
+        {
+            return NotFound(new { message = "Token not found" });
+        }
+
+        _context.ExpoPushTokens.Remove(token);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation($"Expo token removed for user {currentUserId}");
+        return Ok(new { message = "Token removed successfully" });
+    }
+
+    // DELETE /api/push/expo/unregister-all - Eliminar todos los Expo tokens del usuario
+    [Authorize]
+    [HttpDelete("expo/unregister-all")]
+    public async Task<IActionResult> UnregisterAllExpoTokens()
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var tokens = await _context.ExpoPushTokens
+            .Where(t => t.UserId == currentUserId)
+            .ToListAsync();
+
+        if (!tokens.Any())
+        {
+            return Ok(new { message = "No tokens found" });
+        }
+
+        _context.ExpoPushTokens.RemoveRange(tokens);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation($"{tokens.Count} Expo token(s) removed for user {currentUserId}");
+        return Ok(new { message = $"{tokens.Count} token(s) removed successfully" });
+    }
+
+    // GET /api/push/expo/tokens - Obtener tokens Expo del usuario (debugging)
+    [Authorize]
+    [HttpGet("expo/tokens")]
+    public async Task<IActionResult> GetExpoTokens()
+    {
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var tokens = await _context.ExpoPushTokens
+            .Where(t => t.UserId == currentUserId)
+            .Select(t => new
+            {
+                t.Id,
+                t.Token,
+                t.DeviceType,
+                t.DeviceName,
+                t.IsActive,
+                t.CreatedAt,
+                t.LastUsedAt
+            })
+            .ToListAsync();
+
+        return Ok(tokens);
+    }
+
+    // POST /api/push/expo/test - Enviar notificación de prueba Expo
+    [Authorize]
+    [HttpPost("expo/test")]
+    public async Task<IActionResult> SendTestExpoNotification()
+    {
+        try
+        {
+            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            
+            _logger.LogInformation($"Sending test Expo notification to user {currentUserId}");
+
+            // Verificar si hay tokens activos
+            var hasTokens = await _expoPushService.HasActiveTokensAsync(currentUserId);
+            
+            if (!hasTokens)
+            {
+                _logger.LogWarning($"No active Expo tokens found for user {currentUserId}");
+                return BadRequest(new { message = "No active Expo push tokens found. Please register first." });
+            }
+
+            // Enviar notificación de prueba
+            await _expoPushService.SendNotificationToUserAsync(currentUserId, new
+            {
+                title = "Notificación de prueba",
+                body = "Esta es una notificación de prueba desde MyNetApp (Expo)",
+                data = new
+                {
+                    type = "test",
+                    timestamp = DateTime.UtcNow
+                }
+            });
+
+            _logger.LogInformation($"Test Expo notification sent successfully to user {currentUserId}");
+
+            return Ok(new { message = "Test notification sent successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error sending test Expo notification: {ex.Message}");
             return StatusCode(500, new { 
                 message = "Error sending test notification", 
                 error = ex.Message,
