@@ -3,6 +3,7 @@
 ##########################
 **/*service-account*.json
 **/*service_account*.json
+**/*firebase-adminsdk*.json
 **/*gcp*.json
 **/google-credentials*.json
 **/*-credentials*.json

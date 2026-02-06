@@ -99,6 +99,7 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<WebPushService>();
 builder.Services.AddScoped<ExpoPushService>();
+builder.Services.AddScoped<FcmService>();
 builder.Services.AddHttpClient();
 builder.Services.Configure<GoogleCloudStorageOptions>(
     builder.Configuration.GetSection("GoogleCloudStorage")

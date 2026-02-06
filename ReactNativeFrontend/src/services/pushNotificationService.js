@@ -61,42 +61,50 @@ class PushNotificationService {
         return null;
       }
 
-      console.log('✅ Permisos de notificación otorgados, obteniendo token...');
+      console.log('✅ Permisos de notificación otorgados, obteniendo token FCM...');
 
-      // Obtener el token de Expo Push
-      // Intentar múltiples formas de obtener el projectId
-      let projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      // IMPORTANTE: Para notificaciones FCM directas, necesitamos el device token nativo
+      // NO el Expo Push Token. El device token es el FCM registration token real.
+      let fcmToken;
       
-      if (!projectId) {
-        // Fallback: intentar desde Constants.easConfig
-        projectId = Constants.easConfig?.projectId;
-      }
-      
-      if (!projectId) {
-        // Fallback: intentar desde manifest
-        projectId = Constants.manifest?.extra?.eas?.projectId;
-      }
-      
-      console.log('🔑 Project ID encontrado:', projectId || 'NINGUNO');
-      console.log('📦 App Ownership:', Constants.appOwnership);
-      console.log('🏗️  Constants disponibles:', {
-        hasExpoConfig: !!Constants.expoConfig,
-        hasEasConfig: !!Constants.easConfig,
-        hasManifest: !!Constants.manifest
-      });
-      
-      if (!projectId && Constants.appOwnership !== 'expo') {
-        console.error('❌ ERROR CRÍTICO: No se encontró projectId para build standalone');
-        console.error('   Verifica que app.json tenga: extra.eas.projectId');
-        throw new Error('ProjectId es requerido para builds standalone');
+      try {
+        // Obtener el FCM device token nativo (funciona en standalone builds)
+        const deviceToken = await Notifications.getDevicePushTokenAsync();
+        fcmToken = deviceToken.data;
+        console.log('📱 FCM Device Token obtenido:', fcmToken);
+        console.log('🔧 Token Type:', deviceToken.type); // Debería ser "android" o "ios"
+      } catch (deviceTokenError) {
+        console.error('❌ Error obteniendo device token, intentando con Expo token como fallback');
+        console.error('   Error:', deviceTokenError.message);
+        
+        // Fallback: intentar con Expo token (solo funciona en Expo Go)
+        try {
+          let projectId = Constants.expoConfig?.extra?.eas?.projectId;
+          
+          if (!projectId) {
+            projectId = Constants.easConfig?.projectId;
+          }
+          
+          if (!projectId) {
+            projectId = Constants.manifest?.extra?.eas?.projectId;
+          }
+          
+          console.log('🔑 Usando Expo token como fallback con projectId:', projectId);
+          
+          const tokenData = await Notifications.getExpoPushTokenAsync({
+            projectId: projectId,
+          });
+          
+          fcmToken = tokenData.data;
+          console.log('📱 Expo Push Token (fallback) obtenido:', fcmToken);
+        } catch (expoTokenError) {
+          console.error('❌ No se pudo obtener ningún tipo de token');
+          throw expoTokenError;
+        }
       }
 
-      const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: projectId,
-      });
-
-      this.expoPushToken = tokenData.data;
-      console.log('📱 Expo Push Token obtenido:', this.expoPushToken);
+      this.expoPushToken = fcmToken;
+      console.log('✅ Token final registrado:', this.expoPushToken);
 
       // Configuración específica de Android
       if (Platform.OS === 'android') {
