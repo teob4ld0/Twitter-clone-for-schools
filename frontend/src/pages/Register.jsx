@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import GoogleIcon from '../components/GoogleIcon';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -158,7 +159,10 @@ function Register() {
 
       <div style={{ marginTop: '1rem' }}>
         <button type="button" onClick={handleGoogleRedirect} disabled={loading} style={googleButtonStyle}>
-          Registrarse con Google
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <GoogleIcon size={20} />
+            <span>Registrarse con Google</span>
+          </span>
         </button>
       </div>
     </div>
@@ -212,10 +216,13 @@ const googleButtonStyle = {
   fontSize: '1rem',
   backgroundColor: 'white',
   color: '#111',
-  border: '1px solid #ccc',
+  border: '1px solid #dadce0',
   borderRadius: '4px',
   cursor: 'pointer',
-  width: '100%'
+  width: '100%',
+  fontWeight: '500',
+  transition: 'all 0.2s ease',
+  boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
 };
 
 export default Register;

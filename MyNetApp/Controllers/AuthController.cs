@@ -312,6 +312,16 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GoogleExchangeCodeGet([FromQuery(Name = "code")] string? code, [FromQuery(Name = "state")] string? state)
         => await ExchangeGoogleCodeAsync(code, state);
 
+    // Mobile app POST endpoint (returns JSON)
+    [HttpPost("google/exchange")]
+    public async Task<IActionResult> GoogleExchangeCodePost([FromBody] GoogleCodeExchangeDto dto)
+    {
+        if (dto == null)
+            return BadRequest(new { error = "Falta información" });
+        
+        return await ExchangeGoogleCodeAsync(dto.Code, dto.State, dto);
+    }
+
     private async Task<IActionResult> ExchangeGoogleCodeAsync(string? code, string? state)
     {
         return await ExchangeGoogleCodeAsync(code, state, null);
@@ -337,20 +347,32 @@ public class AuthController : ControllerBase
         var safeClientSecret = clientSecret!;
         var safeRedirectUri = redirectUri!;
 
-        var expectedState = GetCookie(Request, "google_oauth_state");
-        if (string.IsNullOrWhiteSpace(expectedState))
-            return Unauthorized(new
-            {
-                error = "Estado inválido",
-                hasCookie = false,
-                hint = "No llegó la cookie de state. Asegurate de iniciar el flujo en el mismo dominio que recibe el callback (ej: si empezás en localhost, el redirectUri también debe ser localhost)."
-            });
+        // Detect mobile flow: if state starts with "mobile:", skip cookie validation
+        var isMobileFlow = !string.IsNullOrWhiteSpace(state) && state.StartsWith("mobile:", StringComparison.Ordinal);
+        
+        if (!isMobileFlow)
+        {
+            // Web flow: validate state against cookie
+            var expectedState = GetCookie(Request, "google_oauth_state");
+            if (string.IsNullOrWhiteSpace(expectedState))
+                return Unauthorized(new
+                {
+                    error = "Estado inválido",
+                    hasCookie = false,
+                    hint = "No llegó la cookie de state. Asegurate de iniciar el flujo en el mismo dominio que recibe el callback (ej: si empezás en localhost, el redirectUri también debe ser localhost)."
+                });
 
-        if (string.IsNullOrWhiteSpace(state) || !string.Equals(expectedState, state, StringComparison.Ordinal))
-            return Unauthorized(new { error = "Estado inválido", hasCookie = true });
+            if (string.IsNullOrWhiteSpace(state) || !string.Equals(expectedState, state, StringComparison.Ordinal))
+                return Unauthorized(new { error = "Estado inválido", hasCookie = true });
 
-        // one-time use
-        Response.Cookies.Delete("google_oauth_state");
+            // one-time use
+            Response.Cookies.Delete("google_oauth_state");
+        }
+        else if (string.IsNullOrWhiteSpace(code))
+        {
+            // Mobile flow: just ensure we have a code
+            return BadRequest(new { error = "Falta code" });
+        }
 
         var http = _httpClientFactory.CreateClient();
         using var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -505,8 +527,19 @@ public class AuthController : ControllerBase
         // If this is the browser callback (GET), redirect to the frontend with token
         if (HttpMethods.IsGet(Request.Method))
         {
-            var frontendUrl = _config["GoogleAuth:FrontendUrl"] ?? "https://app.twittetec.com";
-            return Redirect($"{frontendUrl}/google/callback#token={Uri.EscapeDataString(token)}");
+            // Check if this is a mobile flow (already determined above)
+            if (isMobileFlow)
+            {
+                // Mobile flow: redirect to app with token
+                var mobileScheme = _config["GoogleAuth:MobileScheme"] ?? "mynetapp";
+                return Redirect($"{mobileScheme}://auth?token={Uri.EscapeDataString(token)}");
+            }
+            else
+            {
+                // Web flow: redirect to web app
+                var frontendUrl = _config["GoogleAuth:FrontendUrl"] ?? "https://app.twittetec.com";
+                return Redirect($"{frontendUrl}/google/callback#token={Uri.EscapeDataString(token)}");
+            }
         }
 
         return Ok(new { token });

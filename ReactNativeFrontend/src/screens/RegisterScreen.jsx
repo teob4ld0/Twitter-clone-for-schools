@@ -9,10 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../styles/colors';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import GoogleIcon from '../components/GoogleIcon';
+import { decode as base64Decode } from 'base-64';
 
 export default function RegisterScreen({ navigation }) {
   const [formData, setFormData] = useState({
@@ -23,12 +27,31 @@ export default function RegisterScreen({ navigation }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const googleAuth = useGoogleAuth();
 
   const handleChange = (name, value) => {
     setFormData({
       ...formData,
       [name]: value
     });
+  };
+
+  const parseUserFromToken = (token) => {
+    const tokenPayload = JSON.parse(base64Decode(token.split('.')[1]));
+    return {
+      id:
+        tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+        tokenPayload['sub'] ||
+        tokenPayload['userId'] ||
+        tokenPayload['id'],
+      email:
+        tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ||
+        tokenPayload['email'],
+      username:
+        tokenPayload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+        tokenPayload['name'] ||
+        tokenPayload['username']
+    };
   };
 
   const handleSubmit = async () => {
@@ -72,6 +95,64 @@ export default function RegisterScreen({ navigation }) {
     } catch (err) {
       setError(err.message || 'Error al registrarse');
       console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    if (!googleAuth.isReady) {
+      setError('Google Sign-In no está listo. Intenta de nuevo.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      console.log('🚀 [RegisterScreen] Iniciando Google OAuth...');
+      const result = await googleAuth.promptAsync();
+      console.log('📦 [RegisterScreen] Resultado de Google OAuth:', result ? 'Recibido' : 'Nulo');
+      
+      if (!result) {
+        const authError = googleAuth.error;
+        console.log('⚠️ [RegisterScreen] Error de Google Auth:', authError);
+        if (authError && !authError.includes('cancelado')) {
+          setError(authError);
+        }
+        return;
+      }
+
+      const { token } = result;
+      console.log('🎫 [RegisterScreen] Token recibido:', token ? `Sí (${token.substring(0, 20)}...)` : 'No');
+      
+      if (!token) {
+        console.error('❌ [RegisterScreen] No se recibió token del backend');
+        setError('No se recibió token del servidor');
+        return;
+      }
+      
+      const user = parseUserFromToken(token);
+      console.log('👤 [RegisterScreen] Usuario parseado:', user);
+      
+      if (!user.id) {
+        console.error('❌ [RegisterScreen] No se pudo extraer user.id del token');
+        setError('No se pudo extraer el ID del token. Contacta al administrador.');
+        return;
+      }
+      
+      console.log('✅ [RegisterScreen] Llamando a login() con token y user...');
+      await login(token, user);
+      console.log('🎉 [RegisterScreen] Login completado exitosamente!');
+    } catch (err) {
+      console.error('🛑 [RegisterScreen] Error en handleGoogleRegister:', err);
+      console.error('🛑 [RegisterScreen] Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      const errorMsg = err.response?.data?.error || err.message || 'Error al registrarse con Google';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -136,9 +217,30 @@ export default function RegisterScreen({ navigation }) {
               onPress={handleSubmit}
               disabled={loading}
             >
-              <Text style={styles.buttonText}>
-                {loading ? 'Registrando...' : 'Registrarse'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {loading ? 'Registrando...' : 'Registrarse'}
+                </Text>
+              )}
+            </TouchableOpacity>
+            
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>o</Text>
+              <View style={styles.dividerLine} />
+            </View>
+            
+            <TouchableOpacity 
+              style={[styles.googleButton, loading && styles.buttonDisabled]}
+              onPress={handleGoogleRegister}
+              disabled={loading || !googleAuth.isReady}
+            >
+              <View style={styles.googleButtonContent}>
+                <GoogleIcon size={20} />
+                <Text style={styles.googleButtonText}>Registrarse con Google</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -240,5 +342,44 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#666',
+    fontSize: 14,
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#dadce0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    marginBottom: 16,
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  googleButtonText: {
+    color: '#111',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

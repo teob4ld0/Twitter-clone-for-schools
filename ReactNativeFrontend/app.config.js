@@ -44,6 +44,7 @@ export default ({ config }) => {
     },
     plugins: [
       "expo-font",
+      "expo-web-browser",
       [
         "expo-notifications",
         {
@@ -60,6 +61,7 @@ export default ({ config }) => {
         }
       ]
     ],
+    scheme: "mynetapp",
     notification: {
       icon: "./assets/notification-icon.png",
       color: "#1DA1F2",

@@ -9,11 +9,14 @@ import {
   Platform,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { decode as base64Decode } from 'base-64';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import { colors } from '../styles/colors';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import GoogleIcon from '../components/GoogleIcon';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -21,6 +24,7 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const googleAuth = useGoogleAuth();
 
   const parseUserFromToken = (token) => {
     const tokenPayload = JSON.parse(base64Decode(token.split('.')[1]));
@@ -63,6 +67,64 @@ export default function LoginScreen({ navigation }) {
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
       console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!googleAuth.isReady) {
+      setError('Google Sign-In no está listo. Intenta de nuevo.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      console.log('🚀 [LoginScreen] Iniciando Google OAuth...');
+      const result = await googleAuth.promptAsync();
+      console.log('📦 [LoginScreen] Resultado de Google OAuth:', result ? 'Recibido' : 'Nulo');
+      
+      if (!result) {
+        const authError = googleAuth.error;
+        console.log('⚠️ [LoginScreen] Error de Google Auth:', authError);
+        if (authError && !authError.includes('cancelado')) {
+          setError(authError);
+        }
+        return;
+      }
+
+      const { token } = result;
+      console.log('🎫 [LoginScreen] Token recibido:', token ? `Sí (${token.substring(0, 20)}...)` : 'No');
+      
+      if (!token) {
+        console.error('❌ [LoginScreen] No se recibió token del backend');
+        setError('No se recibió token del servidor');
+        return;
+      }
+      
+      const user = parseUserFromToken(token);
+      console.log('👤 [LoginScreen] Usuario parseado:', user);
+      
+      if (!user.id) {
+        console.error('❌ [LoginScreen] No se pudo extraer user.id del token');
+        setError('No se pudo extraer el ID del token. Contacta al administrador.');
+        return;
+      }
+      
+      console.log('✅ [LoginScreen] Llamando a login() con token y user...');
+      await login(token, user);
+      console.log('🎉 [LoginScreen] Login completado exitosamente!');
+    } catch (err) {
+      console.error('🛑 [LoginScreen] Error en handleGoogleLogin:', err);
+      console.error('🛑 [LoginScreen] Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      const errorMsg = err.response?.data?.error || err.message || 'Error al iniciar sesión con Google';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -120,6 +182,23 @@ export default function LoginScreen({ navigation }) {
               ) : (
                 <Text style={styles.buttonText}>Iniciar Sesión</Text>
               )}
+            </TouchableOpacity>
+            
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>o</Text>
+              <View style={styles.dividerLine} />
+            </View>
+            
+            <TouchableOpacity 
+              style={[styles.googleButton, loading && styles.buttonDisabled]}
+              onPress={handleGoogleLogin}
+              disabled={loading || !googleAuth.isReady}
+            >
+              <View style={styles.googleButtonContent}>
+                <GoogleIcon size={20} />
+                <Text style={styles.googleButtonText}>Continuar con Google</Text>
+              </View>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -209,5 +288,43 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     fontSize: 14,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#666',
+    fontSize: 14,
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#dadce0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  googleButtonText: {
+    color: '#111',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
