@@ -1,8 +1,8 @@
 export default ({ config }) => {
   return {
     ...config,
-    name: "MyNetApp",
-    slug: "mynetapp",
+    name: "Twittetec",
+    slug: "twittetec",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -15,7 +15,7 @@ export default ({ config }) => {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.mynetapp",
+      bundleIdentifier: "com.twittetec.mobile",
       infoPlist: {
         NSPhotoLibraryUsageDescription: "Esta app necesita acceso a tu galería de fotos para que puedas compartir imágenes en tus publicaciones.",
         NSCameraUsageDescription: "Esta app necesita acceso a tu cámara para que puedas tomar fotos y compartirlas.",
