@@ -121,6 +121,24 @@
         },
         {
           "name": "Google OAuth Exchange",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.token) {",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "    console.log('Token guardado:', jsonData.token);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -138,7 +156,48 @@
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "google", "exchange"]
             },
-            "description": "POST /api/auth/google/exchange - Intercambiar código OAuth por token"
+            "description": "POST /api/auth/google/exchange - Intercambiar código OAuth por token (Web)"
+          },
+          "response": []
+        },
+        {
+          "name": "Google OAuth Exchange (Mobile)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.token) {",
+                  "    pm.environment.set('jwt_token', jsonData.token);",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "    console.log('Token guardado:', jsonData.token);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{google_code}}\",\n  \"state\": \"mobile:{{google_state}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/google/exchange",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google", "exchange"]
+            },
+            "description": "POST /api/auth/google/exchange - Intercambiar código OAuth por token (Mobile/Android/iOS). Usa state con prefijo 'mobile:' para que el backend NO valide cookies."
           },
           "response": []
         },
