@@ -85,6 +85,7 @@ apiMultipart.interceptors.response.use(
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  logout: () => api.post('/auth/logout'),
   googleLogin: (idToken) => api.post('/auth/google', { idToken }),
   googleStartUrl: () => 'https://io.twittetec.com/api/auth/google/start',
   googleExchangeCode: (code, state) => api.post('/auth/google/exchange', { code, state }),
@@ -151,7 +152,8 @@ export const pushAPI = {
   subscribe: (subscription) => api.post('/push/subscribe', subscription),
   unsubscribe: (subscription) => api.post('/push/unsubscribe', subscription),
   unsubscribeAll: () => api.delete('/push/unsubscribe-all'),
-  getSubscriptions: () => api.get('/push/subscriptions')
+  getSubscriptions: () => api.get('/push/subscriptions'),
+  unregisterAllExpoTokens: () => api.delete('/push/expo/unregister-all')
 };
 
 export const adminAPI = {

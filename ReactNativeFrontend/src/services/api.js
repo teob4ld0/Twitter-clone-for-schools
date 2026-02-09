@@ -121,6 +121,7 @@ const apiMultipart = {
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  logout: () => api.post('/auth/logout', {}),
   googleLogin: (idToken) => api.post('/auth/google', { idToken }),
   googleStartUrl: () => 'https://io.twittetec.com/api/auth/google/start',
   googleExchangeCode: (code, state) => api.post('/auth/google/exchange', { code, state }),

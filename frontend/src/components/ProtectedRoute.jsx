@@ -11,13 +11,17 @@ export default function ProtectedRoute({ children }) {
     // Esperar a que AuthContext termine de cargar
     if (loading) return;
 
-    if (!isAuthenticated()) {
-      // Si llegó aquí con token expirado, hacer logout
-      logout();
-      navigate('/login', { replace: true });
-    } else {
-      setIsReady(true);
-    }
+    const checkAuth = async () => {
+      if (!isAuthenticated()) {
+        // Si llegó aquí con token expirado, hacer logout
+        await logout();
+        navigate('/login', { replace: true });
+      } else {
+        setIsReady(true);
+      }
+    };
+
+    checkAuth();
   }, [isAuthenticated, logout, navigate, loading]);
 
   // Mostrar loading mientras AuthContext inicializa

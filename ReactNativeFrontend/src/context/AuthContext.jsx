@@ -143,6 +143,17 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       console.log('🚪 [AuthContext] Cerrando sesión...');
+      
+      // Llamar al endpoint de logout del backend para eliminar todos los tokens
+      try {
+        const apiModule = await import('../services/api');
+        await apiModule.authAPI.logout();
+        console.log('✅ [AuthContext] Tokens eliminados en el backend');
+      } catch (error) {
+        console.warn('⚠️ [AuthContext] Error al hacer logout en el backend:', error);
+      }
+      
+      // Limpiar sesión local
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       setToken(null);

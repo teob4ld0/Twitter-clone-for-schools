@@ -301,63 +301,7 @@ function UserProfile() {
                 </span>
               )}
             </div>
-            {!isMobile && (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                {currentUser?.id && currentUser.id !== parseInt(userId) && (
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={openingChat}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: 9999,
-                      border: '1px solid #1da1f2',
-                      background: '#fff',
-                      color: '#1da1f2',
-                      fontWeight: 700,
-                      cursor: openingChat ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    Mensaje
-                  </button>
-                )}
-                <div style={{ minWidth: '120px', maxWidth: '180px' }}>
-                  <FollowingButton
-                    userId={profileUserId}
-                    initialIsFollowing={isFollowing}
-                    onFollowChange={handleFollowChange}
-                  />
-                </div>
-              </div>
-            )}
           </div>
-          {isMobile && currentUser?.id && currentUser.id !== parseInt(userId) && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 12, marginBottom: 8 }}>
-              <button
-                onClick={handleSendMessage}
-                disabled={openingChat}
-                style={{
-                  flex: 1,
-                  padding: '12px 16px',
-                  borderRadius: 9999,
-                  border: '1px solid #1da1f2',
-                  background: '#fff',
-                  color: '#1da1f2',
-                  fontWeight: 700,
-                  cursor: openingChat ? 'not-allowed' : 'pointer',
-                  fontSize: '16px'
-                }}
-              >
-                Mensaje
-              </button>
-              <div style={{ flex: 1 }}>
-                <FollowingButton
-                  userId={profileUserId}
-                  initialIsFollowing={isFollowing}
-                  onFollowChange={handleFollowChange}
-                />
-              </div>
-            </div>
-          )}
           <p style={statsStyle}>
             📝 {statuses.length} {statuses.length === 1 ? 'estado' : 'estados'} •
             👥 {followersCount} {followersCount === 1 ? 'seguidor' : 'seguidores'}
@@ -379,7 +323,35 @@ function UserProfile() {
               {' '}que sigues
             </p>
           )}
-        </div>
+          {/* Botones de acción */}
+          {currentUser?.id && currentUser.id !== parseInt(userId) && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 12 }}>
+              <button
+                onClick={handleSendMessage}
+                disabled={openingChat}
+                style={{
+                  flex: 1,
+                  padding: isMobile ? '12px 16px' : '10px 14px',
+                  borderRadius: 9999,
+                  border: '1px solid #1da1f2',
+                  background: '#fff',
+                  color: '#1da1f2',
+                  fontWeight: 700,
+                  cursor: openingChat ? 'not-allowed' : 'pointer',
+                  fontSize: isMobile ? '16px' : '14px'
+                }}
+              >
+                Mensaje
+              </button>
+              <div style={{ flex: 1 }}>
+                <FollowingButton
+                  userId={profileUserId}
+                  initialIsFollowing={isFollowing}
+                  onFollowChange={handleFollowChange}
+                />
+              </div>
+            </div>
+          )}        </div>
       </div>
 
       {/* Tabs */}

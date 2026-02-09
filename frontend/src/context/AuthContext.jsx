@@ -62,7 +62,28 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Desuscribirse localmente del service worker
+    try {
+      const { unsubscribeFromPushNotifications } = await import('../services/pushService');
+      await unsubscribeFromPushNotifications().catch(err => {
+        console.warn('Error al desuscribir push local:', err);
+      });
+    } catch (error) {
+      console.warn('Error desuscribiendo push:', error);
+    }
+
+    // Llamar al endpoint de logout del backend para eliminar todos los tokens
+    try {
+      const { authAPI } = await import('../services/api');
+      await authAPI.logout().catch(err => {
+        console.warn('Error al hacer logout en el backend:', err);
+      });
+    } catch (error) {
+      console.warn('Error durante logout:', error);
+    }
+    
+    // Limpiar sesión local
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);

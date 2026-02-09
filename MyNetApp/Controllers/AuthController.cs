@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Google.Apis.Auth;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Security.Claims;
 using MyNetApp.Data;
 using MyNetApp.DTOs;
 using MyNetApp.Models;
@@ -598,6 +600,44 @@ public class AuthController : ControllerBase
         }
 
         return Ok(new { message = "Email verificado exitosamente. Ya puedes iniciar sesión." });
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            // Eliminar todas las suscripciones web push del usuario
+            var webPushSubscriptions = await _context.PushSubscriptions
+                .Where(s => s.UserId == currentUserId)
+                .ToListAsync();
+
+            // Eliminar todos los tokens Expo/FCM del usuario
+            var expoTokens = await _context.ExpoPushTokens
+                .Where(t => t.UserId == currentUserId)
+                .ToListAsync();
+
+            _context.PushSubscriptions.RemoveRange(webPushSubscriptions);
+            _context.ExpoPushTokens.RemoveRange(expoTokens);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Sesión cerrada exitosamente",
+                pushSubscriptionsRemoved = webPushSubscriptions.Count,
+                expoTokensRemoved = expoTokens.Count
+            });
+        }
+        catch (Exception ex)
+        {
+            // Log el error pero no fallar el logout
+            Console.WriteLine($"Error durante logout: {ex.Message}");
+            return Ok(new { message = "Sesión cerrada" });
+        }
     }
 
     private string GenerateMD5Hash(string input)

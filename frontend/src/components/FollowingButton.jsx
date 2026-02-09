@@ -102,9 +102,9 @@ function FollowingButton({ userId, initialIsFollowing = false, onFollowChange })
     cursor: isLoading ? 'not-allowed' : 'pointer',
     transition: 'all 0.2s',
     opacity: isLoading ? 0.6 : 1,
-    minWidth: '120px',
     width: '100%',
-    maxWidth: '100%'
+    maxWidth: '100%',
+    boxSizing: 'border-box'
   };
 
   // Mostrar estado de carga mientras se verifica el estado inicial
