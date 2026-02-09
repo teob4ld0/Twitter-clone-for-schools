@@ -8,9 +8,13 @@
 **/google-credentials*.json
 **/*-credentials*.json
 **/credentials.json
+**/google-services.json
 **/appsettings.Development.json
 **/appsettings.*.json
 **/appsettings.json
+
+# Allow example files
+!**/*.example.json
 
 # Environment variables
 .env

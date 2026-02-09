@@ -389,55 +389,62 @@ public class UsersController : ControllerBase
             .ToListAsync();
         _context.PushSubscriptions.RemoveRange(pushSubscriptions);
 
-        // 3. Eliminar mensajes
-        var messages = await _context.Messages
-            .Where(m => m.SenderId == id)
+        // 3. Eliminar chats y mensajes donde participa
+        // Primero obtener los IDs de chats donde participa el usuario
+        var chatIds = await _context.Chats
+            .Where(c => c.User1Id == id || c.User2Id == id)
+            .Select(c => c.Id)
             .ToListAsync();
-        _context.Messages.RemoveRange(messages);
 
-        // 4. Eliminar chats donde participa
+        // Eliminar TODOS los mensajes de esos chats (no solo los del usuario)
+        var messagesInChats = await _context.Messages
+            .Where(m => chatIds.Contains(m.ChatId))
+            .ToListAsync();
+        _context.Messages.RemoveRange(messagesInChats);
+
+        // Ahora sí eliminar los chats
         var chats = await _context.Chats
             .Where(c => c.User1Id == id || c.User2Id == id)
             .ToListAsync();
         _context.Chats.RemoveRange(chats);
 
-        // 5. Eliminar los likes del usuario en statuses de otros
+        // 4. Eliminar los likes del usuario en statuses de otros
         var userLikes = await _context.StatusLikes
             .Where(l => l.UserId == id)
             .ToListAsync();
         _context.StatusLikes.RemoveRange(userLikes);
 
-        // 6. Eliminar los reposts del usuario
+        // 5. Eliminar los reposts del usuario
         var userReposts = await _context.Reposts
             .Where(r => r.UserId == id)
             .ToListAsync();
         _context.Reposts.RemoveRange(userReposts);
 
-        // 7. Eliminar seguidores y seguidos
+        // 6. Eliminar seguidores y seguidos
         var followers = await _context.Followers
             .Where(f => f.FollowerId == id || f.FollowingId == id)
             .ToListAsync();
         _context.Followers.RemoveRange(followers);
 
-        // 8. Obtener IDs de los statuses del usuario
+        // 7. Obtener IDs de los statuses del usuario
         var userStatusIds = await _context.Statuses
             .Where(s => s.UserId == id)
             .Select(s => s.Id)
             .ToListAsync();
 
-        // 9. Eliminar likes en los statuses del usuario
+        // 8. Eliminar likes en los statuses del usuario
         var likesOnUserStatuses = await _context.StatusLikes
             .Where(l => userStatusIds.Contains(l.StatusId))
             .ToListAsync();
         _context.StatusLikes.RemoveRange(likesOnUserStatuses);
 
-        // 10. Eliminar reposts de los statuses del usuario
+        // 9. Eliminar reposts de los statuses del usuario
         var repostsOfUserStatuses = await _context.Reposts
             .Where(r => userStatusIds.Contains(r.StatusId))
             .ToListAsync();
         _context.Reposts.RemoveRange(repostsOfUserStatuses);
 
-        // 11. Desvincular statuses que quotean los statuses del usuario
+        // 10. Desvincular statuses que quotean los statuses del usuario
         var statusesQuotingUser = await _context.Statuses
             .Where(s => s.QuotedStatusId.HasValue && userStatusIds.Contains(s.QuotedStatusId.Value))
             .ToListAsync();
@@ -446,19 +453,19 @@ public class UsersController : ControllerBase
             status.QuotedStatusId = null;
         }
 
-        // 12. Eliminar replies a los statuses del usuario
+        // 11. Eliminar replies a los statuses del usuario
         var repliesToUserStatuses = await _context.Statuses
             .Where(s => s.ParentStatusId.HasValue && userStatusIds.Contains(s.ParentStatusId.Value))
             .ToListAsync();
         _context.Statuses.RemoveRange(repliesToUserStatuses);
 
-        // 13. Eliminar los statuses del usuario
+        // 12. Eliminar los statuses del usuario
         var userStatuses = await _context.Statuses
             .Where(s => s.UserId == id)
             .ToListAsync();
         _context.Statuses.RemoveRange(userStatuses);
 
-        // 14. Finalmente eliminar el usuario
+        // 13. Finalmente eliminar el usuario
         _context.Users.Remove(user);
         
         await _context.SaveChangesAsync();

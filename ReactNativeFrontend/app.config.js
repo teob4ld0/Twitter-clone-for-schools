@@ -70,7 +70,7 @@ export default ({ config }) => {
     },
     extra: {
       eas: {
-        projectId: "6d6ac2a1-d015-4b02-b7e9-b050e4b13cdc"
+        projectId: "6353892a-6151-4106-95b2-5bdce909f548"
       },
       apiUrl: process.env.API_URL || "https://io.twittetec.com/api"
     },

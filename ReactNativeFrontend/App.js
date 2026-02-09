@@ -112,62 +112,64 @@ function AppNavigator() {
     );
   }
 
+  const authenticated = isAuthenticated();
+
   return (
     <NavigationContainer ref={navigationRef}>
-      {isAuthenticated() ? (
-        <SignalRProvider>
-          <PushNotificationProvider navigation={navigationRef}>
+      <SignalRProvider>
+        <PushNotificationProvider navigation={navigationRef}>
+          {authenticated ? (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen 
-              name="StatusDetail" 
-              component={StatusDetailScreen}
-              options={{
-                headerShown: true,
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
-                headerTitle: 'Estado',
-              }}
-            />
-            <Stack.Screen 
-              name="ChatDetail" 
-              component={ChatDetailScreen}
-              options={{
-                headerShown: true,
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
-                headerTitle: 'Chat',
-              }}
-            />
-            <Stack.Screen 
-              name="UserProfile" 
-              component={ProfileScreen}
-              options={{
-                headerShown: true,
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
-                headerTitle: 'Perfil de Usuario',
-              }}
-            />
-            <Stack.Screen 
-              name="Admin" 
-              component={AdminScreen}
-              options={{
-                headerShown: true,
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
-                headerTitle: 'Administración',
-              }}
-            />
-          </Stack.Navigator>
-          </PushNotificationProvider>
-        </SignalRProvider>
-      ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
-      )}
+              <Stack.Screen 
+                name="StatusDetail" 
+                component={StatusDetailScreen}
+                options={{
+                  headerShown: true,
+                  headerStyle: { backgroundColor: colors.primary },
+                  headerTintColor: colors.white,
+                  headerTitle: 'Estado',
+                }}
+              />
+              <Stack.Screen 
+                name="ChatDetail" 
+                component={ChatDetailScreen}
+                options={{
+                  headerShown: true,
+                  headerStyle: { backgroundColor: colors.primary },
+                  headerTintColor: colors.white,
+                  headerTitle: 'Chat',
+                }}
+              />
+              <Stack.Screen 
+                name="UserProfile" 
+                component={ProfileScreen}
+                options={{
+                  headerShown: true,
+                  headerStyle: { backgroundColor: colors.primary },
+                  headerTintColor: colors.white,
+                  headerTitle: 'Perfil de Usuario',
+                }}
+              />
+              <Stack.Screen 
+                name="Admin" 
+                component={AdminScreen}
+                options={{
+                  headerShown: true,
+                  headerStyle: { backgroundColor: colors.primary },
+                  headerTintColor: colors.white,
+                  headerTitle: 'Administración',
+                }}
+              />
+            </Stack.Navigator>
+          ) : (
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </Stack.Navigator>
+          )}
+        </PushNotificationProvider>
+      </SignalRProvider>
     </NavigationContainer>
   );
 }

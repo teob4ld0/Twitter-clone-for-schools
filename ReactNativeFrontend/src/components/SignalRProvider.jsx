@@ -27,7 +27,10 @@ export default function SignalRProvider({ children }) {
 
     // Solo iniciar si hay usuario autenticado y token disponible
     if (!user || !token) {
-      console.log('🔌 SignalR: Usuario no autenticado, no se iniciará la conexión');
+      console.log('🔌 SignalR: Usuario no autenticado, saltando conexión');
+      // Asegurar que las conexiones están limpias
+      chatConnectionRef.current = null;
+      notificationConnectionRef.current = null;
       return;
     }
 
@@ -177,29 +180,44 @@ export default function SignalRProvider({ children }) {
 
     // Cleanup: cerrar conexiones al desmontar o cuando user/token cambien
     return () => {
+      // Solo intentar cerrar si hay usuario (evita errores al hacer logout)
+      if (!user || !token) {
+        console.log('🔌 SignalR: Saltando cleanup (no autenticado)');
+        return;
+      }
+
       console.log('🔌 SignalR: Cerrando conexiones...');
 
       const stopConnections = async () => {
         try {
           const promises = [];
           
-          if (chatConnectionRef.current) {
-            promises.push(chatConnectionRef.current.stop());
+          if (chatConnectionRef.current?.state === signalR.HubConnectionState.Connected) {
+            promises.push(chatConnectionRef.current.stop().catch(err => 
+              console.warn('⚠️ Error cerrando chat:', err.message)
+            ));
           }
           
-          if (notificationConnectionRef.current) {
-            promises.push(notificationConnectionRef.current.stop());
+          if (notificationConnectionRef.current?.state === signalR.HubConnectionState.Connected) {
+            promises.push(notificationConnectionRef.current.stop().catch(err => 
+              console.warn('⚠️ Error cerrando notificaciones:', err.message)
+            ));
           }
 
-          await Promise.all(promises);
+          if (promises.length > 0) {
+            await Promise.allSettled(promises);
+          }
           
           chatConnectionRef.current = null;
           notificationConnectionRef.current = null;
           reconnectAttemptsRef.current = 0;
           
-          console.log('✅ SignalR: Conexiones cerradas correctamente');
+          console.log('✅ SignalR: Conexiones cerradas');
         } catch (error) {
           console.error('❌ SignalR: Error al cerrar conexiones', error);
+          // Limpiar referencias de todas formas
+          chatConnectionRef.current = null;
+          notificationConnectionRef.current = null;
         }
       };
 

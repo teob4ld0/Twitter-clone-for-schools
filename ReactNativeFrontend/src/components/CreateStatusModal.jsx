@@ -103,7 +103,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       onRequestClose={onClose}
     >
@@ -189,14 +189,18 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 32,
     zIndex: 9999,
   },
   modalContainer: {
     backgroundColor: colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '90%',
+    borderRadius: 20,
+    width: '100%',
+    maxHeight: '80%',
+    maxWidth: 600,
     elevation: 10,
     zIndex: 9999,
   },

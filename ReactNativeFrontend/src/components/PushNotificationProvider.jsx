@@ -25,7 +25,7 @@ export default function PushNotificationProvider({ children, navigation }) {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         console.log('📱 App volvió al foreground');
         
-        // Si aún no se ha registrado exitosamente, intentar de nuevo
+        // Solo reintentar si está autenticado
         if (!hasRegistered && Device.isDevice && isAuthenticated()) {
           console.log('🔄 Reintentando registro de notificaciones después de volver al foreground...');
           
@@ -44,7 +44,7 @@ export default function PushNotificationProvider({ children, navigation }) {
     return () => {
       subscription.remove();
     };
-  }, [hasRegistered, isAuthenticated()]);
+  }, [hasRegistered, isAuthenticated]);
 
   useEffect(() => {
     // Verificar si es Expo Go (no soporta push notifications en producción)
@@ -64,22 +64,32 @@ export default function PushNotificationProvider({ children, navigation }) {
       console.log('✅ Build standalone detectado - Usando FCM');
     }
 
-    // Registrar notificaciones si el usuario está autenticado y es un dispositivo físico
-    if (isAuthenticated() && Device.isDevice && !registrationAttempted.current) {
+    // Registrar notificaciones solo si está autenticado
+    const authenticated = isAuthenticated();
+    
+    if (authenticated && Device.isDevice && !registrationAttempted.current) {
       registrationAttempted.current = true;
       console.log('🚀 Iniciando proceso de registro de notificaciones...');
       registerForPushNotifications();
       setupNotificationListeners();
-    } else {
-      console.log('⏸️  Registro de notificaciones omitido:');
-      console.log('   - Autenticado:', isAuthenticated());
-      console.log('   - Es dispositivo:', Device.isDevice);
-      console.log('   - Ya intentado:', registrationAttempted.current);
+    } else if (!authenticated) {
+      console.log('⏸️  Usuario no autenticado, saltando registro de notificaciones');
+      registrationAttempted.current = false;
+      setHasRegistered(false);
+    } else if (!Device.isDevice) {
+      console.log('⏸️  No es dispositivo físico, saltando registro');
     }
 
-    // Limpiar listeners cuando el componente se desmonta
+    // Limpiar listeners cuando el componente se desmonta o cambia autenticación
     return () => {
-      pushNotificationService.removeNotificationListeners();
+      if (hasRegistered) {
+        console.log('🔔 Limpiando listeners de notificaciones...');
+        try {
+          pushNotificationService.removeNotificationListeners();
+        } catch (error) {
+          console.warn('⚠️ Error limpiando listeners:', error.message);
+        }
+      }
     };
   }, [isAuthenticated(), user?.id]);
 
