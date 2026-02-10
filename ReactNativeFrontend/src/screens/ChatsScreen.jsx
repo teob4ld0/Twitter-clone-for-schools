@@ -17,9 +17,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchChats, createOrGetChat, clearError } from '../store/chatSlice';
 import { useAuth } from '../context/AuthContext';
 import ChatListItem from '../components/ChatListItem';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ChatsScreen({ navigation }) {
+  const { theme } = useTheme();
   const dispatch = useDispatch();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -106,10 +107,89 @@ export default function ChatsScreen({ navigation }) {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.cardBackground,
+    },
+    loadingText: {
+      marginTop: 10,
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    createChatContainer: {
+      padding: 16,
+      backgroundColor: theme.colors.cardBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    userIdInput: {
+      flex: 1,
+      height: 44,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 22,
+      paddingHorizontal: 16,
+      fontSize: 15,
+      color: theme.colors.textPrimary,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    createButton: {
+      height: 44,
+      paddingHorizontal: 20,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minWidth: 100,
+    },
+    createButtonDisabled: {
+      opacity: 0.5,
+    },
+    createButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    emptyList: {
+      flexGrow: 1,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 40,
+      minHeight: 300,
+    },
+    emptyText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+      marginTop: 16,
+    },
+    emptySubtext: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+  });
+
   if (loading.chats && !refreshing) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Cargando chats...</Text>
       </View>
     );
@@ -123,7 +203,7 @@ export default function ChatsScreen({ navigation }) {
           <TextInput
             style={styles.userIdInput}
             placeholder="ID de usuario"
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.colors.textTertiary}
             value={otherUserIdInput}
             onChangeText={setOtherUserIdInput}
             keyboardType="numeric"
@@ -138,7 +218,7 @@ export default function ChatsScreen({ navigation }) {
             disabled={creatingChat || !otherUserIdInput.trim()}
           >
             {creatingChat ? (
-              <ActivityIndicator size="small" color={colors.white} />
+              <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
             ) : (
               <Text style={styles.createButtonText}>Abrir Chat</Text>
             )}
@@ -171,13 +251,13 @@ export default function ChatsScreen({ navigation }) {
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Feather name="message-circle" size={64} color={colors.textSecondary} />
+            <Feather name="message-circle" size={64} color={theme.colors.textSecondary} />
             <Text style={styles.emptyText}>No hay chats aún</Text>
             <Text style={styles.emptySubtext}>
               Ingresa un ID de usuario para comenzar una conversación
@@ -192,81 +272,4 @@ export default function ChatsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#666',
-    fontSize: 14,
-  },
-  createChatContainer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e8ed',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  userIdInput: {
-    flex: 1,
-    height: 44,
-    borderWidth: 1,
-    borderColor: '#e1e8ed',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    color: '#14171a',
-    backgroundColor: '#fff',
-  },
-  createButton: {
-    height: 44,
-    paddingHorizontal: 20,
-    backgroundColor: '#0084ff',
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 100,
-  },
-  createButtonDisabled: {
-    opacity: 0.5,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  emptyList: {
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-    minHeight: 300,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#14171a',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-});
+

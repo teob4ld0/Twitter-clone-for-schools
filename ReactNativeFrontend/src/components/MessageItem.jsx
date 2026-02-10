@@ -8,9 +8,10 @@ import {
 } from 'react-native';
 import ImageViewer from './ImageViewer';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 export default function MessageItem({ message, currentUserId, onDelete }) {
+  const { theme } = useTheme();
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
   
   if (!message) return null;
@@ -23,6 +24,119 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
   const hasMedia = message.mediaUrl;
   const isVideo = hasMedia && message.mediaUrl.match(/\.(mp4|webm|mov|m4v)$/i);
   const isImage = hasMedia && message.mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+  const styles = StyleSheet.create({
+    container: {
+      marginVertical: 4,
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+    },
+    ownMessage: {
+      alignSelf: 'flex-end',
+      flexDirection: 'row-reverse',
+    },
+    otherMessage: {
+      alignSelf: 'flex-start',
+    },
+    avatarContainer: {
+      marginHorizontal: 8,
+    },
+    avatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
+    avatarPlaceholder: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.chatMessageOwn,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarText: {
+      color: theme.colors.chatMessageOwnText,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    bubble: {
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      maxWidth: '85%',
+    },
+    ownBubble: {
+      backgroundColor: theme.colors.chatMessageOwn,
+    },
+    otherBubble: {
+      backgroundColor: '#e8d4f8',
+    },
+    contentWrapper: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 8,
+    },
+    messageContent: {
+      flexShrink: 1,
+    },
+    text: {
+      fontSize: 14,
+      lineHeight: 18,
+    },
+    ownText: {
+      color: theme.colors.chatMessageOwnText,
+    },
+    otherText: {
+      color: '#000000',
+    },
+    mediaContainer: {
+      marginTop: 8,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    mediaImage: {
+      width: 240,
+      height: 240,
+      borderRadius: 10,
+    },
+    videoPlaceholder: {
+      width: 240,
+      height: 240,
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 10,
+    },
+    videoText: {
+      marginTop: 8,
+      fontSize: 12,
+    },
+    videoTextOwn: {
+      color: theme.colors.chatMessageOwnText,
+    },
+    videoTextOther: {
+      color: theme.colors.textSecondary,
+    },
+    metaText: {
+      fontSize: 11,
+      marginTop: 6,
+    },
+    ownMeta: {
+      color: 'rgba(255, 255, 255, 0.85)',
+    },
+    otherMeta: {
+      color: theme.colors.textSecondary,
+    },
+    deleteButton: {
+      paddingTop: 2,
+      paddingLeft: 4,
+    },
+    deleteButtonText: {
+      fontSize: 16,
+      color: 'rgba(255, 255, 255, 0.7)',
+      lineHeight: 16,
+    },
+  });
 
   return (
     <View style={[styles.container, isOwn ? styles.ownMessage : styles.otherMessage]}>
@@ -67,7 +181,7 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
                   </TouchableOpacity>
                 ) : isVideo ? (
                   <View style={styles.videoPlaceholder}>
-                    <Feather name="video" size={32} color={isOwn ? colors.white : colors.textSecondary} />
+                    <Feather name="video" size={32} color={isOwn ? theme.colors.chatMessageOwnText : theme.colors.textSecondary} />
                     <Text style={[styles.videoText, isOwn ? styles.videoTextOwn : styles.videoTextOther]}>
                       Video
                     </Text>
@@ -97,116 +211,3 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 4,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-  },
-  ownMessage: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row-reverse',
-  },
-  otherMessage: {
-    alignSelf: 'flex-start',
-  },
-  avatarContainer: {
-    marginHorizontal: 8,
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  avatarPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#0084ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  bubble: {
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    maxWidth: '85%',
-  },
-  ownBubble: {
-    backgroundColor: '#0084ff',
-  },
-  otherBubble: {
-    backgroundColor: '#f1f1f1',
-  },
-  contentWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  messageContent: {
-    flexShrink: 1,
-  },
-  text: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  ownText: {
-    color: '#fff',
-  },
-  otherText: {
-    color: '#111',
-  },
-  mediaContainer: {
-    marginTop: 8,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  mediaImage: {
-    width: 240,
-    height: 240,
-    borderRadius: 10,
-  },
-  videoPlaceholder: {
-    width: 240,
-    height: 240,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-  },
-  videoText: {
-    marginTop: 8,
-    fontSize: 12,
-  },
-  videoTextOwn: {
-    color: '#fff',
-  },
-  videoTextOther: {
-    color: '#666',
-  },
-  metaText: {
-    fontSize: 11,
-    marginTop: 6,
-  },
-  ownMeta: {
-    color: 'rgba(255, 255, 255, 0.85)',
-  },
-  otherMeta: {
-    color: '#666',
-  },
-  deleteButton: {
-    paddingTop: 2,
-    paddingLeft: 4,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: 16,
-  },
-});

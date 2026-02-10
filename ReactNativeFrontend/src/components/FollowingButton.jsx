@@ -8,15 +8,58 @@ import {
   Platform
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { followersAPI, interestSignalsAPI } from '../services/api';
-import { colors } from '../styles/colors';
 
 function FollowingButton({ userId, initialIsFollowing = false, onFollowChange }) {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isLoading, setIsLoading] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+
+  const styles = StyleSheet.create({
+    button: {
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      borderRadius: 9999,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 120,
+      width: '100%',
+      maxWidth: '100%',
+      minHeight: 36,
+    },
+    followButton: {
+      backgroundColor: '#9b59b6',
+    },
+    followingButton: {
+      backgroundColor: theme.colors.cardBackground,
+      borderWidth: 1,
+      borderColor: '#9b59b6',
+    },
+    unfollowHover: {
+      backgroundColor: theme.colors.errorBackground,
+      borderColor: theme.colors.error,
+    },
+    disabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    followText: {
+      color: theme.colors.textOnPrimary,
+    },
+    followingText: {
+      color: '#9b59b6',
+    },
+    unfollowText: {
+      color: theme.colors.error,
+    },
+  });
 
   // Si el usuario es el mismo que está viendo el perfil, no mostrar el botón
   if (!user || Number(user.id) === Number(userId)) {
@@ -141,7 +184,7 @@ function FollowingButton({ userId, initialIsFollowing = false, onFollowChange })
         style={[styles.button, styles.followButton, styles.disabled]}
         disabled
       >
-        <ActivityIndicator size="small" color={colors.white} />
+        <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
       </TouchableOpacity>
     );
   }
@@ -158,7 +201,7 @@ function FollowingButton({ userId, initialIsFollowing = false, onFollowChange })
       {isLoading ? (
         <ActivityIndicator 
           size="small" 
-          color={isFollowing ? colors.primary : colors.white} 
+          color={isFollowing ? '#9b59b6' : theme.colors.textOnPrimary} 
         />
       ) : (
         <Text style={[
@@ -172,47 +215,5 @@ function FollowingButton({ userId, initialIsFollowing = false, onFollowChange })
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 9999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 120,
-    width: '100%',
-    maxWidth: '100%',
-    minHeight: 36,
-  },
-  followButton: {
-    backgroundColor: colors.primary,
-  },
-  followingButton: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  unfollowHover: {
-    backgroundColor: '#ffebee',
-    borderColor: '#e0245e',
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  followText: {
-    color: colors.white,
-  },
-  followingText: {
-    color: colors.primary,
-  },
-  unfollowText: {
-    color: '#e0245e',
-  },
-});
 
 export default FollowingButton;

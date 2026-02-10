@@ -638,9 +638,9 @@ function UserProfile() {
                   flex: 1,
                   padding: isMobile ? '12px 16px' : '10px 14px',
                   borderRadius: 9999,
-                  border: '1px solid #1da1f2',
+                  border: '1px solid #9b59b6',
                   background: '#fff',
-                  color: '#1da1f2',
+                  color: '#9b59b6',
                   fontWeight: 700,
                   cursor: openingChat ? 'not-allowed' : 'pointer',
                   fontSize: isMobile ? '16px' : '14px'

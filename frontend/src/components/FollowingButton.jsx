@@ -90,12 +90,12 @@ function FollowingButton({ userId, initialIsFollowing = false, onFollowChange })
   const buttonStyle = {
     padding: '8px 20px',
     borderRadius: '9999px',
-    border: isFollowing ? '1px solid #1da1f2' : 'none',
+    border: isFollowing ? '1px solid #9b59b6' : 'none',
     backgroundColor: isFollowing
       ? (isHovered ? '#ffebee' : 'white')
-      : '#1da1f2',
+      : '#9b59b6',
     color: isFollowing
-      ? (isHovered ? '#e0245e' : '#1da1f2')
+      ? (isHovered ? '#e0245e' : '#9b59b6')
       : 'white',
     fontSize: '14px',
     fontWeight: 'bold',

@@ -18,14 +18,275 @@ import * as ImagePicker from '../utils/imagePicker';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI } from '../services/api';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 function Reply({ reply, onDelete, onLikeUpdate }) {
   const { user } = useAuth();
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const isAuthor = user?.username === reply.author;
+
+  const styles = StyleSheet.create({
+    comment: {
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    commentHeader: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    avatarSmall: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarImg: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
+    avatarText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    commentBody: {
+      flex: 1,
+    },
+    commentInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 4,
+    },
+    authorName: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+    },
+    date: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+    },
+    content: {
+      fontSize: 14,
+      color: theme.colors.textPrimary,
+      marginBottom: 6,
+      lineHeight: 20,
+    },
+    mention: {
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    mediaWrapper: {
+      marginVertical: 8,
+    },
+    media: {
+      width: '100%',
+      height: 200,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 4,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+    },
+    actionText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      fontWeight: '500',
+    },
+    likedText: {
+      color: theme.colors.error,
+    },
+    repostedText: {
+      color: theme.colors.success,
+    },
+    deleteButton: {
+      padding: 4,
+    },
+    menuOverlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    menuContainer: {
+      backgroundColor: theme.colors.cardBackground,
+      borderRadius: 12,
+      minWidth: 200,
+      padding: 8,
+      ...Platform.select({
+        ios: {
+          shadowColor: theme.colors.shadowColor,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 5,
+        },
+      }),
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+    },
+    menuItemText: {
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+      fontWeight: '500',
+    },
+    menuDivider: {
+      height: 1,
+      backgroundColor: theme.colors.border,
+      marginVertical: 4,
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    modalBody: {
+      flex: 1,
+      padding: 16,
+    },
+    quoteTextarea: {
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+      minHeight: 100,
+      textAlignVertical: 'top',
+      lineHeight: 22,
+    },
+    charCount: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      textAlign: 'right',
+      marginTop: 8,
+    },
+    uploadedMediaPreview: {
+      marginVertical: 12,
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    uploadedMediaImage: {
+      width: '100%',
+      height: 200,
+    },
+    removeMediaButton: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      borderRadius: 16,
+      width: 32,
+      height: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    quotedTweetPreview: {
+      marginTop: 12,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 12,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    previewHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    previewAuthor: {
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginRight: 8,
+    },
+    previewDate: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+    },
+    previewContent: {
+      fontSize: 14,
+      color: theme.colors.textPrimary,
+      lineHeight: 20,
+    },
+    previewMediaWrapper: {
+      marginTop: 8,
+    },
+    modalFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      gap: 12,
+    },
+    mediaButton: {
+      padding: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    cancelButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    cancelButtonText: {
+      color: theme.colors.primary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    submitButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      borderRadius: 20,
+      backgroundColor: theme.colors.primary,
+    },
+    submitButtonDisabled: {
+      opacity: 0.5,
+    },
+    submitButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+  });
 
   // Avatar
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -355,8 +616,8 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               <Feather
                 name="heart"
                 size={16}
-                color={isLiked ? colors.error : colors.textSecondary}
-                fill={isLiked ? colors.error : 'transparent'}
+                color={isLiked ? theme.colors.error : theme.colors.textSecondary}
+                fill={isLiked ? theme.colors.error : 'transparent'}
               />
               <Text style={[styles.actionText, isLiked && styles.likedText]}>
                 {likesCount}
@@ -371,7 +632,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               <Feather
                 name="repeat"
                 size={16}
-                color={isReposted ? colors.success : colors.textSecondary}
+                color={isReposted ? theme.colors.success : theme.colors.textSecondary}
               />
               <Text style={[styles.actionText, isReposted && styles.repostedText]}>
                 {repostsCount}
@@ -382,7 +643,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               onPress={handleOpenThread}
               style={styles.actionButton}
             >
-              <Feather name="message-circle" size={16} color={colors.textSecondary} />
+              <Feather name="message-circle" size={16} color={theme.colors.textSecondary} />
               <Text style={styles.actionText}>{childrenCount}</Text>
             </TouchableOpacity>
           </View>
@@ -390,7 +651,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
 
         {isAuthor && (
           <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-            <Feather name="trash-2" size={16} color={colors.textSecondary} />
+            <Feather name="trash-2" size={16} color={theme.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -413,7 +674,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               onPress={handleRepost}
               disabled={isLoadingRepost}
             >
-              <Feather name="repeat" size={20} color={colors.primary} />
+              <Feather name="repeat" size={20} color={theme.colors.primary} />
               <Text style={styles.menuItemText}>
                 {isReposted ? 'Deshacer Repost' : 'Repost'}
               </Text>
@@ -426,7 +687,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               onPress={handleQuote}
               disabled={isLoadingQuote}
             >
-              <Feather name="edit-3" size={20} color={colors.primary} />
+              <Feather name="edit-3" size={20} color={theme.colors.primary} />
               <Text style={styles.menuItemText}>Quote</Text>
             </TouchableOpacity>
           </View>
@@ -448,7 +709,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
                 setQuoteMediaUri(null);
               }}
             >
-              <Feather name="x" size={24} color={colors.text} />
+              <Feather name="x" size={24} color={theme.colors.textPrimary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Citar Comentario</Text>
             <View style={{ width: 24 }} />
@@ -459,7 +720,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               value={quoteContent}
               onChangeText={setQuoteContent}
               placeholder="Agrega un comentario..."
-              placeholderTextColor="#999"
+              placeholderTextColor={theme.colors.textSecondary}
               style={styles.quoteTextarea}
               multiline
               autoFocus
@@ -479,7 +740,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
                   onPress={() => setQuoteMediaUri(null)}
                   style={styles.removeMediaButton}
                 >
-                  <Feather name="x" size={16} color="#fff" />
+                  <Feather name="x" size={16} color={theme.colors.textOnPrimary} />
                 </TouchableOpacity>
               </View>
             )}
@@ -504,7 +765,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               style={styles.mediaButton}
               disabled={isLoadingQuote || !!quoteMediaUri}
             >
-              <Feather name="image" size={20} color={colors.primary} />
+              <Feather name="image" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
 
             <View style={{ flex: 1 }} />
@@ -530,7 +791,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               disabled={!quoteContent.trim() || isLoadingQuote}
             >
               {isLoadingQuote ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
                 <Text style={styles.submitButtonText}>Citar</Text>
               )}
@@ -541,265 +802,5 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  comment: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  commentHeader: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  avatarSmall: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImg: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  commentBody: {
-    flex: 1,
-  },
-  commentInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  authorName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-  },
-  date: {
-    fontSize: 12,
-    color: '#666',
-  },
-  content: {
-    fontSize: 14,
-    color: '#000',
-    marginBottom: 6,
-    lineHeight: 20,
-  },
-  mention: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  mediaWrapper: {
-    marginVertical: 8,
-  },
-  media: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 4,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  likedText: {
-    color: colors.error,
-  },
-  repostedText: {
-    color: colors.success,
-  },
-  deleteButton: {
-    padding: 4,
-  },
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuContainer: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: 12,
-    minWidth: 200,
-    padding: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-  },
-  menuItemText: {
-    fontSize: 16,
-    color: '#000',
-    fontWeight: '500',
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: 4,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  modalBody: {
-    flex: 1,
-    padding: 16,
-  },
-  quoteTextarea: {
-    fontSize: 16,
-    color: '#000',
-    minHeight: 100,
-    textAlignVertical: 'top',
-    lineHeight: 22,
-  },
-  charCount: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    marginTop: 8,
-  },
-  uploadedMediaPreview: {
-    marginVertical: 12,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  uploadedMediaImage: {
-    width: '100%',
-    height: 200,
-  },
-  removeMediaButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quotedTweetPreview: {
-    marginTop: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    backgroundColor: colors.cardBackground,
-  },
-  previewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  previewAuthor: {
-    fontWeight: 'bold',
-    color: '#000',
-    marginRight: 8,
-  },
-  previewDate: {
-    fontSize: 12,
-    color: '#666',
-  },
-  previewContent: {
-    fontSize: 14,
-    color: '#000',
-    lineHeight: 20,
-  },
-  previewMediaWrapper: {
-    marginTop: 8,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    gap: 12,
-  },
-  mediaButton: {
-    padding: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  cancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cancelButtonText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  submitButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
 
 export default Reply;

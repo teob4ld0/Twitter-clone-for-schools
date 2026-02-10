@@ -9,6 +9,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { store } from './src/store/store';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { colors } from './src/styles/colors';
 
 // Screens
@@ -21,6 +22,7 @@ import ChatsScreen from './src/screens/ChatsScreen';
 import ChatDetailScreen from './src/screens/ChatDetailScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import AdminScreen from './src/screens/AdminScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 
 // Components
 import SignalRProvider from './src/components/SignalRProvider';
@@ -33,7 +35,29 @@ const Tab = createBottomTabNavigator();
 // Header component
 function Header({ navigation }) {
   const { logout } = useAuth();
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
+
+  const headerStyles = {
+    header: {
+      backgroundColor: theme.colors.primary,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      shadowColor: theme.colors.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.textOnPrimary,
+    },
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -53,11 +77,16 @@ function Header({ navigation }) {
   };
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-      <Text style={styles.headerTitle}>Twitetec</Text>
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-        <Feather name="log-out" size={20} color={colors.white} />
-      </TouchableOpacity>
+    <View style={[headerStyles.header, { paddingTop: insets.top + 12 }]}>
+      <Text style={headerStyles.headerTitle}>Twitetec</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.logoutButton}>
+          <Feather name="settings" size={20} color={theme.colors.textOnPrimary} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Feather name="log-out" size={20} color={theme.colors.textOnPrimary} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -100,19 +129,39 @@ function MainTabs() {
 
 function AppNavigator() {
   const { isAuthenticated, loading, isRehydrating } = useAuth();
+  const { theme } = useTheme();
   const navigationRef = useNavigationContainerRef();
+
+  const loadingStyles = {
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+    },
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+    },
+  };
 
   // Mostrar loading mientras se verifica la autenticación o se rehidrata el estado
   if (loading || isRehydrating) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Cargando...</Text>
+      <View style={loadingStyles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={loadingStyles.loadingText}>Cargando...</Text>
       </View>
     );
   }
 
   const authenticated = isAuthenticated();
+
+  const screenOptions = {
+    headerStyle: { backgroundColor: theme.colors.primary },
+    headerTintColor: theme.colors.textOnPrimary,
+  };
 
   return (
     <NavigationContainer ref={navigationRef}>
@@ -126,8 +175,7 @@ function AppNavigator() {
                 component={StatusDetailScreen}
                 options={{
                   headerShown: true,
-                  headerStyle: { backgroundColor: colors.primary },
-                  headerTintColor: colors.white,
+                  ...screenOptions,
                   headerTitle: 'Estado',
                 }}
               />
@@ -136,8 +184,7 @@ function AppNavigator() {
                 component={ChatDetailScreen}
                 options={{
                   headerShown: true,
-                  headerStyle: { backgroundColor: colors.primary },
-                  headerTintColor: colors.white,
+                  ...screenOptions,
                   headerTitle: 'Chat',
                 }}
               />
@@ -146,8 +193,7 @@ function AppNavigator() {
                 component={ProfileScreen}
                 options={{
                   headerShown: true,
-                  headerStyle: { backgroundColor: colors.primary },
-                  headerTintColor: colors.white,
+                  ...screenOptions,
                   headerTitle: 'Perfil de Usuario',
                 }}
               />
@@ -156,9 +202,15 @@ function AppNavigator() {
                 component={AdminScreen}
                 options={{
                   headerShown: true,
-                  headerStyle: { backgroundColor: colors.primary },
-                  headerTintColor: colors.white,
+                  ...screenOptions,
                   headerTitle: 'Administración',
+                }}
+              />
+              <Stack.Screen 
+                name="Settings" 
+                component={SettingsScreen}
+                options={{
+                  headerShown: false,
                 }}
               />
             </Stack.Navigator>
@@ -177,43 +229,16 @@ function AppNavigator() {
 export default function App() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <AppNavigator />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  header: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
   logoutButton: {
     padding: 8,
     borderRadius: 20,

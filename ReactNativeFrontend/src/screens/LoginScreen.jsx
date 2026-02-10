@@ -14,11 +14,12 @@ import {
 import { decode as base64Decode } from 'base-64';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import GoogleIcon from '../components/GoogleIcon';
 
 export default function LoginScreen({ navigation }) {
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -130,6 +131,121 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    content: {
+      padding: 20,
+      maxWidth: 600,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 24,
+      color: theme.colors.textPrimary,
+    },
+    errorContainer: {
+      backgroundColor: theme.colors.errorBackground,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.colors.error,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 14,
+    },
+    form: {
+      gap: 16,
+    },
+    field: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginBottom: 8,
+      color: theme.colors.textPrimary,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 8,
+      padding: 12,
+      fontSize: 16,
+      backgroundColor: theme.colors.cardBackground,
+      color: theme.colors.textPrimary,
+    },
+    button: {
+      backgroundColor: theme.colors.primary,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    linkText: {
+      color: theme.colors.primary,
+      textAlign: 'center',
+      marginTop: 16,
+      fontSize: 14,
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 16,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: theme.colors.border,
+    },
+    dividerText: {
+      marginHorizontal: 16,
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    googleButton: {
+      backgroundColor: theme.colors.cardBackground,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.textPrimary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    googleButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    googleButtonText: {
+      color: theme.colors.textPrimary,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -178,7 +294,7 @@ export default function LoginScreen({ navigation }) {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
                 <Text style={styles.buttonText}>Iniciar Sesión</Text>
               )}
@@ -214,117 +330,4 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  content: {
-    padding: 20,
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    color: '#000',
-  },
-  errorContainer: {
-    backgroundColor: '#ffe0e6',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.error,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 14,
-  },
-  form: {
-    gap: 16,
-  },
-  field: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#000',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: colors.white,
-    color: '#000',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkText: {
-    color: colors.primary,
-    textAlign: 'center',
-    marginTop: 16,
-    fontSize: 14,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#666',
-    fontSize: 14,
-  },
-  googleButton: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#dadce0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  googleButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  googleButtonText: {
-    color: '#111',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
+
