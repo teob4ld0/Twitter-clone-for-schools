@@ -47,8 +47,6 @@ public class FcmService
             using var stream = new FileStream(serviceAccountPath, FileMode.Open, FileAccess.Read);
             _credential = GoogleCredential.FromStream(stream)
                 .CreateScoped("https://www.googleapis.com/auth/firebase.messaging");
-            
-            _logger.LogInformation($"Firebase credentials loaded successfully for project '{_projectId}'");
         }
         catch (Exception ex)
         {
@@ -118,18 +116,17 @@ public class FcmService
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"FCM notification sent successfully to {expoPushToken}");
                 return true;
             }
             else
             {
-                _logger.LogError($"FCM notification failed: {response.StatusCode} - {responseContent}");
+                _logger.LogError($"FCM notification failed. Status: {response.StatusCode}, Response: {responseContent}");
                 return false;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error sending FCM notification to {expoPushToken}");
+            _logger.LogError(ex, "Exception sending FCM notification");
             return false;
         }
     }

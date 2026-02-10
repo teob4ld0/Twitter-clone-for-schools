@@ -26,40 +26,25 @@ public class InterestSignalsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> RecordSignal([FromBody] RecordInterestSignalDto dto)
     {
-        _logger.LogInformation("=== INICIO RecordSignal ===");
-        _logger.LogInformation("Received DTO: StatusId={StatusId}, SignalType={SignalType}, Value={Value}, Metadata={Metadata}", 
-            dto?.StatusId, dto?.SignalType, dto?.Value, dto?.Metadata);
-
         if (!ModelState.IsValid)
         {
-            _logger.LogWarning("ModelState inválido:");
-            foreach (var error in ModelState)
-            {
-                _logger.LogWarning("Key: {Key}, Errors: {Errors}", error.Key, string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage)));
-            }
             return BadRequest(ModelState);
         }
 
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        _logger.LogInformation("UserIdStr from claims: {UserIdStr}", userIdStr);
         
         if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out var userId))
         {
-            _logger.LogWarning("Usuario no autenticado o userId inválido");
             return Unauthorized(new { message = "Usuario no autenticado" });
         }
-
-        _logger.LogInformation("UserId parsed: {UserId}", userId);
 
         // Validar que el status existe (solo si se proporciona StatusId)
         if (dto.StatusId.HasValue)
         {
             var statusExists = await _context.Statuses.AnyAsync(s => s.Id == dto.StatusId.Value);
-            _logger.LogInformation("Status exists check: StatusId={StatusId}, Exists={Exists}", dto.StatusId, statusExists);
             
             if (!statusExists)
             {
-                _logger.LogWarning("Status no encontrado: {StatusId}", dto.StatusId);
                 return NotFound(new { message = "Status no encontrado" });
             }
         }
@@ -68,10 +53,8 @@ public class InterestSignalsController : ControllerBase
             // Para señales sin status (follow/unfollow/opening_user_profile), validar que el tipo lo permite
             if (dto.SignalType != "follow" && dto.SignalType != "unfollow" && dto.SignalType != "opening_user_profile")
             {
-                _logger.LogWarning("StatusId es requerido para el tipo de señal: {SignalType}", dto.SignalType);
                 return BadRequest(new { message = "StatusId es requerido para este tipo de señal" });
             }
-            _logger.LogInformation("Señal sin StatusId (tipo: {SignalType})", dto.SignalType);
         }
 
 
@@ -114,15 +97,8 @@ public class InterestSignalsController : ControllerBase
                 CreatedAt = DateTime.UtcNow
             };
 
-            _logger.LogInformation("Creando señal: UserId={UserId}, StatusId={StatusId}, Type={Type}, Value={Value}", 
-                signal.UserId, signal.StatusId, signal.SignalType, signal.Value);
-
             _context.InterestSignals.Add(signal);
-            var saveResult = await _context.SaveChangesAsync();
-            
-            _logger.LogInformation("SaveChanges result: {SaveResult} registros guardados", saveResult);
-            _logger.LogInformation("✅ Interest signal recorded: User={UserId}, Status={StatusId}, Type={SignalType}, Value={Value}",
-                userId, dto.StatusId, dto.SignalType, dto.Value);
+            await _context.SaveChangesAsync();
 
             return Ok(new { 
                 message = "Señal registrada correctamente",
@@ -131,8 +107,7 @@ public class InterestSignalsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error recording interest signal: {Message}, StackTrace: {StackTrace}", 
-                ex.Message, ex.StackTrace);
+            _logger.LogError(ex, "Error recording interest signal");
             return StatusCode(500, new { message = "Error al registrar la señal", details = ex.Message });
         }
     }

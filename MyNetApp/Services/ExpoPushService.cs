@@ -30,7 +30,8 @@ public class ExpoPushService
     /// IMPORTANTE: Los tokens almacenados deben ser FCM device tokens nativos,
     /// NO Expo Push Tokens. El frontend debe usar getDevicePushTokenAsync()
     /// </summary>
-    public async Task SendNotificationToUserAsync(int userId, object payload)
+    /// <returns>True si al menos una notificación fue enviada exitosamente</returns>
+    public async Task<bool> SendNotificationToUserAsync(int userId, object payload)
     {
         // Obtener todos los tokens activos del usuario
         var tokens = await _context.ExpoPushTokens
@@ -39,29 +40,34 @@ public class ExpoPushService
 
         if (!tokens.Any())
         {
-            _logger.LogInformation($"No active Expo push tokens found for user {userId}");
-            return;
+            return false;
         }
-
-        _logger.LogInformation($"Sending push notification to user {userId} ({tokens.Count} device(s))");
 
         // Extraer título y cuerpo del payload
         var title = GetPropertyValue(payload, "title") ?? "Nueva notificación";
         var body = GetPropertyValue(payload, "body") ?? "";
         var data = ExtractDataDictionary(payload);
 
+        int successCount = 0;
+
         // Enviar a cada token
         foreach (var token in tokens)
         {
             try
             {
-                await _fcmService.SendNotificationAsync(token.Token, title, body, data);
+                var success = await _fcmService.SendNotificationAsync(token.Token, title, body, data);
+                if (success)
+                {
+                    successCount++;
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error sending notification to token {token.Token}");
+                _logger.LogError(ex, $"Exception in ExpoPushService for user {userId}, token ID: {token.Id}");
             }
         }
+
+        return successCount > 0;
     }
 
     /// <summary>

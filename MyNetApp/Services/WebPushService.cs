@@ -32,8 +32,6 @@ public class WebPushService
 
         _vapidDetails = new VapidDetails(subject, publicKey, privateKey);
         _webPushClient = new WebPushClient();
-        
-        _logger.LogInformation($"WebPushService initialized with subject: {subject}");
     }
 
     // Enviar notificación push a un usuario específico
@@ -46,13 +44,10 @@ public class WebPushService
 
         if (!subscriptions.Any())
         {
-            _logger.LogInformation($"No active push subscriptions found for user {userId}");
             return;
         }
 
         var payloadJson = JsonSerializer.Serialize(payload);
-        _logger.LogInformation($"Sending push notification to user {userId} ({subscriptions.Count} subscription(s))");
-        _logger.LogDebug($"Payload: {payloadJson}");
 
         // Enviar a todas las suscripciones del usuario (puede tener múltiples dispositivos)
         var tasks = subscriptions.Select(async subscription =>
@@ -66,11 +61,10 @@ public class WebPushService
                 );
 
                 await _webPushClient.SendNotificationAsync(pushSubscription, payloadJson, _vapidDetails);
-                _logger.LogInformation($"Push notification sent successfully to user {userId} (endpoint: {subscription.Endpoint.Substring(0, Math.Min(50, subscription.Endpoint.Length))}...)");
             }
             catch (WebPushException ex)
             {
-                _logger.LogError(ex, $"WebPushException sending push to user {userId}: {ex.Message}, StatusCode: {ex.StatusCode}");
+                _logger.LogError(ex, $"WebPushException sending push to user {userId}");
                 
                 // Si el subscription expiró o es inválido, eliminarlo
                 if (ex.StatusCode == System.Net.HttpStatusCode.Gone || 
@@ -78,12 +72,11 @@ public class WebPushService
                 {
                     _context.PushSubscriptions.Remove(subscription);
                     await _context.SaveChangesAsync();
-                    _logger.LogWarning($"Removed invalid subscription for user {userId}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Unexpected error sending push to user {userId}: {ex.Message}");
+                _logger.LogError(ex, $"Unexpected error sending push to user {userId}");
             }
         });
 
