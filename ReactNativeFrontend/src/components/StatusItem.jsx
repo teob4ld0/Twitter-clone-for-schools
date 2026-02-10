@@ -21,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { statusAPI, interestSignalsAPI, mediaAPI } from '../services/api';
 import ReplyList from './ReplyList';
 import ImageViewer from './ImageViewer';
-import colors from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -36,6 +36,8 @@ function StatusItem({
 }) {
   const { user } = useAuth();
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(theme);
 
   // Validación defensiva
   if (!status || !status.id) {
@@ -491,7 +493,7 @@ function StatusItem({
     >
       {repostLabel && (
         <View style={styles.repostBanner}>
-          <Feather name="repeat" size={14} color={colors.textSecondary} />
+          <Feather name="repeat" size={14} color={theme.colors.textSecondary} />
           <Text style={styles.repostText}>{repostLabel}</Text>
         </View>
       )}
@@ -532,7 +534,7 @@ function StatusItem({
             }}
             style={styles.deleteButton}
           >
-            <Feather name="trash-2" size={18} color={colors.textSecondary} />
+            <Feather name="trash-2" size={18} color={theme.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -599,13 +601,13 @@ function StatusItem({
           <Feather
             name={isLiked ? 'heart' : 'heart'}
             size={18}
-            color={isLiked ? colors.error : colors.textSecondary}
-            fill={isLiked ? colors.error : 'none'}
+            color={isLiked ? theme.colors.error : theme.colors.textSecondary}
+            fill={isLiked ? theme.colors.error : 'none'}
           />
           <Text
             style={[
               styles.actionButtonText,
-              isLiked && { color: colors.error }
+              isLiked && { color: theme.colors.error }
             ]}
           >
             {likesCount}
@@ -624,12 +626,12 @@ function StatusItem({
             <Feather
               name="repeat"
               size={18}
-              color={isReposted ? colors.success : colors.textSecondary}
+              color={isReposted ? theme.colors.success : theme.colors.textSecondary}
             />
             <Text
               style={[
                 styles.actionButtonText,
-                isReposted && { color: colors.success }
+                isReposted && { color: theme.colors.success }
               ]}
             >
               {repostsCount}
@@ -647,12 +649,12 @@ function StatusItem({
           <Feather
             name="message-circle"
             size={18}
-            color={showReplies ? colors.primary : colors.textSecondary}
+            color={showReplies ? theme.colors.primary : theme.colors.textSecondary}
           />
           <Text
             style={[
               styles.actionButtonText,
-              showReplies && { color: colors.primary }
+              showReplies && { color: theme.colors.primary }
             ]}
           >
             {repliesCount}
@@ -684,7 +686,7 @@ function StatusItem({
           onPress={() => setShowDeleteModal(false)}
         >
           <View style={styles.deleteModal}>
-            <Feather name="trash-2" size={32} color={colors.error} />
+            <Feather name="trash-2" size={32} color={theme.colors.error} />
             <Text style={styles.deleteModalTitle}>¿Eliminar publicación?</Text>
             <Text style={styles.deleteModalText}>Esta acción no se puede deshacer.</Text>
             <View style={styles.deleteModalButtons}>
@@ -725,7 +727,7 @@ function StatusItem({
               }}
               style={styles.quoteModalClose}
             >
-              <Feather name="x" size={24} color={colors.textSecondary} />
+              <Feather name="x" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -793,7 +795,7 @@ function StatusItem({
               style={styles.mediaButton}
               disabled={isLoadingQuote || !!quoteMediaFile}
             >
-              <Feather name="image" size={20} color={colors.primary} />
+              <Feather name="image" size={20} color={theme.colors.primary} />
             </TouchableOpacity>
             <View style={styles.quoteModalActions}>
               <TouchableOpacity
@@ -849,7 +851,7 @@ function StatusItem({
               style={styles.menuItem}
               disabled={isLoadingRepost}
             >
-              <Feather name="repeat" size={20} color={colors.textPrimary} />
+              <Feather name="repeat" size={20} color={theme.colors.textPrimary} />
               <Text style={styles.menuItemText}>
                 {isReposted ? 'Deshacer Repost' : 'Repost'}
               </Text>
@@ -863,7 +865,7 @@ function StatusItem({
               style={styles.menuItem}
               disabled={isLoadingQuote}
             >
-              <Feather name="edit-3" size={20} color={colors.textPrimary} />
+              <Feather name="edit-3" size={20} color={theme.colors.textPrimary} />
               <Text style={styles.menuItemText}>Quote</Text>
             </TouchableOpacity>
           </View>
@@ -883,13 +885,14 @@ function StatusItem({
   );
 }
 
-const styles = StyleSheet.create({
+function useThemedStyles(theme) {
+  return StyleSheet.create({
   postCard: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.cardBackground,
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: theme.colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -902,10 +905,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: theme.colors.border,
   },
   repostText: {
-    color: '#657786',
+    color: theme.colors.textSecondary,
     fontSize: 13,
     fontWeight: '600'
   },
@@ -925,12 +928,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#1da1f2',
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center'
   },
   avatarText: {
-    color: '#fff',
+    color: theme.colors.textOnPrimary,
     fontSize: 20,
     fontWeight: '700'
   },
@@ -938,19 +941,19 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f0f0f0'
+    backgroundColor: theme.colors.backgroundTertiary
   },
   authorTextContainer: {
     flex: 1
   },
   authorName: {
     fontSize: 16,
-    color: '#14171a',
+    color: theme.colors.textPrimary,
     fontWeight: '700'
   },
   date: {
     fontSize: 14,
-    color: '#657786',
+    color: theme.colors.textSecondary,
     marginTop: 2
   },
   deleteButton: {
@@ -967,10 +970,10 @@ const styles = StyleSheet.create({
   contentText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#14171a'
+    color: theme.colors.textPrimary
   },
   mention: {
-    color: colors.primary,
+    color: theme.colors.primary,
     fontWeight: '600'
   },
   mediaWrapper: {
@@ -981,33 +984,33 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 240,
     borderRadius: 16,
-    backgroundColor: '#f0f0f0'
+    backgroundColor: theme.colors.backgroundTertiary
   },
   mediaLink: {
-    color: colors.primary,
+    color: theme.colors.primary,
     textDecorationLine: 'underline'
   },
   quoteCard: {
     borderWidth: 1,
-    borderColor: '#e1e8ed',
+    borderColor: theme.colors.border,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    backgroundColor: '#f7f9fa'
+    backgroundColor: theme.colors.backgroundSecondary
   },
   deletedQuoteCard: {
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: theme.colors.backgroundSecondary,
     opacity: 0.6
   },
   deletedQuoteText: {
     fontSize: 14,
     fontStyle: 'italic',
-    color: '#666',
+    color: theme.colors.textSecondary,
     flex: 1
   },
   quoteHeader: {
@@ -1019,24 +1022,24 @@ const styles = StyleSheet.create({
   quoteBadge: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.primary
+    color: theme.colors.primary
   },
   quoteAuthor: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
+    color: theme.colors.textPrimary,
     flex: 1
   },
   quoteDate: {
     fontSize: 12,
-    color: '#666'
+    color: theme.colors.textSecondary
   },
   quoteContent: {
     marginTop: 4
   },
   quoteContentText: {
     fontSize: 15,
-    color: '#000',
+    color: theme.colors.textPrimary,
     lineHeight: 20
   },
   quoteMediaWrapper: {
@@ -1047,7 +1050,7 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: theme.colors.border,
     alignItems: 'center'
   },
   actionButton: {
@@ -1061,7 +1064,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 14,
-    color: '#657786',
+    color: theme.colors.textSecondary,
     fontWeight: '600'
   },
   repostMenuContainer: {
@@ -1071,24 +1074,24 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.border
+    borderTopColor: theme.colors.border
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: theme.colors.modalOverlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
     zIndex: 9999
   },
   deleteModal: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.cardBackground,
     borderRadius: 16,
     padding: 24,
     width: '90%',
     maxWidth: 400,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: theme.colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -1097,13 +1100,13 @@ const styles = StyleSheet.create({
   deleteModalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#14171a',
+    color: theme.colors.textPrimary,
     marginTop: 16,
     marginBottom: 8
   },
   deleteModalText: {
     fontSize: 15,
-    color: '#657786',
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24
   },
@@ -1116,30 +1119,30 @@ const styles = StyleSheet.create({
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: '#f7f9fa',
+    backgroundColor: theme.colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: '#e1e8ed',
+    borderColor: theme.colors.border,
     borderRadius: 24
   },
   cancelButtonText: {
-    color: '#14171a',
+    color: theme.colors.textPrimary,
     fontSize: 15,
     fontWeight: 'bold'
   },
   deleteConfirmButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: colors.error,
+    backgroundColor: theme.colors.error,
     borderRadius: 24
   },
   deleteConfirmButtonText: {
-    color: '#fff',
+    color: theme.colors.textOnPrimary,
     fontSize: 15,
     fontWeight: 'bold'
   },
   quoteModalContainer: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: theme.colors.background,
     zIndex: 9999
   },
   quoteModalHeader: {
@@ -1148,12 +1151,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border
+    borderBottomColor: theme.colors.border
   },
   quoteModalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000'
+    color: theme.colors.textPrimary
   },
   quoteModalClose: {
     padding: 8
@@ -1165,13 +1168,13 @@ const styles = StyleSheet.create({
   quoteTextarea: {
     fontSize: 18,
     lineHeight: 26,
-    color: '#000',
+    color: theme.colors.textPrimary,
     minHeight: 120,
     textAlignVertical: 'top'
   },
   charCount: {
     fontSize: 14,
-    color: '#666',
+    color: theme.colors.textSecondary,
     textAlign: 'right',
     marginTop: 8,
     marginBottom: 16
@@ -1181,7 +1184,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.border,
     marginBottom: 16
   },
   uploadedMediaImage: {
@@ -1202,9 +1205,9 @@ const styles = StyleSheet.create({
   quotedTweetPreview: {
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 12,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: theme.colors.backgroundSecondary,
     marginBottom: 16
   },
   previewHeader: {
@@ -1214,17 +1217,17 @@ const styles = StyleSheet.create({
   },
   previewAuthor: {
     fontWeight: 'bold',
-    color: '#000',
+    color: theme.colors.textPrimary,
     fontSize: 15
   },
   previewDate: {
-    color: '#666',
+    color: theme.colors.textSecondary,
     fontSize: 14,
     marginLeft: 8
   },
   previewContent: {
     fontSize: 15,
-    color: '#000',
+    color: theme.colors.textPrimary,
     lineHeight: 22
   },
   previewMedia: {
@@ -1236,13 +1239,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: theme.colors.border,
     gap: 12
   },
   mediaButton: {
     padding: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 20,
     width: 40,
     height: 40,
@@ -1260,18 +1263,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 24
   },
   cancelButtonModalText: {
-    color: '#666',
+    color: theme.colors.textSecondary,
     fontSize: 15,
     fontWeight: 'bold'
   },
   submitButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 24,
     minWidth: 80,
     alignItems: 'center'
@@ -1280,24 +1283,24 @@ const styles = StyleSheet.create({
     opacity: 0.5
   },
   submitButtonText: {
-    color: '#fff',
+    color: theme.colors.textOnPrimary,
     fontSize: 15,
     fontWeight: 'bold'
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.modalOverlay,
     justifyContent: 'center',
     alignItems: 'center'
   },
   repostMenu: {
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: theme.colors.cardBackground,
     borderRadius: 12,
     minWidth: 180,
     overflow: 'hidden',
     elevation: 10,
     zIndex: 9999,
-    shadowColor: '#000',
+    shadowColor: theme.colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12
@@ -1311,12 +1314,13 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000'
+    color: theme.colors.textPrimary
   },
   menuDivider: {
     height: 1,
-    backgroundColor: colors.border
+    backgroundColor: theme.colors.border
   }
-});
+  });
+}
 
 export default StatusItem;

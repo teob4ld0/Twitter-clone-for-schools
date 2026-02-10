@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	fetchChats,
@@ -17,6 +18,7 @@ import { useIsMobile } from "../hooks/useMobile";
 
 export default function ChatsPage() {
 	const { user } = useAuth();
+	const { theme } = useTheme();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
@@ -31,6 +33,228 @@ export default function ChatsPage() {
 
 	const [fileError, setFileError] = useState('');
 	const [isSending, setIsSending] = useState(false);
+
+	// Estilos - definidos dentro del componente para acceder a theme
+	const desktopContainerStyle = {
+		display: "flex",
+		gap: 16,
+		height: "calc(100vh - 120px)"
+	};
+
+	const mobileContainerStyle = {
+		display: "flex",
+		flexDirection: "column",
+		height: "calc(100vh - 130px)",
+		position: "relative"
+	};
+
+	const desktopListStyle = {
+		width: 320,
+		borderRight: "1px solid #ddd",
+		overflowY: "auto"
+	};
+
+	const mobileListVisibleStyle = {
+		width: "100%",
+		height: "100%",
+		overflowY: "auto",
+		backgroundColor: theme.colors.background
+	};
+
+	const mobileListHiddenStyle = {
+		display: "none"
+	};
+
+	const desktopChatStyle = {
+		flex: 1,
+		display: "flex",
+		flexDirection: "column"
+	};
+
+	const mobileChatVisibleStyle = {
+		width: "100%",
+		height: "100%",
+		display: "flex",
+		flexDirection: "column",
+		backgroundColor: theme.colors.background
+	};
+
+	const mobileChatHiddenStyle = {
+		display: "none"
+	};
+
+	const chatHeaderStyle = {
+		padding: 12,
+		borderBottom: `1px solid ${theme.colors.border}`,
+		display: "flex",
+		alignItems: "center",
+		gap: 12,
+		backgroundColor: theme.colors.cardBackground,
+		position: "sticky",
+		top: 0,
+		zIndex: 10
+	};
+
+	const backButtonStyle = {
+		background: "none",
+		border: "none",
+		cursor: "pointer",
+		padding: 8,
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		color: theme.colors.primary,
+		minHeight: "44px",
+		minWidth: "44px"
+	};
+
+	const messagesContainerStyle = {
+		flex: 1,
+		overflowY: "auto",
+		padding: 12
+	};
+
+	const inputContainerStyle = {
+		padding: 12,
+		borderTop: `1px solid ${theme.colors.border}`,
+		backgroundColor: theme.colors.cardBackground
+	};
+
+	const createChatContainerStyle = {
+		padding: '1rem',
+		backgroundColor: theme.colors.cardBackgroundHover,
+		borderBottom: `1px solid ${theme.colors.border}`
+	};
+
+	const createChatInputStyle = {
+		flex: 1,
+		padding: '0.75rem',
+		fontSize: '1rem',
+		border: `1px solid ${theme.colors.border}`,
+		borderRadius: '8px',
+		outline: 'none',
+		transition: 'border-color 0.2s',
+		backgroundColor: theme.colors.inputBackground,
+		color: theme.colors.textPrimary
+	};
+
+	const createChatButtonStyle = {
+		padding: '0.75rem 1.5rem',
+		backgroundColor: theme.colors.primary,
+		color: 'white',
+		border: 'none',
+		borderRadius: '24px',
+		fontSize: '0.95rem',
+		fontWeight: 'bold',
+		cursor: 'pointer',
+		transition: 'background-color 0.2s',
+		whiteSpace: 'nowrap'
+	};
+
+	const errorMessageStyle = {
+		color: theme.colors.error,
+		fontSize: '0.875rem',
+		marginTop: '0.5rem',
+		padding: '0.5rem',
+		backgroundColor: theme.colors.errorBackground,
+		borderRadius: '6px'
+	};
+
+	const fileErrorStyle = {
+		padding: '0.75rem',
+		backgroundColor: theme.colors.errorBackground,
+		color: theme.colors.error,
+		borderRadius: '8px',
+		fontSize: '0.875rem',
+		marginBottom: '0.5rem'
+	};
+
+	const mediaFileDisplayStyle = {
+		marginBottom: '0.75rem',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: '0.5rem',
+		padding: '0.75rem',
+		backgroundColor: theme.colors.cardBackgroundHover,
+		borderRadius: '8px',
+		border: `1px solid ${theme.colors.border}`
+	};
+
+	const mediaFileNameStyle = {
+		fontSize: '0.875rem',
+		color: theme.colors.textPrimary,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap'
+	};
+
+	const removeFileButtonStyle = {
+		padding: '0.25rem 0.5rem',
+		backgroundColor: 'transparent',
+		color: theme.colors.textSecondary,
+		border: `1px solid ${theme.colors.border}`,
+		borderRadius: '50%',
+		cursor: 'pointer',
+		fontSize: '1rem',
+		width: '28px',
+		height: '28px',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		transition: 'background-color 0.2s'
+	};
+
+	const messageInputRowStyle = {
+		display: 'flex',
+		gap: '0.5rem',
+		alignItems: 'center'
+	};
+
+	const chatMediaButtonStyle = {
+		padding: '0.5rem',
+		backgroundColor: 'transparent',
+		color: theme.colors.primary,
+		border: `1px solid ${theme.colors.border}`,
+		borderRadius: '50%',
+		cursor: 'pointer',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: '40px',
+		height: '40px',
+		transition: 'background-color 0.2s',
+		flexShrink: 0
+	};
+
+	const chatInputStyle = {
+		flex: 1,
+		padding: '0.75rem 1rem',
+		fontSize: '1rem',
+		border: `1px solid ${theme.colors.border}`,
+		borderRadius: '24px',
+		outline: 'none',
+		transition: 'border-color 0.2s',
+		backgroundColor: theme.colors.inputBackground,
+		color: theme.colors.textPrimary
+	};
+
+	const chatSendButtonStyle = {
+		padding: '0.75rem',
+		backgroundColor: theme.colors.primary,
+		color: 'white',
+		border: 'none',
+		borderRadius: '50%',
+		cursor: 'pointer',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		width: '40px',
+		height: '40px',
+		fontSize: '1.25rem',
+		transition: 'background-color 0.2s',
+		flexShrink: 0
+	};
 
 	const { selectedChatId, messages, loading, error, chats } = useSelector((state) => ({
 		selectedChatId: state.chat.selectedChatId,
@@ -138,28 +362,28 @@ export default function ChatsPage() {
 		}
 	}, [isMobile]);
 
-	if (!currentUserId) return <div>Loading...</div>;
+	if (!currentUserId) return <div style={{ color: theme.colors.textPrimary }}>Loading...</div>;
 
 	return (
 		<div style={isMobile ? mobileContainerStyle : desktopContainerStyle}>
 			{/* Lista de chats */}
 			<div style={isMobile ? (showChatList ? mobileListVisibleStyle : mobileListHiddenStyle) : desktopListStyle}>
-				<div style={createChatContainerStyle}>
+				<div style={{ ...createChatContainerStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
 					<div style={{ display: "flex", gap: 8, marginBottom: 8, flexDirection: isMobile ? 'column' : 'row' }}>
 						<input 
 							placeholder="ID de usuario" 
 							value={otherUserIdInput} 
 							onChange={(e) => setOtherUserIdInput(e.target.value)} 
-							style={createChatInputStyle}
+							style={{ ...createChatInputStyle, backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.textPrimary }}
 						/>
 						<button 
 							onClick={handleCreateOrOpenChat} 
-							style={createChatButtonStyle}
+							style={{ ...createChatButtonStyle, backgroundColor: theme.colors.buttonPrimary, color: theme.colors.buttonPrimaryText }}
 						>
 							Abrir Chat
 						</button>
 					</div>
-					{error && <div style={errorMessageStyle}>{error}</div>}
+					{error && <div style={{ ...errorMessageStyle, backgroundColor: theme.colors.errorLight, color: theme.colors.error }}>{error}</div>}
 				</div>
 				<ChatsList onChatSelect={openChat} selectedChatId={selectedChatId} currentUserId={currentUserId} />
 			</div>
@@ -167,11 +391,11 @@ export default function ChatsPage() {
 			{/* Vista del chat */}
 			<div style={isMobile ? (showChatList ? mobileChatHiddenStyle : mobileChatVisibleStyle) : desktopChatStyle}>
 				{/* Header del chat */}
-				<div style={chatHeaderStyle}>
+				<div style={{ ...chatHeaderStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
 					{isMobile && selectedChat && (
 						<button
 							onClick={() => setShowChatList(true)}
-							style={backButtonStyle}
+							style={{ ...backButtonStyle, color: theme.colors.link }}
 							title="Volver a chats"
 						>
 							<svg style={{ width: '24px', height: '24px' }} viewBox="0 0 24 24" fill="currentColor">
@@ -192,7 +416,7 @@ export default function ChatsPage() {
 								margin: 0,
 								fontWeight: 800,
 								cursor: selectedChat.otherUser?.id ? 'pointer' : 'default',
-								color: '#14171a',
+							color: theme.colors.textPrimary,
 								fontSize: isMobile ? '18px' : '16px'
 							}}
 							title="Ver perfil"
@@ -200,32 +424,32 @@ export default function ChatsPage() {
 							{selectedChat.otherUser?.userName ?? selectedChat.otherUser?.username ?? `Chat ${selectedChat.id}`}
 						</button>
 					) : (
-						<div style={{ fontWeight: 700, fontSize: isMobile ? '16px' : '14px' }}>
+						<div style={{ fontWeight: 700, fontSize: isMobile ? '16px' : '14px', color: theme.colors.textSecondary }}>
 							{isMobile ? 'Selecciona un chat' : 'Select a chat'}
 						</div>
 					)}
 				</div>
 
 				{/* Mensajes */}
-				<div style={messagesContainerStyle}>
-					{!selectedChat && <div style={{ color: "#666", padding: 20, textAlign: 'center' }}>Select or create a chat to start messaging.</div>}
-					{selectedChat && loading.messages && <div style={{ padding: 20 }}>Loading messages...</div>}
-					{selectedChat && error && <div style={{ color: "#c00", padding: 20 }}>Error: {error}</div>}
+				<div style={{ ...messagesContainerStyle, backgroundColor: theme.colors.background }}>
+					{!selectedChat && <div style={{ color: theme.colors.textSecondary, padding: 20, textAlign: 'center' }}>Select or create a chat to start messaging.</div>}
+					{selectedChat && loading.messages && <div style={{ padding: 20, color: theme.colors.textPrimary }}>Loading messages...</div>}
+					{selectedChat && error && <div style={{ color: theme.colors.error, padding: 20 }}>Error: {error}</div>}
 					{selectedChat && !loading.messages && messages.map((m) => <div key={m.id} style={{ marginBottom: 8 }}><Message message={m} currentUserId={currentUserId} onDelete={() => handleDeleteMessage(m.id)} /></div>)}
 					<div ref={bottomRef} />
 				</div>
 
 				{/* Input de mensajes */}
 				{selectedChat && (
-					<div style={inputContainerStyle}>
+					<div style={{ ...inputContainerStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
 						{fileError && (
-							<div style={fileErrorStyle}>
+							<div style={{ ...fileErrorStyle, backgroundColor: theme.colors.errorLight, color: theme.colors.error }}>
 								{fileError}
 							</div>
 						)}
 						{mediaFile && (
-							<div style={mediaFileDisplayStyle}>
-								<div style={mediaFileNameStyle}>
+								<div style={{ ...mediaFileDisplayStyle, backgroundColor: theme.colors.backgroundSecondary, borderColor: theme.colors.border }}>
+								<div style={{ ...mediaFileNameStyle, color: theme.colors.textPrimary }}>
 									📎 <b>{mediaFile.name}</b>
 								</div>
 								<button
@@ -234,7 +458,7 @@ export default function ChatsPage() {
 										setFileError('');
 										if (fileInputRef.current) fileInputRef.current.value = '';
 									}}
-									style={removeFileButtonStyle}
+									style={{ ...removeFileButtonStyle, borderColor: theme.colors.border, color: theme.colors.textSecondary }}
 								>
 									✕
 								</button>
@@ -254,7 +478,7 @@ export default function ChatsPage() {
 							/>
 							<button
 								onClick={() => fileInputRef.current?.click()}
-								style={chatMediaButtonStyle}
+								style={{ ...chatMediaButtonStyle, borderColor: theme.colors.border, color: theme.colors.link }}
 								disabled={isSending || !!mediaFile}
 								type="button"
 								title="Adjuntar archivo"
@@ -269,13 +493,13 @@ export default function ChatsPage() {
 								value={messageText} 
 								onChange={(e) => setMessageText(e.target.value)} 
 								onKeyDown={(e) => { if (e.key === "Enter" && !isSending) handleSendMessage(); }} 
-								style={chatInputStyle} 
+								style={{ ...chatInputStyle, borderColor: theme.colors.inputBorder, backgroundColor: theme.colors.inputBackground, color: theme.colors.textPrimary }} 
 								placeholder="Escribe un mensaje..." 
 								disabled={isSending} 
 							/>
 							<button 
 								onClick={handleSendMessage} 
-								style={chatSendButtonStyle} 
+								style={{ ...chatSendButtonStyle, backgroundColor: theme.colors.buttonPrimary, color: theme.colors.buttonPrimaryText }} 
 								disabled={isSending}
 							>
 								{isSending ? '📤' : '➤'}
@@ -287,221 +511,3 @@ export default function ChatsPage() {
 		</div>
 	);
 }
-
-// Estilos
-const desktopContainerStyle = {
-	display: "flex",
-	gap: 16,
-	height: "calc(100vh - 120px)"
-};
-
-const mobileContainerStyle = {
-	display: "flex",
-	flexDirection: "column",
-	height: "calc(100vh - 130px)",
-	position: "relative"
-};
-
-const desktopListStyle = {
-	width: 320,
-	borderRight: "1px solid #ddd",
-	overflowY: "auto"
-};
-
-const mobileListVisibleStyle = {
-	width: "100%",
-	height: "100%",
-	overflowY: "auto",
-	backgroundColor: "#fff"
-};
-
-const mobileListHiddenStyle = {
-	display: "none"
-};
-
-const desktopChatStyle = {
-	flex: 1,
-	display: "flex",
-	flexDirection: "column"
-};
-
-const mobileChatVisibleStyle = {
-	width: "100%",
-	height: "100%",
-	display: "flex",
-	flexDirection: "column",
-	backgroundColor: "#fff"
-};
-
-const mobileChatHiddenStyle = {
-	display: "none"
-};
-
-const chatHeaderStyle = {
-	padding: 12,
-	borderBottom: "1px solid #eee",
-	display: "flex",
-	alignItems: "center",
-	gap: 12,
-	backgroundColor: "#fff",
-	position: "sticky",
-	top: 0,
-	zIndex: 10
-};
-
-const backButtonStyle = {
-	background: "none",
-	border: "none",
-	cursor: "pointer",
-	padding: 8,
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	color: "#1da1f2",
-	minHeight: "44px",
-	minWidth: "44px"
-};
-
-const messagesContainerStyle = {
-	flex: 1,
-	overflowY: "auto",
-	padding: 12
-};
-
-const inputContainerStyle = {
-	padding: 12,
-	borderTop: "1px solid #eee",
-	backgroundColor: "#fff"
-};
-
-const createChatContainerStyle = {
-	padding: '1rem',
-	backgroundColor: '#f7f9fa',
-	borderBottom: '1px solid #e1e8ed'
-};
-
-const createChatInputStyle = {
-	flex: 1,
-	padding: '0.75rem',
-	fontSize: '1rem',
-	border: '1px solid #e1e8ed',
-	borderRadius: '8px',
-	outline: 'none',
-	transition: 'border-color 0.2s'
-};
-
-const createChatButtonStyle = {
-	padding: '0.75rem 1.5rem',
-	backgroundColor: '#1da1f2',
-	color: 'white',
-	border: 'none',
-	borderRadius: '24px',
-	fontSize: '0.95rem',
-	fontWeight: 'bold',
-	cursor: 'pointer',
-	transition: 'background-color 0.2s',
-	whiteSpace: 'nowrap'
-};
-
-const errorMessageStyle = {
-	color: '#e0245e',
-	fontSize: '0.875rem',
-	marginTop: '0.5rem',
-	padding: '0.5rem',
-	backgroundColor: '#fee',
-	borderRadius: '6px'
-};
-
-const fileErrorStyle = {
-	padding: '0.75rem',
-	backgroundColor: '#fee',
-	color: '#e0245e',
-	borderRadius: '8px',
-	fontSize: '0.875rem',
-	marginBottom: '0.5rem'
-};
-
-const mediaFileDisplayStyle = {
-	marginBottom: '0.75rem',
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-	gap: '0.5rem',
-	padding: '0.75rem',
-	backgroundColor: '#f7f9fa',
-	borderRadius: '8px',
-	border: '1px solid #e1e8ed'
-};
-
-const mediaFileNameStyle = {
-	fontSize: '0.875rem',
-	color: '#14171a',
-	overflow: 'hidden',
-	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap'
-};
-
-const removeFileButtonStyle = {
-	padding: '0.25rem 0.5rem',
-	backgroundColor: 'transparent',
-	color: '#657786',
-	border: '1px solid #e1e8ed',
-	borderRadius: '50%',
-	cursor: 'pointer',
-	fontSize: '1rem',
-	width: '28px',
-	height: '28px',
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	transition: 'background-color 0.2s'
-};
-
-const messageInputRowStyle = {
-	display: 'flex',
-	gap: '0.5rem',
-	alignItems: 'center'
-};
-
-const chatMediaButtonStyle = {
-	padding: '0.5rem',
-	backgroundColor: 'transparent',
-	color: '#1da1f2',
-	border: '1px solid #e1e8ed',
-	borderRadius: '50%',
-	cursor: 'pointer',
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	width: '40px',
-	height: '40px',
-	transition: 'background-color 0.2s',
-	flexShrink: 0
-};
-
-const chatInputStyle = {
-	flex: 1,
-	padding: '0.75rem 1rem',
-	fontSize: '1rem',
-	border: '1px solid #e1e8ed',
-	borderRadius: '24px',
-	outline: 'none',
-	transition: 'border-color 0.2s'
-};
-
-const chatSendButtonStyle = {
-	padding: '0.75rem',
-	backgroundColor: '#1da1f2',
-	color: 'white',
-	border: 'none',
-	borderRadius: '50%',
-	cursor: 'pointer',
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'center',
-	width: '40px',
-	height: '40px',
-	fontSize: '1.25rem',
-	transition: 'background-color 0.2s',
-	flexShrink: 0
-};

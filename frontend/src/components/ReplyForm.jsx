@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 function ReplyForm({
   onSubmit,
@@ -8,12 +9,158 @@ function ReplyForm({
   autoFocus = false,
   compact = false
 }) {
+  const { theme } = useTheme();
   const [content, setContent] = useState('');
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [fileError, setFileError] = useState('');
   const textareaRef = useRef(null);
   const fileRef = useRef(null);
+
+  // Estilos dentro del componente para acceder a theme
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginBottom: '16px',
+    padding: '12px',
+    backgroundColor: theme.colors.cardBackgroundHover,
+    borderRadius: '8px'
+  };
+
+  const compactFormStyle = {
+    ...formStyle,
+    marginBottom: '10px',
+    padding: '10px'
+  };
+
+  const topRowStyle = {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'flex-end'
+  };
+
+  const bottomRowStyle = {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    width: '100%',
+    overflow: 'hidden'
+  };
+
+  const textareaStyle = {
+    flex: 1,
+    padding: '8px 12px',
+    fontSize: '16px',
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '6px',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    minHeight: '40px',
+    maxWidth: '100%',
+    backgroundColor: theme.colors.inputBackground,
+    color: theme.colors.textPrimary
+  };
+
+  const buttonStyle = {
+    padding: '10px 16px',
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    flexShrink: 0,
+    minHeight: '44px',
+    whiteSpace: 'nowrap'
+  };
+
+  const fileInputStyle = {
+    fontSize: '14px',
+    flex: 1,
+    minWidth: 0,
+    maxWidth: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  };
+
+  const fileNameStyle = {
+    fontSize: '12px',
+    color: theme.colors.textSecondary,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    flex: 1,
+    minWidth: 0,
+    maxWidth: '100%'
+  };
+
+  const errorStyle = {
+    padding: '8px 12px',
+    backgroundColor: theme.colors.errorBackground,
+    color: theme.colors.error,
+    borderRadius: '6px',
+    fontSize: '0.875rem',
+    marginBottom: '8px',
+    width: '100%'
+  };
+
+  const mediaButtonStyle = {
+    padding: '0.5rem',
+    backgroundColor: 'transparent',
+    color: theme.colors.primary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '50%',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '36px',
+    height: '36px',
+    transition: 'background-color 0.2s'
+  };
+
+  const mediaPreviewContainerStyle = {
+    position: 'relative',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: `1px solid ${theme.colors.border}`,
+    marginBottom: '0.5rem'
+  };
+
+  const mediaPreviewImageStyle = {
+    width: '100%',
+    maxHeight: '200px',
+    objectFit: 'cover',
+    display: 'block'
+  };
+
+  const removeMediaButtonStyle = {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
+  const charCountStyleReply = {
+    fontSize: '0.75rem',
+    color: theme.colors.textSecondary,
+    textAlign: 'right',
+    marginTop: '0.25rem'
+  };
 
   useEffect(() => {
     if (autoFocus && textareaRef.current) {
@@ -149,147 +296,5 @@ function ReplyForm({
     </form>
   );
 }
-
-const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  marginBottom: '16px',
-  padding: '12px',
-  backgroundColor: '#f7f9fa',
-  borderRadius: '8px'
-};
-
-const compactFormStyle = {
-  ...formStyle,
-  marginBottom: '10px',
-  padding: '10px'
-};
-
-const topRowStyle = {
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'flex-end'
-};
-
-const bottomRowStyle = {
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'center',
-  flexWrap: 'wrap',
-  width: '100%',
-  overflow: 'hidden'
-};
-
-const textareaStyle = {
-  flex: 1,
-  padding: '8px 12px',
-  fontSize: '16px',
-  border: '1px solid #e1e8ed',
-  borderRadius: '6px',
-  resize: 'vertical',
-  fontFamily: 'inherit',
-  minHeight: '40px',
-  maxWidth: '100%'
-};
-
-const buttonStyle = {
-  padding: '10px 16px',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s',
-  flexShrink: 0,
-  minHeight: '44px',
-  whiteSpace: 'nowrap'
-};
-
-const fileInputStyle = {
-  fontSize: '14px',
-  flex: 1,
-  minWidth: 0,
-  maxWidth: '100%',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis'
-};
-
-const fileNameStyle = {
-  fontSize: '12px',
-  color: '#657786',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  flex: 1,
-  minWidth: 0,
-  maxWidth: '100%'
-};
-
-const errorStyle = {
-  padding: '8px 12px',
-  backgroundColor: '#fee',
-  color: '#c00',
-  borderRadius: '6px',
-  fontSize: '0.875rem',
-  marginBottom: '8px',
-  width: '100%'
-};
-
-const mediaButtonStyle = {
-  padding: '0.5rem',
-  backgroundColor: 'transparent',
-  color: '#1da1f2',
-  border: '1px solid #e1e8ed',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '36px',
-  height: '36px',
-  transition: 'background-color 0.2s'
-};
-
-const mediaPreviewContainerStyle = {
-  position: 'relative',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  border: '1px solid #e1e8ed',
-  marginBottom: '0.5rem'
-};
-
-const mediaPreviewImageStyle = {
-  width: '100%',
-  maxHeight: '200px',
-  objectFit: 'cover',
-  display: 'block'
-};
-
-const removeMediaButtonStyle = {
-  position: 'absolute',
-  top: '0.5rem',
-  right: '0.5rem',
-  width: '28px',
-  height: '28px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(0, 0, 0, 0.75)',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '0.875rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-};
-
-const charCountStyleReply = {
-  fontSize: '0.75rem',
-  color: '#657786',
-  textAlign: 'right',
-  marginTop: '0.25rem'
-};
 
 export default ReplyForm;

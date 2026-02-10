@@ -56,10 +56,9 @@ public class EmailService
 
             await _contactsApi.CreateContactAsync(createContact);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Log error pero no fallar el flujo principal
-            Console.WriteLine($"Error sincronizando contacto con Brevo: {ex.Message}");
         }
     }
 
@@ -67,8 +66,6 @@ public class EmailService
     {
         try
         {
-            Console.WriteLine($"[EmailService] Intentando enviar email de verificación a: {toEmail}");
-            
             var senderEmail = _config["Brevo:SenderEmail"] ?? "noreply@twittetec.com";
             var senderName = _config["Brevo:SenderName"] ?? "Twittetec";
             var frontendUrl = _config["Brevo:FrontendUrl"] ?? "https://app.twittetec.com";
@@ -79,8 +76,6 @@ public class EmailService
 
             // Intentar usar template del dashboard si está configurado
             var templateId = _config.GetValue<long?>("Brevo:VerificationEmailTemplateId");
-            
-            Console.WriteLine($"[EmailService] Template ID: {templateId}, Sender: {senderEmail}");
 
         var sendSmtpEmail = new SendSmtpEmail
         {
@@ -154,22 +149,10 @@ public class EmailService
             ";
         }
 
-            Console.WriteLine($"[EmailService] Enviando email con template: {(templateId.HasValue ? templateId.Value.ToString() : "HTML inline")}");
-            
             var result = await _apiInstance.SendTransacEmailAsync(sendSmtpEmail);
-            
-            Console.WriteLine($"[EmailService] ✓ Email de verificación enviado exitosamente a {toEmail}. MessageId: {result.MessageId}");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[EmailService] ✗ ERROR enviando email de verificación a {toEmail}:");
-            Console.WriteLine($"[EmailService] Tipo: {ex.GetType().Name}");
-            Console.WriteLine($"[EmailService] Mensaje: {ex.Message}");
-            Console.WriteLine($"[EmailService] StackTrace: {ex.StackTrace}");
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"[EmailService] InnerException: {ex.InnerException.Message}");
-            }
             throw; // Re-lanzar para que el controlador lo maneje
         }
     }
@@ -178,8 +161,6 @@ public class EmailService
     {
         try
         {
-            Console.WriteLine($"[EmailService] Enviando email de bienvenida a: {toEmail}");
-            
             var senderEmail = _config["Brevo:SenderEmail"] ?? "support@twittetec.com";
             var senderName = _config["Brevo:SenderName"] ?? "Twittetec";
             var templateId = _config.GetValue<long?>("Brevo:WelcomeEmailTemplateId");
@@ -247,11 +228,9 @@ public class EmailService
             }
 
             var result = await _apiInstance.SendTransacEmailAsync(sendSmtpEmail);
-            Console.WriteLine($"[EmailService] ✓ Email de bienvenida enviado exitosamente a {toEmail}. MessageId: {result.MessageId}");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[EmailService] ✗ ERROR enviando email de bienvenida a {toEmail}: {ex.Message}");
             throw;
         }
     }
@@ -260,8 +239,6 @@ public class EmailService
     {
         try
         {
-            Console.WriteLine($"[EmailService] Enviando email de reset de contraseña a: {toEmail}");
-            
             var senderEmail = _config["Brevo:SenderEmail"] ?? "support@twittetec.com";
             var senderName = _config["Brevo:SenderName"] ?? "Twittetec";
             var frontendUrl = _config["Brevo:FrontendUrl"] ?? "https://app.twittetec.com";
@@ -341,11 +318,9 @@ public class EmailService
             }
 
             var result = await _apiInstance.SendTransacEmailAsync(sendSmtpEmail);
-            Console.WriteLine($"[EmailService] ✓ Email de reset enviado exitosamente a {toEmail}. MessageId: {result.MessageId}");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[EmailService] ✗ ERROR enviando email de reset a {toEmail}: {ex.Message}");
             throw;
         }
     }

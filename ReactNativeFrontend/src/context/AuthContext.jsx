@@ -171,6 +171,14 @@ export function AuthProvider({ children }) {
     return !isTokenExpired(token);
   };
 
+  const isAdmin = () => {
+    if (!user || !user.email) {
+      return false;
+    }
+    // Los admins son usuarios cuyo email NO termina con @alumno.etec.um.edu.ar
+    return !user.email.endsWith('@alumno.etec.um.edu.ar');
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -178,7 +186,8 @@ export function AuthProvider({ children }) {
       login, 
       updateUser,
       logout, 
-      isAuthenticated, 
+      isAuthenticated,
+      isAdmin, 
       loading,
       isRehydrating
     }}>

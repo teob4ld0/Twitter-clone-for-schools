@@ -13,7 +13,6 @@ public class NotificationHub : Hub
         if (!string.IsNullOrEmpty(userId))
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}");
-            Console.WriteLine($"User {userId} connected to notification hub");
         }
         await base.OnConnectedAsync();
     }
@@ -24,7 +23,6 @@ public class NotificationHub : Hub
         if (!string.IsNullOrEmpty(userId))
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user_{userId}");
-            Console.WriteLine($"User {userId} disconnected from notification hub");
         }
         await base.OnDisconnectedAsync(exception);
     }

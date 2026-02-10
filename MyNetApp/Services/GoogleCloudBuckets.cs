@@ -162,9 +162,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 		var contentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType;
 		var objectName = BuildObjectName(file.FileName, prefix);
 
-		_logger.LogInformation("GoogleCloudBuckets: Iniciando upload - Bucket: {Bucket}, ObjectName: {ObjectName}, ContentType: {ContentType}, Tamaño: {Size} bytes", 
-			_options.BucketName, objectName, contentType, file.Length);
-
 		using var stream = file.OpenReadStream();
 
 		var uploadOptions = new UploadObjectOptions();
@@ -175,9 +172,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 
 		try
 		{
-			_logger.LogInformation("GoogleCloudBuckets: Llamando a UploadObjectAsync...");
-			var startTime = DateTime.UtcNow;
-			
 			await _storage.UploadObjectAsync(
 				bucket: _options.BucketName,
 				objectName: objectName,
@@ -186,9 +180,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 				options: uploadOptions,
 				cancellationToken: ct
 			);
-			
-			var duration = DateTime.UtcNow - startTime;
-			_logger.LogInformation("GoogleCloudBuckets: UploadObjectAsync completado en {Duration}ms", duration.TotalMilliseconds);
 		}
 		catch (GoogleApiException ex) when (ex.HttpStatusCode == HttpStatusCode.Forbidden)
 		{
@@ -207,8 +198,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 			stream.Position = 0;
 			try
 			{
-				var startTime = DateTime.UtcNow;
-				
 				await _storage.UploadObjectAsync(
 					bucket: _options.BucketName,
 					objectName: objectName,
@@ -217,9 +206,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 					options: null,
 					cancellationToken: ct
 				);
-				
-				var duration = DateTime.UtcNow - startTime;
-				_logger.LogInformation("GoogleCloudBuckets: Reintento sin ACL completado en {Duration}ms", duration.TotalMilliseconds);
 			}
 			catch (GoogleApiException ex) when (ex.HttpStatusCode == HttpStatusCode.Forbidden)
 			{
@@ -237,8 +223,6 @@ public sealed class GoogleCloudBuckets : IMediaStorage
 			_logger.LogError(ex, "GoogleCloudBuckets: Error inesperado al subir - Tipo: {ExceptionType}", ex.GetType().Name);
 			throw;
 		}
-
-		_logger.LogInformation("GoogleCloudBuckets: Upload exitoso - URL: {Url}", GetPublicUrl(objectName));
 
 		return new MediaUploadResult(
 			Bucket: _options.BucketName,

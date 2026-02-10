@@ -10,9 +10,10 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { statusAPI } from '../services/api';
 import StatusItem from '../components/StatusItem';
-import colors from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 export default function StatusDetailScreen() {
+  const { theme } = useTheme();
   const navigation = useNavigation();
   const route = useRoute();
   
@@ -59,11 +60,78 @@ export default function StatusDetailScreen() {
     navigation.goBack();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    centeredContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      backgroundColor: theme.colors.cardBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+    },
+    headerBackButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      minHeight: 44,
+      justifyContent: 'center',
+    },
+    headerBackButtonText: {
+      color: theme.colors.primary,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollViewContent: {
+      paddingBottom: 20,
+    },
+    loadingText: {
+      marginTop: 12,
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 16,
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    emptyText: {
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+    backButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 9999,
+      minHeight: 44,
+    },
+    backButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+  });
+
   // Loading state
   if (loading) {
     return (
       <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Cargando estado...</Text>
       </View>
     );
@@ -128,69 +196,4 @@ export default function StatusDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background
-  },
-  centeredContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.background
-  },
-  header: {
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingVertical: 8,
-    paddingHorizontal: 12
-  },
-  headerBackButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    minHeight: 44,
-    justifyContent: 'center'
-  },
-  headerBackButtonText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 16
-  },
-  scrollView: {
-    flex: 1
-  },
-  scrollViewContent: {
-    paddingBottom: 20
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#666',
-    fontSize: 16
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 16,
-    marginBottom: 16,
-    textAlign: 'center'
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 16,
-    marginBottom: 16,
-    textAlign: 'center'
-  },
-  backButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 9999,
-    minHeight: 44
-  },
-  backButtonText: {
-    color: colors.white,
-    fontWeight: '700',
-    fontSize: 16
-  }
-});
+

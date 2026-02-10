@@ -22,12 +22,13 @@ import {
   setSelectedChat 
 } from '../store/chatSlice';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 import MessageItem from '../components/MessageItem';
 import * as ImagePicker from '../utils/imagePicker';
 
 export default function ChatDetailScreen({ route, navigation }) {
   const { chatId, otherUser } = route.params;
+  const { theme } = useTheme();
   const dispatch = useDispatch();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -188,13 +189,179 @@ export default function ChatDetailScreen({ route, navigation }) {
     });
   }, [navigation, currentOtherUser]);
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+      padding: 20,
+    },
+    loadingText: {
+      marginTop: 10,
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    errorText: {
+      marginTop: 12,
+      fontSize: 16,
+      color: theme.colors.error,
+      textAlign: 'center',
+    },
+    retryButton: {
+      marginTop: 16,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 20,
+    },
+    retryButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    headerTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    headerTitle: {
+      fontSize: 17,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+    },
+    messagesList: {
+      padding: 12,
+      flexGrow: 1,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 40,
+      minHeight: 200,
+    },
+    emptyText: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 12,
+    },
+    inputContainer: {
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      backgroundColor: theme.colors.cardBackground,
+      paddingHorizontal: 12,
+      paddingTop: 10,
+      elevation: 10,
+      zIndex: 9999,
+    },
+    fileErrorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      padding: 10,
+      backgroundColor: theme.colors.errorBackground,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    fileErrorText: {
+      flex: 1,
+      fontSize: 13,
+      color: theme.colors.error,
+    },
+    mediaPreviewContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 10,
+      backgroundColor: theme.colors.background,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    mediaPreview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+      gap: 10,
+    },
+    mediaThumbnail: {
+      width: 50,
+      height: 50,
+      borderRadius: 6,
+      backgroundColor: theme.colors.border,
+    },
+    videoPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    mediaFileName: {
+      flex: 1,
+      fontSize: 13,
+      color: theme.colors.textPrimary,
+    },
+    removeMediaButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.cardBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    mediaButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    },
+    input: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 20,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      maxHeight: 100,
+      fontSize: 15,
+      color: theme.colors.textPrimary,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    sendButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    sendButtonDisabled: {
+      opacity: 0.4,
+    },
+  });
+
   // Solo mostrar loading si es la primera carga Y no hay mensajes
   const isInitialLoading = loading.messages && chatMessages.length === 0;
 
   if (isInitialLoading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Cargando mensajes...</Text>
       </View>
     );
@@ -203,7 +370,7 @@ export default function ChatDetailScreen({ route, navigation }) {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Feather name="alert-circle" size={48} color={colors.error} />
+        <Feather name="alert-circle" size={48} color={theme.colors.error} />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -235,7 +402,7 @@ export default function ChatDetailScreen({ route, navigation }) {
         contentContainerStyle={styles.messagesList}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Feather name="message-square" size={48} color={colors.textSecondary} />
+            <Feather name="message-square" size={48} color={theme.colors.textSecondary} />
             <Text style={styles.emptyText}>
               Inicia la conversación con @{currentOtherUser?.username}
             </Text>
@@ -253,7 +420,7 @@ export default function ChatDetailScreen({ route, navigation }) {
         {/* File Error */}
         {fileError ? (
           <View style={styles.fileErrorContainer}>
-            <Feather name="alert-circle" size={16} color={colors.error} />
+            <Feather name="alert-circle" size={16} color={theme.colors.error} />
             <Text style={styles.fileErrorText}>{fileError}</Text>
           </View>
         ) : null}
@@ -266,7 +433,7 @@ export default function ChatDetailScreen({ route, navigation }) {
                 <Image source={{ uri: mediaFile.uri }} style={styles.mediaThumbnail} />
               ) : (
                 <View style={styles.videoPlaceholder}>
-                  <Feather name="video" size={24} color={colors.white} />
+                  <Feather name="video" size={24} color={theme.colors.textOnPrimary} />
                 </View>
               )}
               <Text style={styles.mediaFileName} numberOfLines={1}>
@@ -277,7 +444,7 @@ export default function ChatDetailScreen({ route, navigation }) {
               onPress={removeMediaFile}
               style={styles.removeMediaButton}
             >
-              <Feather name="x" size={20} color={colors.textSecondary} />
+              <Feather name="x" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
         ) : null}
@@ -292,14 +459,14 @@ export default function ChatDetailScreen({ route, navigation }) {
             <Feather 
               name="image" 
               size={22} 
-              color={mediaFile ? colors.textSecondary : colors.primary} 
+              color={mediaFile ? theme.colors.textSecondary : theme.colors.primary} 
             />
           </TouchableOpacity>
 
           <TextInput
             style={styles.input}
             placeholder="Escribe un mensaje..."
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.colors.textTertiary}
             value={messageText}
             onChangeText={setMessageText}
             multiline
@@ -316,9 +483,9 @@ export default function ChatDetailScreen({ route, navigation }) {
             disabled={(!messageText.trim() && !mediaFile) || sending}
           >
             {sending ? (
-              <ActivityIndicator size="small" color={colors.white} />
+              <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
             ) : (
-              <Feather name="send" size={20} color={colors.white} />
+              <Feather name="send" size={20} color={theme.colors.textOnPrimary} />
             )}
           </TouchableOpacity>
         </View>
@@ -327,168 +494,4 @@ export default function ChatDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f7f9fa',
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 10,
-    color: '#666',
-    fontSize: 14,
-  },
-  errorText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-  },
-  retryButtonText: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#000',
-  },
-  messagesList: {
-    padding: 12,
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-    minHeight: 200,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 12,
-  },
-  inputContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#e1e8ed',
-    backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    elevation: 10,
-    zIndex: 9999,
-  },
-  fileErrorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 10,
-    backgroundColor: '#fee',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  fileErrorText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.error,
-  },
-  mediaPreviewContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 10,
-    backgroundColor: '#f7f9fa',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  mediaPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 10,
-  },
-  mediaThumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: '#e1e8ed',
-  },
-  videoPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mediaFileName: {
-    flex: 1,
-    fontSize: 13,
-    color: '#14171a',
-  },
-  removeMediaButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e1e8ed',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  mediaButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#e1e8ed',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    maxHeight: 100,
-    fontSize: 15,
-    color: '#14171a',
-    backgroundColor: '#fff',
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#0084ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sendButtonDisabled: {
-    opacity: 0.4,
-  },
-});
+

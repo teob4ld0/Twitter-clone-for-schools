@@ -10,7 +10,7 @@ import {
 import Reply from './Reply';
 import ReplyForm from './ReplyForm';
 import { mediaAPI, repliesAPI, interestSignalsAPI } from '../services/api';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 function ReplyList({
   statusId,
@@ -27,6 +27,7 @@ function ReplyList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { theme } = useTheme();
 
   const loadReplies = async () => {
     try {
@@ -145,7 +146,7 @@ function ReplyList({
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator size="small" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Cargando respuestas...</Text>
         </View>
       </View>
@@ -162,8 +163,53 @@ function ReplyList({
     );
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    loadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    },
+    loadingText: {
+      marginLeft: 10,
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    errorContainer: {
+      padding: 12,
+      backgroundColor: theme.colors.errorBackground,
+      borderRadius: 6,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 14,
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: 'center',
+    },
+    emptyText: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+      textAlign: 'center',
+    },
+    focusedReply: {
+      borderRadius: 8,
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+      padding: 6,
+      marginVertical: 4,
+    },
+  });
+
   const containerStyle = indent > 0 
-    ? [styles.container, styles.nestedContainer(indent)]
+    ? [styles.container, { marginTop: 10, paddingTop: 10, borderTopWidth: 0, marginLeft: Math.min(indent, 6) * 16, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: theme.colors.borderLight }]
     : styles.container;
 
   return (
@@ -206,59 +252,5 @@ function ReplyList({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  nestedContainer: (indent) => ({
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 0,
-    marginLeft: Math.min(indent, 6) * 16,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.borderLight,
-  }),
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  loadingText: {
-    marginLeft: 10,
-    color: '#666',
-    fontSize: 14,
-  },
-  errorContainer: {
-    padding: 12,
-    backgroundColor: '#fee',
-    borderRadius: 6,
-  },
-  errorText: {
-    color: '#c00',
-    fontSize: 14,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  focusedReply: {
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    padding: 6,
-    marginVertical: 4,
-  },
-});
 
 export default ReplyList;

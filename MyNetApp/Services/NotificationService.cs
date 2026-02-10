@@ -11,17 +11,20 @@ public class NotificationService
     private readonly AppDbContext _context;
     private readonly WebPushService _webPushService;
     private readonly ExpoPushService _expoPushService;
+    private readonly ILogger<NotificationService> _logger;
 
     public NotificationService(
         IHubContext<NotificationHub> notificationHub, 
         AppDbContext context,
         WebPushService webPushService,
-        ExpoPushService expoPushService)
+        ExpoPushService expoPushService,
+        ILogger<NotificationService> logger)
     {
         _notificationHub = notificationHub;
         _context = context;
         _webPushService = webPushService;
         _expoPushService = expoPushService;
+        _logger = logger;
     }
 
     public async Task<Notification> SendNotificationAsync(
@@ -89,8 +92,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            // Log pero no fallar si push falla
-            Console.WriteLine($"Failed to send Web Push notification: {ex.Message}");
+            _logger.LogWarning(ex, $"Failed to send Web Push notification to user {targetUserId}");
         }
 
         // Intentar enviar por Expo Push (mobile apps)
@@ -100,8 +102,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            // Log pero no fallar si push falla
-            Console.WriteLine($"Failed to send Expo Push notification: {ex.Message}");
+            _logger.LogError(ex, $"Exception sending Expo Push notification to user {targetUserId}");
         }
 
         return notification;

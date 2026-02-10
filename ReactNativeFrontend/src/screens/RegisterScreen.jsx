@@ -13,12 +13,13 @@ import {
 } from 'react-native';
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import GoogleIcon from '../components/GoogleIcon';
 import { decode as base64Decode } from 'base-64';
 
 export default function RegisterScreen({ navigation }) {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     Username: '',
     Email: '',
@@ -158,6 +159,134 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    content: {
+      padding: 24,
+      maxWidth: 400,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: 24,
+      textAlign: 'center',
+    },
+    errorContainer: {
+      backgroundColor: theme.colors.errorBackground,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 14,
+    },
+    form: {
+      gap: 16,
+    },
+    field: {
+      marginBottom: 8,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    },
+    input: {
+      padding: 12,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 8,
+      backgroundColor: theme.colors.cardBackground,
+      color: theme.colors.textPrimary,
+    },
+    helperText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    button: {
+      backgroundColor: theme.colors.primary,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 24,
+    },
+    footerText: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    footerLink: {
+      color: theme.colors.primary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 16,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: theme.colors.border,
+    },
+    dividerText: {
+      marginHorizontal: 16,
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+    },
+    googleButton: {
+      backgroundColor: theme.colors.cardBackground,
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.textPrimary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+      marginBottom: 16,
+    },
+    googleButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    googleButtonText: {
+      color: theme.colors.textPrimary,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -218,7 +347,7 @@ export default function RegisterScreen({ navigation }) {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
                 <Text style={styles.buttonText}>
                   {loading ? 'Registrando...' : 'Registrarse'}
@@ -256,130 +385,4 @@ export default function RegisterScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  content: {
-    padding: 24,
-    maxWidth: 400,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  errorContainer: {
-    backgroundColor: '#fee',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#c00',
-    fontSize: 14,
-  },
-  form: {
-    gap: 16,
-  },
-  field: {
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    marginBottom: 8,
-  },
-  input: {
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    backgroundColor: colors.white,
-    color: '#000',
-  },
-  helperText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  footerLink: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#666',
-    fontSize: 14,
-  },
-  googleButton: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#dadce0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    marginBottom: 16,
-  },
-  googleButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  googleButtonText: {
-    color: '#111',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
+

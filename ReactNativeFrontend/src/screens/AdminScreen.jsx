@@ -14,21 +14,11 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { adminAPI } from '../services/api';
-
-const colors = {
-  primary: '#1DA1F2',
-  background: '#15202B',
-  surface: '#192734',
-  border: '#38444d',
-  text: '#ffffff',
-  textSecondary: '#8899A6',
-  error: '#f91880',
-  success: '#17BF63',
-  warning: '#FFAD1F',
-  danger: '#E0245E',
-};
+import { useTheme } from '../context/ThemeContext';
 
 const AdminScreen = ({ navigation }) => {
+  const { theme } = useTheme();
+  const styles = useAdminThemedStyles(theme);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -194,15 +184,15 @@ const AdminScreen = ({ navigation }) => {
         {/* Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Feather name="file-text" size={14} color={colors.textSecondary} />
+            <Feather name="file-text" size={14} color={theme.colors.textSecondary} />
             <Text style={styles.statText}>{item.statusesCount || 0} posts</Text>
           </View>
           <View style={styles.statItem}>
-            <Feather name="users" size={14} color={colors.textSecondary} />
+            <Feather name="users" size={14} color={theme.colors.textSecondary} />
             <Text style={styles.statText}>{item.followersCount || 0} seguidores</Text>
           </View>
           <View style={styles.statItem}>
-            <Feather name="user-check" size={14} color={colors.textSecondary} />
+            <Feather name="user-check" size={14} color={theme.colors.textSecondary} />
             <Text style={styles.statText}>{item.followingCount || 0} siguiendo</Text>
           </View>
         </View>
@@ -225,13 +215,13 @@ const AdminScreen = ({ navigation }) => {
               disabled={isActionLoading}
             >
               {isActionLoading ? (
-                <ActivityIndicator size="small" color={colors.text} />
+                <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
               ) : (
                 <>
                   <Feather
                     name={item.banned ? 'unlock' : 'slash'}
                     size={16}
-                    color={colors.text}
+                    color={theme.colors.textOnPrimary}
                   />
                   <Text style={styles.actionButtonText}>
                     {item.banned ? 'Desbanear' : 'Banear'}
@@ -246,10 +236,10 @@ const AdminScreen = ({ navigation }) => {
               disabled={isActionLoading}
             >
               {isActionLoading ? (
-                <ActivityIndicator size="small" color={colors.text} />
+                <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
               ) : (
                 <>
-                  <Feather name="trash-2" size={16} color={colors.text} />
+                  <Feather name="trash-2" size={16} color={theme.colors.textOnPrimary} />
                   <Text style={styles.actionButtonText}>Eliminar</Text>
                 </>
               )}
@@ -263,7 +253,7 @@ const AdminScreen = ({ navigation }) => {
   if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Cargando usuarios...</Text>
       </View>
     );
@@ -272,7 +262,7 @@ const AdminScreen = ({ navigation }) => {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Feather name="alert-circle" size={48} color={colors.error} />
+        <Feather name="alert-circle" size={48} color={theme.colors.error} />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={loadUsers}>
           <Text style={styles.retryButtonText}>Reintentar</Text>
@@ -291,17 +281,17 @@ const AdminScreen = ({ navigation }) => {
 
       {/* Buscador */}
       <View style={styles.searchContainer}>
-        <Feather name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+        <Feather name="search" size={20} color={theme.colors.textSecondary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar por usuario, email o ID..."
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.colors.textTertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Feather name="x" size={20} color={colors.textSecondary} />
+            <Feather name="x" size={20} color={theme.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -316,13 +306,13 @@ const AdminScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Feather name="users" size={48} color={colors.textSecondary} />
+            <Feather name="users" size={48} color={theme.colors.textSecondary} />
             <Text style={styles.emptyText}>
               {searchQuery ? 'No se encontraron usuarios' : 'No hay usuarios'}
             </Text>
@@ -333,225 +323,227 @@ const AdminScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    margin: 16,
-    marginBottom: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#000',
-    fontSize: 16,
-    paddingVertical: 4,
-  },
-  listContent: {
-    padding: 16,
-    paddingTop: 8,
-  },
-  userCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  userHeader: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  avatarContainer: {
-    marginRight: 12,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  avatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  userInfo: {
-    flex: 1,
-  },
-  usernameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  username: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-    marginRight: 8,
-  },
-  email: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  userMeta: {
-    fontSize: 12,
-    color: '#666',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 12,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 4,
-  },
-  badgeContainer: {
-    marginBottom: 12,
-  },
-  bannedBadge: {
-    backgroundColor: colors.error,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  bannedText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  studentBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-  adminBadge: {
-    backgroundColor: colors.warning,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  banButton: {
-    backgroundColor: colors.warning,
-  },
-  unbanButton: {
-    backgroundColor: colors.success,
-  },
-  deleteButton: {
-    backgroundColor: colors.danger,
-  },
-  actionButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    marginLeft: 6,
-    fontSize: 14,
-  },
-  loadingText: {
-    color: '#666',
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 12,
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 16,
-    marginTop: 12,
-  },
-});
+function useAdminThemedStyles(theme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    centerContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    header: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.backgroundSecondary,
+      margin: 16,
+      marginBottom: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    searchIcon: {
+      marginRight: 8,
+    },
+    searchInput: {
+      flex: 1,
+      color: theme.colors.textPrimary,
+      fontSize: 16,
+      paddingVertical: 4,
+    },
+    listContent: {
+      padding: 16,
+      paddingTop: 8,
+    },
+    userCard: {
+      backgroundColor: theme.colors.cardBackground,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    userHeader: {
+      flexDirection: 'row',
+      marginBottom: 12,
+    },
+    avatarContainer: {
+      marginRight: 12,
+    },
+    avatar: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+    },
+    avatarPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    avatarText: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.textOnPrimary,
+    },
+    userInfo: {
+      flex: 1,
+    },
+    usernameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    username: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginRight: 8,
+    },
+    email: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginBottom: 4,
+    },
+    userMeta: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 12,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    statText: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      marginLeft: 4,
+    },
+    badgeContainer: {
+      marginBottom: 12,
+    },
+    bannedBadge: {
+      backgroundColor: theme.colors.error,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    bannedText: {
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: theme.colors.textOnPrimary,
+    },
+    studentBadge: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      alignSelf: 'flex-start',
+    },
+    adminBadge: {
+      backgroundColor: theme.colors.warning,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      alignSelf: 'flex-start',
+    },
+    badgeText: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: theme.colors.textOnPrimary,
+    },
+    actionsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    actionButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      borderRadius: 8,
+      marginHorizontal: 4,
+    },
+    banButton: {
+      backgroundColor: theme.colors.warning,
+    },
+    unbanButton: {
+      backgroundColor: theme.colors.success,
+    },
+    deleteButton: {
+      backgroundColor: theme.colors.buttonDanger,
+    },
+    actionButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontWeight: 'bold',
+      marginLeft: 6,
+      fontSize: 14,
+    },
+    loadingText: {
+      color: theme.colors.textSecondary,
+      marginTop: 12,
+      fontSize: 16,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 16,
+      textAlign: 'center',
+      marginTop: 12,
+      marginBottom: 20,
+    },
+    retryButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 8,
+    },
+    retryButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: 40,
+    },
+    emptyText: {
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+      marginTop: 12,
+    },
+  });
+}
 
 export default AdminScreen;

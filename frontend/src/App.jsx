@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './layouts/Layout';
 import Feed from './pages/Feed';
 import Login from './pages/Login';
@@ -15,6 +16,7 @@ import ChatsPage from './pages/Chats';
 import NotificationsPage from './pages/Notifications';
 import AdminPage from './pages/AdminPage';
 import Download from './pages/Download';
+import SettingsPage from './pages/SettingsPage';
 import SignalRProvider from './components/SignalRProvider';
 import PushNotificationProvider from './components/PushNotificationProvider';
 import InstallPrompt from './components/InstallPrompt';
@@ -22,10 +24,11 @@ import InstallPrompt from './components/InstallPrompt';
 function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <SignalRProvider>
-          <PushNotificationProvider>
-            <Layout>
+      <ThemeProvider>
+        <BrowserRouter>
+          <SignalRProvider>
+            <PushNotificationProvider>
+              <Layout>
             <Routes>
               <Route
                 path="/"
@@ -113,12 +116,21 @@ function App() {
                   <Download />
                 }
               />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Layout>
           <InstallPrompt />
           </PushNotificationProvider>
         </SignalRProvider>
       </BrowserRouter>
+      </ThemeProvider>
     </Provider>
   );
 }

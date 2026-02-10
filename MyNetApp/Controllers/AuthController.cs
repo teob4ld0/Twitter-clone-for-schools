@@ -129,10 +129,9 @@ public class AuthController : ControllerBase
                     user.Id
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log error pero no fallar el registro
-                Console.WriteLine($"Error enviando email de verificación: {ex.Message}");
             }
         }
 
@@ -242,9 +241,8 @@ public class AuthController : ControllerBase
                     }
                 );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"Error sincronizando contacto de Google: {ex.Message}");
             }
         }
         else
@@ -496,9 +494,8 @@ public class AuthController : ControllerBase
                         }
                     );
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine($"Error sincronizando contacto de Google: {ex.Message}");
                 }
             }
         }
@@ -593,10 +590,9 @@ public class AuthController : ControllerBase
 
             await _emailService.SendWelcomeEmailAsync(user.Email, user.Username);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Log error pero no fallar la verificación
-            Console.WriteLine($"Error enviando email de bienvenida: {ex.Message}");
         }
 
         return Ok(new { message = "Email verificado exitosamente. Ya puedes iniciar sesión." });
@@ -632,10 +628,9 @@ public class AuthController : ControllerBase
                 expoTokensRemoved = expoTokens.Count
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Log el error pero no fallar el logout
-            Console.WriteLine($"Error durante logout: {ex.Message}");
             return Ok(new { message = "Sesión cerrada" });
         }
     }

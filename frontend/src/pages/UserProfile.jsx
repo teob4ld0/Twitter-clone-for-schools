@@ -5,6 +5,7 @@ import Status from '../components/Status';
 import FollowingButton from '../components/FollowingButton';
 import Reply from '../components/Reply';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useDispatch } from 'react-redux';
 import { createOrGetChat } from '../store/chatSlice';
 import { useIsMobile } from '../hooks/useMobile';
@@ -13,6 +14,7 @@ function UserProfile() {
   const { userId } = useParams();  // ← Extrae el parámetro de la URL
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
+  const { theme } = useTheme();
   const dispatch = useDispatch();
 
 	const profileUserId = Number.parseInt(String(userId), 10);
@@ -38,6 +40,309 @@ function UserProfile() {
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
   const [avatarVersion, setAvatarVersion] = useState(0);
   const isMobile = useIsMobile();
+
+  // Estilos
+  const containerStyle = {
+    maxWidth: '600px',
+    margin: '0 auto',
+    padding: '20px'
+  };
+
+  const mobileContainerStyle = {
+    maxWidth: '100%',
+    margin: '0',
+    padding: '0.5rem'
+  };
+
+  const mobileProfileCardStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    padding: '16px',
+    marginBottom: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px'
+  };
+
+  const mobileAvatarStyle = {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    border: `3px solid ${theme.colors.secondaryBackground}`
+  };
+
+  const mobileHeaderRowStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginBottom: '8px'
+  };
+
+  const mobileNameStyle = {
+    margin: '0',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: theme.colors.textPrimary
+  };
+
+  const headerStyle = {
+    marginBottom: '20px'
+  };
+
+  const backButtonStyle = {
+    background: 'none',
+    border: 'none',
+    color: theme.colors.primary,
+    fontSize: '16px',
+    cursor: 'pointer',
+    padding: '8px 12px',
+    fontWeight: 'bold'
+  };
+
+  const profileCardStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px',
+    display: 'flex',
+    gap: '20px',
+    alignItems: 'center'
+  };
+
+  const avatarStyle = {
+    width: '120px',
+    height: '120px',
+    borderRadius: '50%',
+    border: `4px solid ${theme.colors.secondaryBackground}`
+  };
+
+  const infoStyle = {
+    flex: 1
+  };
+
+  const headerRowStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px'
+  };
+
+  const nameContainerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flexWrap: 'wrap',
+    flex: 1,
+    minWidth: 0
+  };
+
+  const nameStyle = {
+    margin: '0',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: theme.colors.textPrimary
+  };
+
+  const userIdStyle = {
+    fontSize: '16px',
+    fontWeight: '400',
+    color: theme.colors.textSecondary,
+    marginLeft: '6px'
+  };
+
+  const mutualBadgeStyle = {
+    fontSize: '12px',
+    backgroundColor: theme.colors.secondaryBackground,
+    color: theme.colors.primary,
+    padding: '4px 10px',
+    borderRadius: '12px',
+    fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px'
+  };
+
+  const followsYouBadgeStyle = {
+    fontSize: '12px',
+    backgroundColor: theme.colors.border,
+    color: theme.colors.textPrimary,
+    padding: '4px 10px',
+    borderRadius: '12px',
+    fontWeight: '600',
+    display: 'inline-flex',
+    alignItems: 'center'
+  };
+
+  const emailStyle = {
+    color: theme.colors.textSecondary,
+    margin: '0 0 12px 0'
+  };
+
+  const statsStyle = {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: theme.colors.textPrimary,
+    margin: '8px 0'
+  };
+
+  const dateStyle = {
+    color: theme.colors.textSecondary,
+    fontSize: '14px',
+    margin: '4px 0'
+  };
+
+  const mutualFollowersStyle = {
+    color: theme.colors.textSecondary,
+    fontSize: '13px',
+    margin: '8px 0 0 0',
+    fontWeight: '400'
+  };
+
+  const tabsContainerStyle = {
+    display: 'flex',
+    borderBottom: `1px solid ${theme.colors.border}`,
+    marginBottom: '20px'
+  };
+
+  const tabStyle = {
+    flex: 1,
+    padding: '16px',
+    background: 'none',
+    border: 'none',
+    fontSize: '15px',
+    fontWeight: '600',
+    color: theme.colors.textSecondary,
+    cursor: 'pointer',
+    borderBottom: '2px solid transparent',
+    transition: 'all 0.2s'
+  };
+
+  const activeTabStyle = {
+    flex: 1,
+    padding: '16px',
+    background: 'none',
+    border: 'none',
+    fontSize: '15px',
+    fontWeight: '600',
+    color: theme.colors.primary,
+    cursor: 'pointer',
+    borderBottom: `2px solid ${theme.colors.primary}`,
+    transition: 'all 0.2s'
+  };
+
+  const tabContentStyle = {
+    minHeight: '200px'
+  };
+
+  const emptyStateStyle = {
+    backgroundColor: theme.colors.secondaryBackground,
+    padding: '40px',
+    textAlign: 'center',
+    borderRadius: '12px',
+    color: theme.colors.textSecondary
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    marginBottom: '16px',
+    color: theme.colors.textPrimary
+  };
+
+  const commentCardStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    padding: '16px',
+    marginBottom: '12px'
+  };
+
+  const commentHeaderStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px'
+  };
+
+  const commentHeaderLeftStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flex: 1
+  };
+
+  const commentTypeBadgeStyle = {
+    fontSize: '12px',
+    backgroundColor: theme.colors.secondaryBackground,
+    color: theme.colors.primary,
+    padding: '2px 8px',
+    borderRadius: '12px',
+    fontWeight: '600'
+  };
+
+  const commentDateStyle = {
+    fontSize: '14px',
+    color: theme.colors.textSecondary
+  };
+
+  const commentContentStyle = {
+    margin: '8px 0',
+    fontSize: '15px',
+    color: theme.colors.textPrimary,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word'
+  };
+
+  const truncateTextStyle = {
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    wordBreak: 'break-word'
+  };
+
+  const commentMetaStyle = {
+    fontSize: '13px',
+    color: theme.colors.textSecondary,
+    marginTop: '8px',
+    paddingTop: '8px',
+    borderTop: `1px solid ${theme.colors.border}`
+  };
+
+  const commentStatsStyle = {
+    fontSize: '14px',
+    color: theme.colors.textSecondary,
+    marginTop: '8px'
+  };
+
+  const loadingStyle = {
+    textAlign: 'center',
+    padding: '40px',
+    fontSize: '18px',
+    color: theme.colors.textSecondary
+  };
+
+  const errorContainerStyle = {
+    textAlign: 'center',
+    padding: '40px',
+    color: theme.colors.error
+  };
+
+  const buttonStyle = {
+    padding: '12px 24px',
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.textOnPrimary,
+    border: 'none',
+    borderRadius: '9999px',
+    fontSize: '15px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    marginTop: '16px'
+  };
 
   const isOwnProfile = currentUserId != null && profileUserId === currentUserId;
 
@@ -271,9 +576,9 @@ function UserProfile() {
                 style={{
                   padding: '8px 14px',
                   borderRadius: 9999,
-                  border: '1px solid #1da1f2',
-                  background: '#fff',
-                  color: '#1da1f2',
+                  border: `1px solid ${theme.colors.primary}`,
+                  background: theme.colors.cardBackground,
+                  color: theme.colors.primary,
                   fontWeight: 700,
                   cursor: uploadingProfilePicture ? 'not-allowed' : 'pointer'
                 }}
@@ -333,9 +638,9 @@ function UserProfile() {
                   flex: 1,
                   padding: isMobile ? '12px 16px' : '10px 14px',
                   borderRadius: 9999,
-                  border: '1px solid #1da1f2',
+                  border: '1px solid #9b59b6',
                   background: '#fff',
-                  color: '#1da1f2',
+                  color: '#9b59b6',
                   fontWeight: 700,
                   cursor: openingChat ? 'not-allowed' : 'pointer',
                   fontSize: isMobile ? '16px' : '14px'
@@ -508,308 +813,5 @@ function UserProfile() {
     </div>
   );
 }
-
-// Estilos
-const containerStyle = {
-  maxWidth: '600px',
-  margin: '0 auto',
-  padding: '20px'
-};
-
-const mobileContainerStyle = {
-  maxWidth: '100%',
-  margin: '0',
-  padding: '0.5rem'
-};
-
-const mobileProfileCardStyle = {
-  backgroundColor: 'white',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  padding: '16px',
-  marginBottom: '16px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px'
-};
-
-const mobileAvatarStyle = {
-  width: '80px',
-  height: '80px',
-  borderRadius: '50%',
-  border: '3px solid #f5f8fa'
-};
-
-const mobileHeaderRowStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  marginBottom: '8px'
-};
-
-const mobileNameStyle = {
-  margin: '0',
-  fontSize: '20px',
-  fontWeight: 'bold',
-  color: '#14171a'
-};
-
-const headerStyle = {
-  marginBottom: '20px'
-};
-
-const backButtonStyle = {
-  background: 'none',
-  border: 'none',
-  color: '#1da1f2',
-  fontSize: '16px',
-  cursor: 'pointer',
-  padding: '8px 12px',
-  fontWeight: 'bold'
-};
-
-const profileCardStyle = {
-  backgroundColor: 'white',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  padding: '24px',
-  marginBottom: '24px',
-  display: 'flex',
-  gap: '20px',
-  alignItems: 'center'
-};
-
-const avatarStyle = {
-  width: '120px',
-  height: '120px',
-  borderRadius: '50%',
-  border: '4px solid #f5f8fa'
-};
-
-const infoStyle = {
-  flex: 1
-};
-
-const headerRowStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '8px'
-};
-
-const nameContainerStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  flexWrap: 'wrap',
-  flex: 1,
-  minWidth: 0
-};
-
-const nameStyle = {
-  margin: '0',
-  fontSize: '24px',
-  fontWeight: 'bold',
-  color: '#14171a'
-};
-
-const userIdStyle = {
-  fontSize: '16px',
-  fontWeight: '400',
-  color: '#657786',
-  marginLeft: '6px'
-};
-
-const mutualBadgeStyle = {
-  fontSize: '12px',
-  backgroundColor: '#e8f5fe',
-  color: '#1da1f2',
-  padding: '4px 10px',
-  borderRadius: '12px',
-  fontWeight: '600',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '4px'
-};
-
-const followsYouBadgeStyle = {
-  fontSize: '12px',
-  backgroundColor: '#f0f0f0',
-  color: '#14171a',
-  padding: '4px 10px',
-  borderRadius: '12px',
-  fontWeight: '600',
-  display: 'inline-flex',
-  alignItems: 'center'
-};
-
-const emailStyle = {
-  color: '#657786',
-  margin: '0 0 12px 0'
-};
-
-const statsStyle = {
-  fontSize: '16px',
-  fontWeight: 'bold',
-  color: '#14171a',
-  margin: '8px 0'
-};
-
-const dateStyle = {
-  color: '#657786',
-  fontSize: '14px',
-  margin: '4px 0'
-};
-
-const mutualFollowersStyle = {
-  color: '#657786',
-  fontSize: '13px',
-  margin: '8px 0 0 0',
-  fontWeight: '400'
-};
-
-const tabsContainerStyle = {
-  display: 'flex',
-  borderBottom: '1px solid #e1e8ed',
-  marginBottom: '20px'
-};
-
-const tabStyle = {
-  flex: 1,
-  padding: '16px',
-  background: 'none',
-  border: 'none',
-  fontSize: '15px',
-  fontWeight: '600',
-  color: '#657786',
-  cursor: 'pointer',
-  borderBottom: '2px solid transparent',
-  transition: 'all 0.2s'
-};
-
-const activeTabStyle = {
-  flex: 1,
-  padding: '16px',
-  background: 'none',
-  border: 'none',
-  fontSize: '15px',
-  fontWeight: '600',
-  color: '#1da1f2',
-  cursor: 'pointer',
-  borderBottom: '2px solid #1da1f2',
-  transition: 'all 0.2s'
-};
-
-const tabContentStyle = {
-  minHeight: '200px'
-};
-
-const emptyStateStyle = {
-  backgroundColor: '#f7f9fa',
-  padding: '40px',
-  textAlign: 'center',
-  borderRadius: '12px',
-  color: '#657786'
-};
-
-const sectionTitleStyle = {
-  fontSize: '18px',
-  fontWeight: 'bold',
-  marginBottom: '16px',
-  color: '#14171a'
-};
-
-const commentCardStyle = {
-  backgroundColor: 'white',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  padding: '16px',
-  marginBottom: '12px'
-};
-
-const commentHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: '8px'
-};
-
-const commentHeaderLeftStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  flex: 1
-};
-
-const commentTypeBadgeStyle = {
-  fontSize: '12px',
-  backgroundColor: '#e8f5fe',
-  color: '#1da1f2',
-  padding: '2px 8px',
-  borderRadius: '12px',
-  fontWeight: '600'
-};
-
-const commentDateStyle = {
-  fontSize: '14px',
-  color: '#657786'
-};
-
-const commentContentStyle = {
-  margin: '8px 0',
-  fontSize: '15px',
-  color: '#14171a',
-  wordWrap: 'break-word',
-  overflowWrap: 'break-word',
-  wordBreak: 'break-word'
-};
-
-const truncateTextStyle = {
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  wordBreak: 'break-word'
-};
-
-const commentMetaStyle = {
-  fontSize: '13px',
-  color: '#657786',
-  marginTop: '8px',
-  paddingTop: '8px',
-  borderTop: '1px solid #f0f0f0'
-};
-
-const commentStatsStyle = {
-  fontSize: '14px',
-  color: '#657786',
-  marginTop: '8px'
-};
-
-const loadingStyle = {
-  textAlign: 'center',
-  padding: '40px',
-  fontSize: '18px',
-  color: '#657786'
-};
-
-const errorContainerStyle = {
-  textAlign: 'center',
-  padding: '40px',
-  color: '#e0245e'
-};
-
-const buttonStyle = {
-  padding: '12px 24px',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  border: 'none',
-  borderRadius: '9999px',
-  fontSize: '15px',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  marginTop: '16px'
-};
 
 export default UserProfile;

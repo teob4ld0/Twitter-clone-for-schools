@@ -14,7 +14,6 @@ public class ChatHub : Hub
         {
             // Agregar el usuario a un grupo con su ID para recibir notificaciones personales
             await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}");
-            Console.WriteLine($"User {userId} connected to chat hub");
         }
         await base.OnConnectedAsync();
     }
@@ -25,7 +24,6 @@ public class ChatHub : Hub
         if (!string.IsNullOrEmpty(userId))
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user_{userId}");
-            Console.WriteLine($"User {userId} disconnected from chat hub");
         }
         await base.OnDisconnectedAsync(exception);
     }

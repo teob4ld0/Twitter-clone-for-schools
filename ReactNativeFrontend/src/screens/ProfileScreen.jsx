@@ -12,7 +12,7 @@ import {
   Alert,
   Platform
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from '../utils/imagePicker';
 import { useAuth } from '../context/AuthContext';
 import { useDispatch } from 'react-redux';
@@ -21,12 +21,14 @@ import { usersAPI, statusAPI, followersAPI, repliesAPI, interestSignalsAPI } fro
 import StatusItem from '../components/StatusItem';
 import Reply from '../components/Reply';
 import FollowingButton from '../components/FollowingButton';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const ProfileScreen = ({ route, navigation }) => {
   const { userId: routeUserId } = route.params || {};
-  const { user: currentUser, updateUser } = useAuth();
+  const { user: currentUser, updateUser, isAdmin } = useAuth();
+  const { theme } = useTheme();
   const dispatch = useDispatch();
+  const styles = useProfileThemedStyles(theme);
 
   // Determinar el userId a mostrar
   const profileUserId = routeUserId 
@@ -268,7 +270,7 @@ const ProfileScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Cargando perfil...</Text>
       </View>
     );
@@ -278,7 +280,7 @@ const ProfileScreen = ({ route, navigation }) => {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Feather name="alert-circle" size={48} color={colors.error} />
+        <Feather name="alert-circle" size={48} color={theme.colors.error} />
         <Text style={styles.errorTitle}>Error</Text>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity 
@@ -461,7 +463,7 @@ const ProfileScreen = ({ route, navigation }) => {
       {/* Header con botón volver */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonHeader}>
-          <Feather name="arrow-left" size={24} color={colors.primary} />
+          <Feather name="arrow-left" size={24} color={theme.colors.primary} />
           <Text style={styles.backButtonHeaderText}>Volver</Text>
         </TouchableOpacity>
       </View>
@@ -528,6 +530,17 @@ const ProfileScreen = ({ route, navigation }) => {
                 />
               </View>
             </View>
+          )}
+
+          {/* Botón de Admin - solo visible en el propio perfil si eres admin */}
+          {isOwnProfile && isAdmin && isAdmin() && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Admin')}
+              style={styles.adminButton}
+            >
+              <MaterialIcons name="admin-panel-settings" size={20} color={theme.colors.textOnPrimary} />
+              <Text style={styles.adminButtonText}>Panel de Administración</Text>
+            </TouchableOpacity>
           )}
 
           {/* Stats */}
@@ -620,7 +633,7 @@ const ProfileScreen = ({ route, navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary]}
+            colors={[theme.colors.primary]}
           />
         }
         contentContainerStyle={styles.listContent}
@@ -629,275 +642,293 @@ const ProfileScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-    padding: 20,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.textSecondary,
-  },
-  errorTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.error,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  backButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: colors.primary,
-    borderRadius: 9999,
-    marginTop: 16,
-  },
-  backButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  listContent: {
-    flexGrow: 1,
-    paddingBottom: 80,
-  },
-  header: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  backButtonHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  backButtonHeaderText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  profileCard: {
-    backgroundColor: colors.white,
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: colors.background,
-  },
-  changePhotoButton: {
-    marginTop: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.white,
-  },
-  changePhotoButtonDisabled: {
-    opacity: 0.5,
-  },
-  changePhotoButtonText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 8,
-  },
-  username: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  userId: {
-    fontSize: 14,
-    fontWeight: 'normal',
-    color: '#666',
-  },
-  mutualBadge: {
-    backgroundColor: '#e8f5fe',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  mutualBadgeText: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  followsYouBadge: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  followsYouBadgeText: {
-    fontSize: 12,
-    color: '#000',
-    fontWeight: '600',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  messageButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-  },
-  messageButtonDisabled: {
-    opacity: 0.5,
-  },
-  messageButtonText: {
-    color: colors.primary,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  followButtonContainer: {
-    flex: 1,
-  },
-  stats: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 4,
-  },
-  memberSince: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  mutualFollowersText: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTab: {
-    borderBottomColor: colors.primary,
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#666',
-  },
-  activeTabText: {
-    color: colors.primary,
-  },
-  emptyState: {
-    backgroundColor: '#f7f9fa',
-    padding: 40,
-    margin: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: 15,
-    color: '#666',
-    textAlign: 'center',
-  },
-  replyCard: {
-    backgroundColor: colors.white,
-    padding: 16,
-    marginHorizontal: 12,
-    marginVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  replyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  replyHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  replyBadge: {
-    backgroundColor: '#e8f5fe',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  replyBadgeText: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  replyDate: {
-    fontSize: 14,
-    color: '#666',
-  },
-  replyMeta: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  replyMetaText: {
-    fontSize: 13,
-    color: '#666',
-  },
-  truncate: {
-    flex: 1,
-  },
-});
+function useProfileThemedStyles(theme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+      padding: 20,
+    },
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+    },
+    errorTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: theme.colors.error,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    errorText: {
+      fontSize: 16,
+      color: theme.colors.error,
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    backButton: {
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 9999,
+      marginTop: 16,
+    },
+    backButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    listContent: {
+      flexGrow: 1,
+      paddingBottom: 80,
+    },
+    header: {
+      padding: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    backButtonHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    backButtonHeaderText: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    profileCard: {
+      backgroundColor: theme.colors.cardBackground,
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    avatarContainer: {
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    avatar: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      borderWidth: 3,
+      borderColor: theme.colors.background,
+    },
+    changePhotoButton: {
+      marginTop: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 9999,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.cardBackground,
+    },
+    changePhotoButtonDisabled: {
+      opacity: 0.5,
+    },
+    changePhotoButtonText: {
+      color: theme.colors.primary,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    infoContainer: {
+      flex: 1,
+    },
+    nameContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 8,
+    },
+    username: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    userId: {
+      fontSize: 14,
+      fontWeight: 'normal',
+      color: theme.colors.textSecondary,
+    },
+    mutualBadge: {
+      backgroundColor: theme.colors.infoBackground,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    mutualBadgeText: {
+      fontSize: 12,
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    followsYouBadge: {
+      backgroundColor: theme.colors.backgroundTertiary,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    followsYouBadgeText: {
+      fontSize: 12,
+      color: theme.colors.textPrimary,
+      fontWeight: '600',
+    },
+    actionButtons: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 12,
+      marginBottom: 12,
+    },
+    messageButton: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 9999,
+      borderWidth: 1,
+      borderColor: '#9b59b6',
+      backgroundColor: theme.colors.cardBackground,
+      alignItems: 'center',
+    },
+    messageButtonDisabled: {
+      opacity: 0.5,
+    },
+    messageButtonText: {
+      color: '#9b59b6',
+      fontSize: 15,
+      fontWeight: 'bold',
+    },
+    followButtonContainer: {
+      flex: 1,
+    },
+    adminButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 9999,
+      marginTop: 12,
+    },
+    adminButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 15,
+      fontWeight: 'bold',
+    },
+    stats: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: 4,
+    },
+    memberSince: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginBottom: 8,
+    },
+    mutualFollowersText: {
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    bold: {
+      fontWeight: 'bold',
+    },
+    tabsContainer: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.cardBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 16,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    activeTab: {
+      borderBottomColor: theme.colors.primary,
+    },
+    tabText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.colors.textSecondary,
+    },
+    activeTabText: {
+      color: theme.colors.primary,
+    },
+    emptyState: {
+      backgroundColor: theme.colors.background,
+      padding: 40,
+      margin: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    emptyStateText: {
+      fontSize: 15,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+    },
+    replyCard: {
+      backgroundColor: theme.colors.cardBackground,
+      padding: 16,
+      marginHorizontal: 12,
+      marginVertical: 6,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    replyHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    replyHeaderLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flex: 1,
+    },
+    replyBadge: {
+      backgroundColor: theme.colors.infoBackground,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 12,
+    },
+    replyBadgeText: {
+      fontSize: 12,
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    replyDate: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    replyMeta: {
+      marginTop: 8,
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.borderLight,
+    },
+    replyMetaText: {
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+    },
+    truncate: {
+      flex: 1,
+    },
+  });
+}
 
 export default ProfileScreen;

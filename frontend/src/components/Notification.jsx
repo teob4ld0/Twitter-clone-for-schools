@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const notificationTypeLabels = {
 	1: 'liked your status',
@@ -13,6 +14,7 @@ const notificationTypeLabels = {
 
 export default function Notification({ notification, onMarkAsRead }) {
 	const navigate = useNavigate();
+	const { theme } = useTheme();
 
 	const handleClick = () => {
 		// Marcar como leída al hacer clic
@@ -57,24 +59,24 @@ export default function Notification({ notification, onMarkAsRead }) {
 			onClick={handleClick}
 			style={{
 				padding: '12px 16px',
-				borderBottom: '1px solid #e1e8ed',
+				borderBottom: `1px solid ${theme.colors.border}`,
 				cursor: 'pointer',
-				backgroundColor: notification.isRead ? '#fff' : '#f7f9fa',
+				backgroundColor: notification.isRead ? theme.colors.cardBackground : theme.colors.secondaryBackground,
 				transition: 'background-color 0.2s',
 				display: 'flex',
 				gap: '12px',
 				alignItems: 'flex-start'
 			}}
-			onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-			onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notification.isRead ? '#fff' : '#f7f9fa'}
+			onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.colors.hoverBackground}
+			onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notification.isRead ? theme.colors.cardBackground : theme.colors.secondaryBackground}
 		>
 			{/* Avatar placeholder */}
 			<div style={{
 				width: '40px',
 				height: '40px',
 				borderRadius: '50%',
-				backgroundColor: '#1da1f2',
-				color: 'white',
+				backgroundColor: theme.colors.primary,
+				color: theme.colors.textOnPrimary,
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
@@ -90,7 +92,7 @@ export default function Notification({ notification, onMarkAsRead }) {
 				<div style={{ fontSize: '14px', lineHeight: '1.4' }}>
 					<strong>{notification.actor?.username || 'Someone'}</strong>
 					{' '}
-					<span style={{ color: '#657786' }}>
+					<span style={{ color: theme.colors.textSecondary }}>
 						{notification.type === 1 && notification.parentStatusId
 							? 'liked your reply'
 							: (notification.type === 7 && notification.parentStatusId
@@ -103,7 +105,7 @@ export default function Notification({ notification, onMarkAsRead }) {
 						}
 					</span>
 				</div>
-				<div style={{ fontSize: '13px', color: '#657786', marginTop: '4px' }}>
+				<div style={{ fontSize: '13px', color: theme.colors.textSecondary, marginTop: '4px' }}>
 					{formatTime(notification.createdAt)}
 				</div>
 			</div>
@@ -114,7 +116,7 @@ export default function Notification({ notification, onMarkAsRead }) {
 					width: '8px',
 					height: '8px',
 					borderRadius: '50%',
-					backgroundColor: '#1da1f2',
+					backgroundColor: theme.colors.primary,
 					flexShrink: 0,
 					marginTop: '6px'
 				}} />

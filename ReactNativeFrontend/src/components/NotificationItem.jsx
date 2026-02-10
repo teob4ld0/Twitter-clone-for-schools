@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 // Notification type labels mapping
 const notificationTypeLabels = {
@@ -20,6 +20,7 @@ const notificationTypeLabels = {
 };
 
 export default function NotificationItem({ notification, onMarkAsRead, onPress }) {
+  const { theme } = useTheme();
   const handleClick = () => {
     // Llamar a onPress del padre para manejar navegación
     if (onPress) {
@@ -59,6 +60,66 @@ export default function NotificationItem({ notification, onMarkAsRead, onPress }
 
   const actorInitial = notification.actor?.username?.charAt(0).toUpperCase() || '?';
 
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      padding: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      backgroundColor: theme.colors.cardBackground,
+      alignItems: 'flex-start',
+    },
+    unread: {
+      backgroundColor: theme.colors.backgroundSecondary,
+    },
+    avatarPlaceholder: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
+      flexShrink: 0,
+    },
+    avatarText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    content: {
+      flex: 1,
+      minWidth: 0,
+    },
+    message: {
+      fontSize: 14,
+      lineHeight: 19.6,
+      marginBottom: 4,
+    },
+    username: {
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    action: {
+      color: theme.colors.textSecondary,
+    },
+    timestamp: {
+      fontSize: 13,
+      color: theme.colors.textSecondary,
+      marginTop: 4,
+    },
+    unreadDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.colors.primary,
+      flexShrink: 0,
+      marginLeft: 8,
+      marginTop: 6,
+    },
+  });
+
   return (
     <TouchableOpacity
       style={[
@@ -91,63 +152,3 @@ export default function NotificationItem({ notification, onMarkAsRead, onPress }
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.white,
-    alignItems: 'flex-start',
-  },
-  unread: {
-    backgroundColor: '#f7f9fa',
-  },
-  avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-    flexShrink: 0,
-  },
-  avatarText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-    minWidth: 0,
-  },
-  message: {
-    fontSize: 14,
-    lineHeight: 19.6, // 1.4 line height
-    marginBottom: 4,
-  },
-  username: {
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  action: {
-    color: '#666',
-  },
-  timestamp: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-    flexShrink: 0,
-    marginLeft: 8,
-    marginTop: 6,
-  },
-});

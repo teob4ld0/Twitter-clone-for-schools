@@ -1,16 +1,60 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 import { useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabBar({ state, descriptors, navigation }) {
+  const { theme } = useTheme();
   const unreadCount = useSelector((state) => state.notification?.unreadCount || 0);
   const insets = useSafeAreaInsets();
 
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      backgroundColor: theme.colors.cardBackground,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      paddingTop: 8,
+      elevation: 8,
+      shadowColor: theme.colors.shadowColor,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    tab: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 8,
+    },
+    label: {
+      fontSize: 11,
+      marginTop: 4,
+      fontWeight: '500',
+    },
+    badge: {
+      position: 'absolute',
+      right: -8,
+      top: -4,
+      backgroundColor: theme.colors.error,
+      borderRadius: 10,
+      minWidth: 18,
+      height: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 4,
+    },
+    badgeText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 10,
+      fontWeight: 'bold',
+    },
+  });
+
   const getIcon = (routeName, isFocused) => {
-    const iconColor = isFocused ? colors.primary : colors.textSecondary;
+    const iconColor = isFocused ? theme.colors.primary : theme.colors.textSecondary;
     const size = 24;
 
     switch (routeName) {
@@ -76,7 +120,7 @@ export default function TabBar({ state, descriptors, navigation }) {
             {getIcon(route.name, isFocused)}
             <Text style={[
               styles.label,
-              { color: isFocused ? colors.primary : colors.textSecondary }
+              { color: isFocused ? theme.colors.primary : theme.colors.textSecondary }
             ]}>
               {label}
             </Text>
@@ -86,46 +130,3 @@ export default function TabBar({ state, descriptors, navigation }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 8,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  label: {
-    fontSize: 11,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  badge: {
-    position: 'absolute',
-    right: -8,
-    top: -4,
-    backgroundColor: colors.error,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: colors.white,
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-});

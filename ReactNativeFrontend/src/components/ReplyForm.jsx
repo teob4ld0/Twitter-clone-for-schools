@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from '../utils/imagePicker';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 
 function ReplyForm({
   onSubmit,
@@ -22,6 +22,7 @@ function ReplyForm({
   autoFocus = false,
   compact = false
 }) {
+  const { theme } = useTheme();
   const [content, setContent] = useState('');
   const [mediaUri, setMediaUri] = useState(null);
   const [fileError, setFileError] = useState('');
@@ -93,6 +94,113 @@ function ReplyForm({
 
   const isSubmitDisabled = isLoading || (!content.trim() && !mediaUri) || content.length > 280;
 
+  const styles = StyleSheet.create({
+    form: {
+      marginBottom: 16,
+      padding: 12,
+      backgroundColor: theme.colors.cardBackground,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    compactForm: {
+      marginBottom: 10,
+      padding: 10,
+      backgroundColor: theme.colors.cardBackground,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    topRow: {
+      marginBottom: 8,
+    },
+    bottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 8,
+    },
+    textarea: {
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+      minHeight: 60,
+      textAlignVertical: 'top',
+      padding: 0,
+      lineHeight: 22,
+    },
+    button: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      minWidth: 100,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.5,
+    },
+    buttonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    fileName: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      flex: 1,
+    },
+    errorContainer: {
+      padding: 8,
+      backgroundColor: theme.colors.errorBackground,
+      borderRadius: 6,
+      marginBottom: 8,
+    },
+    errorText: {
+      fontSize: 14,
+      color: theme.colors.error,
+    },
+    mediaButton: {
+      padding: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    mediaButtonDisabled: {
+      opacity: 0.5,
+    },
+    mediaPreviewContainer: {
+      marginVertical: 8,
+      borderRadius: 12,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    mediaPreviewImage: {
+      width: '100%',
+      height: 200,
+    },
+    removeMediaButton: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      borderRadius: 16,
+      width: 32,
+      height: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    charCount: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      textAlign: 'right',
+      marginTop: 4,
+    },
+  });
+
   return (
     <View style={compact ? styles.compactForm : styles.form}>
       {fileError ? (
@@ -107,7 +215,7 @@ function ReplyForm({
           value={content}
           onChangeText={setContent}
           placeholder={placeholder}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.colors.textSecondary}
           style={styles.textarea}
           multiline
           numberOfLines={2}
@@ -140,7 +248,7 @@ function ReplyForm({
           style={[styles.mediaButton, (isLoading || mediaUri) && styles.mediaButtonDisabled]}
           disabled={isLoading || !!mediaUri}
         >
-          <Feather name="image" size={20} color={colors.primary} />
+          <Feather name="image" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
 
         {mediaUri && (
@@ -160,7 +268,7 @@ function ReplyForm({
           disabled={isSubmitDisabled}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={theme.colors.textOnPrimary} size="small" />
           ) : (
             <Text style={styles.buttonText}>{buttonLabel}</Text>
           )}
@@ -169,112 +277,5 @@ function ReplyForm({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  form: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: colors.cardBackground,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  compactForm: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: colors.cardBackground,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  topRow: {
-    marginBottom: 8,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-  },
-  textarea: {
-    fontSize: 16,
-    color: '#000',
-    minHeight: 60,
-    textAlignVertical: 'top',
-    padding: 0,
-    lineHeight: 22,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    minWidth: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  fileName: {
-    fontSize: 12,
-    color: '#666',
-    flex: 1,
-  },
-  errorContainer: {
-    padding: 8,
-    backgroundColor: '#fee',
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#c00',
-  },
-  mediaButton: {
-    padding: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mediaButtonDisabled: {
-    opacity: 0.5,
-  },
-  mediaPreviewContainer: {
-    marginVertical: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  mediaPreviewImage: {
-    width: '100%',
-    height: 200,
-  },
-  removeMediaButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  charCount: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    textAlign: 'right',
-    marginTop: 4,
-  },
-});
 
 export default ReplyForm;

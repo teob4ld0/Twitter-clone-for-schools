@@ -42,7 +42,7 @@ export default function Message({ message, currentUserId, compact = false, onDel
 		display: "inline-block",
 		padding: compact ? "6px 8px" : "10px 14px",
 		borderRadius: 12,
-		background: isMine ? "#0084ff" : "#f1f1f1",
+		background: isMine ? "#0084ff" : "#e8d4f8",
 		color: isMine ? "#fff" : "#111",
 		maxWidth: "100%",
 		fontSize: compact ? 12 : 14,

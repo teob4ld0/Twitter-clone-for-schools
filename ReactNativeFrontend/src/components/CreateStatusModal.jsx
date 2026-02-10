@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from '../utils/imagePicker';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../styles/colors';
+import { useTheme } from '../context/ThemeContext';
 import { mediaAPI, statusAPI } from '../services/api';
 
 export default function CreateStatusModal({ visible, onClose, onStatusCreated }) {
+  const { theme } = useTheme();
   const [content, setContent] = useState('');
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -100,6 +101,128 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
   const charCount = content.length;
   const maxChars = 350;
 
+  const styles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 32,
+      zIndex: 9999,
+    },
+    modalContainer: {
+      backgroundColor: theme.colors.cardBackground,
+      borderRadius: 20,
+      width: '100%',
+      maxHeight: '80%',
+      maxWidth: 600,
+      elevation: 10,
+      zIndex: 9999,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    closeButton: {
+      padding: 4,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    modalContent: {
+      padding: 16,
+    },
+    errorContainer: {
+      backgroundColor: theme.colors.errorBackground,
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 12,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 14,
+    },
+    textInput: {
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+      minHeight: 120,
+      textAlignVertical: 'top',
+      paddingVertical: 8,
+    },
+    charCount: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      textAlign: 'right',
+      marginTop: 8,
+    },
+    mediaPreviewContainer: {
+      marginTop: 16,
+      position: 'relative',
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    mediaPreview: {
+      width: '100%',
+      height: 200,
+      borderRadius: 12,
+    },
+    videoPlaceholder: {
+      width: '100%',
+      height: 200,
+      backgroundColor: theme.colors.backgroundSecondary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 12,
+    },
+    videoText: {
+      marginTop: 8,
+      color: theme.colors.textSecondary,
+    },
+    removeMediaButton: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      borderRadius: 20,
+      width: 32,
+      height: 32,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    mediaButton: {
+      padding: 8,
+    },
+    submitButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 20,
+    },
+    submitButtonDisabled: {
+      opacity: 0.5,
+    },
+    submitButtonText: {
+      color: theme.colors.textOnPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+  });
+
   return (
     <Modal
       visible={visible}
@@ -111,7 +234,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Feather name="x" size={24} color={colors.text} />
+              <Feather name="x" size={24} color={theme.colors.textPrimary} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Nuevo Post</Text>
             <View style={{ width: 24 }} />
@@ -128,7 +251,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
               style={styles.textInput}
               multiline
               placeholder="¿Qué estás pensando?"
-              placeholderTextColor="#999"
+              placeholderTextColor={theme.colors.textTertiary}
               value={content}
               onChangeText={setContent}
               maxLength={maxChars}
@@ -141,7 +264,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
               <View style={styles.mediaPreviewContainer}>
                 {mediaFile?.type?.startsWith('video') ? (
                   <View style={styles.videoPlaceholder}>
-                    <Feather name="video" size={48} color={colors.textSecondary} />
+                    <Feather name="video" size={48} color={theme.colors.textSecondary} />
                     <Text style={styles.videoText}>Video seleccionado</Text>
                   </View>
                 ) : (
@@ -151,7 +274,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
                   onPress={handleRemoveMedia}
                   style={styles.removeMediaButton}
                 >
-                  <Feather name="x" size={20} color={colors.white} />
+                  <Feather name="x" size={20} color={theme.colors.textOnPrimary} />
                 </TouchableOpacity>
               </View>
             )}
@@ -163,7 +286,7 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
               style={styles.mediaButton}
               disabled={loading || !!mediaFile}
             >
-              <Feather name="image" size={24} color={mediaFile ? colors.textSecondary : colors.primary} />
+              <Feather name="image" size={24} color={mediaFile ? theme.colors.textSecondary : theme.colors.primary} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -185,124 +308,4 @@ export default function CreateStatusModal({ visible, onClose, onStatusCreated })
   );
 }
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 32,
-    zIndex: 9999,
-  },
-  modalContainer: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    width: '100%',
-    maxHeight: '80%',
-    maxWidth: 600,
-    elevation: 10,
-    zIndex: 9999,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  modalContent: {
-    padding: 16,
-  },
-  errorContainer: {
-    backgroundColor: '#fee',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  errorText: {
-    color: '#c00',
-    fontSize: 14,
-  },
-  textInput: {
-    fontSize: 16,
-    color: '#000',
-    minHeight: 120,
-    textAlignVertical: 'top',
-    paddingVertical: 8,
-  },
-  charCount: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    marginTop: 8,
-  },
-  mediaPreviewContainer: {
-    marginTop: 16,
-    position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  mediaPreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-  },
-  videoPlaceholder: {
-    width: '100%',
-    height: 200,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-  },
-  videoText: {
-    marginTop: 8,
-    color: '#666',
-  },
-  removeMediaButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 20,
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  mediaButton: {
-    padding: 8,
-  },
-  submitButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 20,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+
