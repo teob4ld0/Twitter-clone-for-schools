@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
 import { mediaAPI, statusAPI } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 function CreateStatus({ onStatusCreated }) {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     content: ''
   });
@@ -10,6 +12,105 @@ function CreateStatus({ onStatusCreated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
+
+  // Estilos - definidos dentro del componente para acceder a theme
+  const containerStyle = {
+    padding: '1.5rem',
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '8px',
+    backgroundColor: theme.colors.cardBackground,
+    marginBottom: '2rem'
+  };
+
+  const formStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  };
+
+  const textareaStyle = {
+    padding: '0.75rem',
+    fontSize: '1rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    resize: 'vertical'
+  };
+
+  const buttonStyle = {
+    padding: '0.75rem',
+    fontSize: '1rem',
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  };
+
+  const errorStyle = {
+    padding: '0.75rem',
+    backgroundColor: '#fee',
+    color: '#c00',
+    borderRadius: '4px',
+    marginBottom: '1rem'
+  };
+
+  const actionsRowStyle = {
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'center'
+  };
+
+  const mediaButtonStyle = {
+    padding: '0.75rem',
+    backgroundColor: 'transparent',
+    color: theme.colors.primary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '8px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    transition: 'background-color 0.2s',
+    fontSize: '1rem'
+  };
+
+  const mediaPreviewContainerStyle = {
+    position: 'relative',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: `1px solid ${theme.colors.border}`,
+    marginBottom: '0.5rem'
+  };
+
+  const mediaPreviewStyle = {
+    width: '100%',
+    maxHeight: '300px',
+    objectFit: 'cover',
+    display: 'block'
+  };
+
+  const removeMediaBtnStyle = {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
+  const charCountStyle = {
+    fontSize: '0.875rem',
+    color: theme.colors.textSecondary,
+    textAlign: 'right',
+    marginTop: '-0.5rem'
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -92,10 +193,10 @@ function CreateStatus({ onStatusCreated }) {
   };
 
   return (
-    <div style={containerStyle}>
-      <h2>Postea algo</h2>
+    <div style={{ ...containerStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
+      <h2 style={{ color: theme.colors.textPrimary }}>Postea algo</h2>
       
-      {error && <div style={errorStyle}>{error}</div>}
+      {error && <div style={{ ...errorStyle, backgroundColor: theme.colors.errorLight, color: theme.colors.error }}>{error}</div>}
       
       <form onSubmit={handleSubmit} style={formStyle}>
         
@@ -106,11 +207,11 @@ function CreateStatus({ onStatusCreated }) {
           placeholder="¿Qué estás pensando?"
           required
           rows="4"
-          style={textareaStyle}
+          style={{ ...textareaStyle, backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.inputBorder, color: theme.colors.textPrimary }}
           maxLength={350}
         />
         
-        <div style={charCountStyle}>
+        <div style={{ ...charCountStyle, color: theme.colors.textSecondary }}>
           {formData.content.length}/350
         </div>
 
@@ -171,103 +272,5 @@ function CreateStatus({ onStatusCreated }) {
     </div>
   );
 }
-
-const containerStyle = {
-  padding: '1.5rem',
-  border: '1px solid #ddd',
-  borderRadius: '8px',
-  backgroundColor: '#fff',
-  marginBottom: '2rem'
-};
-
-const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem'
-};
-
-const textareaStyle = {
-  padding: '0.75rem',
-  fontSize: '1rem',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  resize: 'vertical'
-};
-
-const buttonStyle = {
-  padding: '0.75rem',
-  fontSize: '1rem',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer'
-};
-
-const errorStyle = {
-  padding: '0.75rem',
-  backgroundColor: '#fee',
-  color: '#c00',
-  borderRadius: '4px',
-  marginBottom: '1rem'
-};
-
-const actionsRowStyle = {
-  display: 'flex',
-  gap: '0.75rem',
-  alignItems: 'center'
-};
-
-const mediaButtonStyle = {
-  padding: '0.75rem',
-  backgroundColor: 'transparent',
-  color: '#1da1f2',
-  border: '1px solid #e1e8ed',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  transition: 'background-color 0.2s',
-  fontSize: '1rem'
-};
-
-const mediaPreviewContainerStyle = {
-  position: 'relative',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  border: '1px solid #e1e8ed',
-  marginBottom: '0.5rem'
-};
-
-const mediaPreviewStyle = {
-  width: '100%',
-  maxHeight: '300px',
-  objectFit: 'cover',
-  display: 'block'
-};
-
-const removeMediaBtnStyle = {
-  position: 'absolute',
-  top: '0.5rem',
-  right: '0.5rem',
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(0, 0, 0, 0.75)',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '1rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-};
-
-const charCountStyle = {
-  fontSize: '0.875rem',
-  color: '#657786',
-  textAlign: 'right',
-  marginTop: '-0.5rem'
-};
 
 export default CreateStatus;

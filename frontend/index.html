@@ -12,8 +12,29 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icon.svg" />
     <title>Twittetec - Red Social</title>
+    <!-- Script para aplicar tema antes de que React cargue (evita flash) -->
+    <script>
+      (function() {
+        try {
+          const savedTheme = localStorage.getItem('app-theme');
+          const theme = savedTheme === 'dark' ? 'dark' : 'light';
+          // Usar documentElement en lugar de body ya que body aún no existe aquí
+          document.documentElement.setAttribute('data-theme', theme);
+          // También preparar el body cuando esté disponible
+          if (document.body) {
+            document.body.setAttribute('data-theme', theme);
+          }
+        } catch (e) {
+          // Si falla, usar tema claro por defecto
+          document.documentElement.setAttribute('data-theme', 'light');
+          if (document.body) {
+            document.body.setAttribute('data-theme', 'light');
+          }
+        }
+      })();
+    </script>
   </head>
-  <body>
+  <body data-theme="light">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -12,7 +12,7 @@ import {
   Alert,
   Platform
 } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from '../utils/imagePicker';
 import { useAuth } from '../context/AuthContext';
 import { useDispatch } from 'react-redux';
@@ -25,7 +25,7 @@ import { colors } from '../styles/colors';
 
 const ProfileScreen = ({ route, navigation }) => {
   const { userId: routeUserId } = route.params || {};
-  const { user: currentUser, updateUser } = useAuth();
+  const { user: currentUser, updateUser, isAdmin } = useAuth();
   const dispatch = useDispatch();
 
   // Determinar el userId a mostrar
@@ -530,6 +530,17 @@ const ProfileScreen = ({ route, navigation }) => {
             </View>
           )}
 
+          {/* Botón de Admin - solo visible en el propio perfil si eres admin */}
+          {isOwnProfile && isAdmin && isAdmin() && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Admin')}
+              style={styles.adminButton}
+            >
+              <MaterialIcons name="admin-panel-settings" size={20} color={colors.white} />
+              <Text style={styles.adminButtonText}>Panel de Administración</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Stats */}
           <Text style={styles.stats}>
             📝 {statuses.length} {statuses.length === 1 ? 'estado' : 'estados'} •
@@ -793,6 +804,22 @@ const styles = StyleSheet.create({
   },
   followButtonContainer: {
     flex: 1,
+  },
+  adminButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 9999,
+    marginTop: 12,
+  },
+  adminButtonText: {
+    color: colors.white,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
   stats: {
     fontSize: 15,

@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchNotifications, markAsRead, markAllAsRead } from '../store/notificationSlice';
+import { useTheme } from '../context/ThemeContext';
 import Notification from '../components/Notification';
 
 export default function NotificationsPage() {
 	const dispatch = useDispatch();
 	const { notifications, unreadCount, loading, error } = useSelector((state) => state.notification);
+	const { theme } = useTheme();
 
 	useEffect(() => {
 		dispatch(fetchNotifications());
@@ -28,14 +30,14 @@ export default function NotificationsPage() {
 	}
 
 	return (
-		<div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#fff', minHeight: '100vh' }}>
+		<div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: theme.colors.cardBackground, minHeight: '100vh' }}>
 			{/* Header */}
 			<div style={{
 				padding: '16px 20px',
-				borderBottom: '1px solid #e1e8ed',
+				borderBottom: `1px solid ${theme.colors.border}`,
 				position: 'sticky',
 				top: 0,
-				backgroundColor: '#fff',
+				backgroundColor: theme.colors.cardBackground,
 				zIndex: 10,
 				display: 'flex',
 				justifyContent: 'space-between',
@@ -50,7 +52,7 @@ export default function NotificationsPage() {
 						style={{
 							background: 'none',
 							border: 'none',
-							color: '#1da1f2',
+							color: theme.colors.primary,
 							fontSize: '14px',
 							cursor: 'pointer',
 							fontWeight: '500'
@@ -65,8 +67,8 @@ export default function NotificationsPage() {
 			{error && (
 				<div style={{
 					padding: '16px',
-					backgroundColor: '#ffebee',
-					color: '#c62828',
+					backgroundColor: theme.colors.errorBackground,
+					color: theme.colors.error,
 					fontSize: '14px'
 				}}>
 					Error: {error}
@@ -78,7 +80,7 @@ export default function NotificationsPage() {
 				<div style={{
 					padding: '40px 20px',
 					textAlign: 'center',
-					color: '#657786'
+					color: theme.colors.textSecondary
 				}}>
 					<div style={{ fontSize: '48px', marginBottom: '16px' }}>🔔</div>
 					<div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>

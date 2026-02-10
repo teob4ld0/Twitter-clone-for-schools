@@ -12,13 +12,64 @@ html {
 }
 
 body {
-  background-color: #f5f8fa;
   margin: 0;
   padding: 0;
   /* Previene bounce scrolling en iOS */
   overscroll-behavior-y: none;
   /* Mejora el touch */
   touch-action: manipulation;
+  /* El color de fondo se maneja desde ThemeContext */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Estilos para tema claro (por defecto) */
+body[data-theme="light"] {
+  background-color: #ffffff;
+  color: #0f1419;
+}
+
+/* Estilos para tema oscuro */
+body[data-theme="dark"] {
+  background-color: #000000;
+  color: #e7e9ea;
+}
+
+/* Scrollbar personalizado para tema claro */
+body[data-theme="light"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f5f8fa;
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #cfd9de;
+  border-radius: 6px;
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #aab8c2;
+}
+
+/* Scrollbar personalizado para tema oscuro */
+body[data-theme="dark"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #16181c;
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #2f3336;
+  border-radius: 6px;
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #565a5e;
 }
 
 /* Animación para el spinner de carga */

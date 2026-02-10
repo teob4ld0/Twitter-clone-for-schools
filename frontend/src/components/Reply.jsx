@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI } from '../services/api';
 
 function Reply({ reply, onDelete, onLikeUpdate }) {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const isAuthor = user?.username === reply.author;
 
@@ -300,6 +302,12 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
     const isVideo = lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.mov') || lower.endsWith('.m4v');
     const isImage = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.gif') || lower.endsWith('.webp');
 
+    const mediaStyle = {
+      maxWidth: '100%',
+      borderRadius: '10px',
+      border: `1px solid ${theme.colors.border}`
+    };
+
     if (isVideo) {
       return <video controls style={mediaStyle} src={url} />;
     }
@@ -309,6 +317,302 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
     return (
       <a href={url} target="_blank" rel="noreferrer">{url}</a>
     );
+  };
+
+  // Estilos
+  const commentStyle = {
+    padding: '12px 0',
+    borderBottom: `1px solid ${theme.colors.border}`
+  };
+
+  const commentHeaderStyle = {
+    display: 'flex',
+    gap: '12px',
+    position: 'relative'
+  };
+
+  const avatarSmallStyle = {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.textOnPrimary,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    flexShrink: 0
+  };
+
+  const avatarImgStyle = {
+    width: '100%',
+    height: '100%',
+    borderRadius: '50%',
+    objectFit: 'cover'
+  };
+
+  const commentBodyStyle = {
+    flex: 1,
+    minWidth: 0
+  };
+
+  const commentInfoStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '4px'
+  };
+
+  const authorNameStyle = {
+    fontSize: '0.875rem',
+    color: theme.colors.textPrimary
+  };
+
+  const dateStyle = {
+    fontSize: '0.75rem',
+    color: theme.colors.textSecondary
+  };
+
+  const contentStyle = {
+    fontSize: '0.875rem',
+    color: theme.colors.textPrimary,
+    margin: '0 0 6px 0',
+    lineHeight: '1.4',
+    wordBreak: 'break-word'
+  };
+
+  const mediaWrapperStyle = {
+    margin: '8px 0'
+  };
+
+  const actionButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s',
+    fontWeight: '500'
+  };
+
+  const actionsRowStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    flexWrap: 'wrap'
+  };
+
+  const deleteButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    opacity: 0.6,
+    padding: '4px',
+    transition: 'opacity 0.2s',
+    position: 'absolute',
+    right: 0,
+    top: 0
+  };
+
+  const mentionStyle = {
+    color: theme.colors.link,
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'color 0.2s',
+    textDecoration: 'none'
+  };
+
+  const repostMenuStyle = {
+    position: 'absolute',
+    bottom: '100%',
+    left: '0',
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '8px',
+    boxShadow: `0 4px 12px ${theme.colors.shadowColor}`,
+    zIndex: 1000,
+    minWidth: '200px',
+    padding: '4px 0',
+    marginBottom: '4px'
+  };
+
+  const menuItemStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    border: 'none',
+    background: 'none',
+    textAlign: 'left',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    color: theme.colors.textPrimary,
+    display: 'flex',
+    alignItems: 'center',
+    transition: 'background-color 0.2s'
+  };
+
+  const modalOverlayStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: theme.colors.modalOverlay,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10000,
+    padding: '20px'
+  };
+
+  const modalContentStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: '16px',
+    maxWidth: '600px',
+    width: '100%',
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: `0 8px 32px ${theme.colors.shadowColor}`,
+    overflow: 'hidden'
+  };
+
+  const modalHeaderStyle = {
+    padding: '20px',
+    borderBottom: `1px solid ${theme.colors.border}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  };
+
+  const modalCloseButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: theme.colors.textSecondary,
+    padding: '4px 8px',
+    transition: 'color 0.2s'
+  };
+
+  const quoteTextareaStyle = {
+    width: '100%',
+    minHeight: '120px',
+    padding: '16px 20px',
+    fontSize: '1rem',
+    border: 'none',
+    outline: 'none',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    lineHeight: '1.5',
+    backgroundColor: theme.colors.cardBackground,
+    color: theme.colors.textPrimary
+  };
+
+  const charCountStyle = {
+    padding: '0 20px 10px',
+    textAlign: 'right',
+    fontSize: '0.875rem',
+    color: theme.colors.textSecondary
+  };
+
+  const uploadedMediaPreviewStyle = {
+    position: 'relative',
+    margin: '10px 20px',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: `1px solid ${theme.colors.border}`
+  };
+
+  const uploadedMediaImageStyle = {
+    width: '100%',
+    maxHeight: '300px',
+    objectFit: 'cover',
+    display: 'block'
+  };
+
+  const removeMediaButtonStyle = {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    background: 'rgba(0, 0, 0, 0.6)',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background 0.2s'
+  };
+
+  const quotedTweetPreviewStyle = {
+    margin: '10px 20px',
+    padding: '12px',
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    backgroundColor: theme.colors.secondaryBackground
+  };
+
+  const previewHeaderStyle = {
+    display: 'flex',
+    alignItems: 'center'
+  };
+
+  const modalFooterStyle = {
+    padding: '16px 20px',
+    borderTop: `1px solid ${theme.colors.border}`,
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  };
+
+  const mediaButtonStyle = {
+    background: 'none',
+    border: `1px solid ${theme.colors.primary}`,
+    borderRadius: '50%',
+    width: '40px',
+    height: '40px',
+    cursor: 'pointer',
+    color: theme.colors.primary,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+    padding: 0
+  };
+
+  const cancelButtonStyle = {
+    padding: '10px 20px',
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '20px',
+    background: theme.colors.cardBackground,
+    cursor: 'pointer',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+    color: theme.colors.primary
+  };
+
+  const submitButtonStyle = {
+    padding: '10px 24px',
+    border: 'none',
+    borderRadius: '20px',
+    background: theme.colors.primary,
+    color: theme.colors.textOnPrimary,
+    cursor: 'pointer',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    transition: 'all 0.2s'
   };
 
   return (
@@ -482,7 +786,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
             <div style={quotedTweetPreviewStyle}>
               <div style={previewHeaderStyle}>
                 <span style={{ fontWeight: 'bold' }}>@{reply.author}</span>
-                <span style={{ color: '#657786', fontSize: '0.875rem', marginLeft: '0.5rem' }}>
+                <span style={{ color: theme.colors.textSecondary, fontSize: '0.875rem', marginLeft: '0.5rem' }}>
                   {formatDate(reply.createdAt)}
                 </span>
               </div>
@@ -549,304 +853,5 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
     </div>
   );
 }
-
-const commentStyle = {
-  padding: '12px 0',
-  borderBottom: '1px solid #f0f0f0'
-};
-
-const commentHeaderStyle = {
-  display: 'flex',
-  gap: '12px',
-  position: 'relative'
-};
-
-const avatarSmallStyle = {
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '0.875rem',
-  fontWeight: 'bold',
-  flexShrink: 0
-};
-
-const avatarImgStyle = {
-  width: '100%',
-  height: '100%',
-  borderRadius: '50%',
-  objectFit: 'cover'
-};
-
-const commentBodyStyle = {
-  flex: 1,
-  minWidth: 0
-};
-
-const commentInfoStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  marginBottom: '4px'
-};
-
-const authorNameStyle = {
-  fontSize: '0.875rem',
-  color: '#14171a'
-};
-
-const dateStyle = {
-  fontSize: '0.75rem',
-  color: '#657786'
-};
-
-const contentStyle = {
-  fontSize: '0.875rem',
-  color: '#14171a',
-  margin: '0 0 6px 0',
-  lineHeight: '1.4',
-  wordBreak: 'break-word'
-};
-
-const mediaWrapperStyle = {
-  margin: '8px 0'
-};
-
-const mediaStyle = {
-  maxWidth: '100%',
-  borderRadius: '10px',
-  border: '1px solid #e1e8ed'
-};
-
-const actionButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '0.75rem',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  padding: '4px 8px',
-  borderRadius: '4px',
-  transition: 'background-color 0.2s',
-  fontWeight: '500'
-};
-
-const actionsRowStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  flexWrap: 'wrap'
-};
-
-const deleteButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1rem',
-  cursor: 'pointer',
-  opacity: 0.6,
-  padding: '4px',
-  transition: 'opacity 0.2s',
-  position: 'absolute',
-  right: 0,
-  top: 0
-};
-
-const mentionStyle = {
-  color: '#1da1f2',
-  fontWeight: '600',
-  cursor: 'pointer',
-  transition: 'color 0.2s',
-  textDecoration: 'none'
-};
-
-const repostMenuStyle = {
-  position: 'absolute',
-  bottom: '100%',
-  left: '0',
-  backgroundColor: '#fff',
-  border: '1px solid #e1e8ed',
-  borderRadius: '8px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-  zIndex: 1000,
-  minWidth: '200px',
-  padding: '4px 0',
-  marginBottom: '4px'
-};
-
-const menuItemStyle = {
-  width: '100%',
-  padding: '12px 16px',
-  border: 'none',
-  background: 'none',
-  textAlign: 'left',
-  cursor: 'pointer',
-  fontSize: '0.9rem',
-  fontWeight: '500',
-  color: '#14171a',
-  display: 'flex',
-  alignItems: 'center',
-  transition: 'background-color 0.2s'
-};
-
-const modalOverlayStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 10000,
-  padding: '20px'
-};
-
-const modalContentStyle = {
-  backgroundColor: '#fff',
-  borderRadius: '16px',
-  maxWidth: '600px',
-  width: '100%',
-  maxHeight: '90vh',
-  display: 'flex',
-  flexDirection: 'column',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-  overflow: 'hidden'
-};
-
-const modalHeaderStyle = {
-  padding: '20px',
-  borderBottom: '1px solid #e1e8ed',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-};
-
-const modalCloseButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.5rem',
-  cursor: 'pointer',
-  color: '#657786',
-  padding: '4px 8px',
-  transition: 'color 0.2s'
-};
-
-const quoteTextareaStyle = {
-  width: '100%',
-  minHeight: '120px',
-  padding: '16px 20px',
-  fontSize: '1rem',
-  border: 'none',
-  outline: 'none',
-  resize: 'vertical',
-  fontFamily: 'inherit',
-  lineHeight: '1.5'
-};
-
-const charCountStyle = {
-  padding: '0 20px 10px',
-  textAlign: 'right',
-  fontSize: '0.875rem',
-  color: '#657786'
-};
-
-const uploadedMediaPreviewStyle = {
-  position: 'relative',
-  margin: '10px 20px',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  border: '1px solid #e1e8ed'
-};
-
-const uploadedMediaImageStyle = {
-  width: '100%',
-  maxHeight: '300px',
-  objectFit: 'cover',
-  display: 'block'
-};
-
-const removeMediaButtonStyle = {
-  position: 'absolute',
-  top: '8px',
-  right: '8px',
-  background: 'rgba(0, 0, 0, 0.6)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '50%',
-  width: '32px',
-  height: '32px',
-  cursor: 'pointer',
-  fontSize: '1rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'background 0.2s'
-};
-
-const quotedTweetPreviewStyle = {
-  margin: '10px 20px',
-  padding: '12px',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  backgroundColor: '#f7f9fa'
-};
-
-const previewHeaderStyle = {
-  display: 'flex',
-  alignItems: 'center'
-};
-
-const modalFooterStyle = {
-  padding: '16px 20px',
-  borderTop: '1px solid #e1e8ed',
-  display: 'flex',
-  gap: '12px',
-  justifyContent: 'space-between',
-  alignItems: 'center'
-};
-
-const mediaButtonStyle = {
-  background: 'none',
-  border: '1px solid #1da1f2',
-  borderRadius: '50%',
-  width: '40px',
-  height: '40px',
-  cursor: 'pointer',
-  color: '#1da1f2',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.2s',
-  padding: 0
-};
-
-const cancelButtonStyle = {
-  padding: '10px 20px',
-  border: '1px solid #e1e8ed',
-  borderRadius: '20px',
-  background: '#fff',
-  cursor: 'pointer',
-  fontSize: '0.95rem',
-  fontWeight: 'bold',
-  transition: 'all 0.2s',
-  color: '#1da1f2'
-};
-
-const submitButtonStyle = {
-  padding: '10px 24px',
-  border: 'none',
-  borderRadius: '20px',
-  background: '#1da1f2',
-  color: '#fff',
-  cursor: 'pointer',
-  fontSize: '0.95rem',
-  fontWeight: 'bold',
-  transition: 'all 0.2s'
-};
 
 export default Reply;

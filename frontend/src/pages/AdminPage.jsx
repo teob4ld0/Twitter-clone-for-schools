@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 function AdminPage() {
+  const { theme } = useTheme();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,21 +98,21 @@ function AdminPage() {
   };
 
   if (loading) {
-    return <div style={containerStyle}>Cargando usuarios...</div>;
+    return <div style={{ ...containerStyle, backgroundColor: theme.colors.cardBackground, color: theme.colors.textPrimary }}>Cargando usuarios...</div>;
   }
 
   if (error) {
     return (
-      <div style={containerStyle}>
-        <div style={errorStyle}>{error}</div>
+      <div style={{ ...containerStyle, backgroundColor: theme.colors.cardBackground }}>
+        <div style={{ ...errorStyle, backgroundColor: theme.colors.errorLight, color: theme.colors.error }}>{error}</div>
       </div>
     );
   }
 
   return (
-    <div style={isMobile ? mobileContainerStyle : containerStyle}>
-      <h1 style={isMobile ? mobileTitleStyle : titleStyle}>Panel de Administración</h1>
-      <p style={statsStyle}>Total de usuarios: <strong>{users.length}</strong></p>
+    <div style={isMobile ? { ...mobileContainerStyle, backgroundColor: theme.colors.background, color: theme.colors.textPrimary } : { ...containerStyle, backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
+      <h1 style={isMobile ? { ...mobileTitleStyle, color: theme.colors.textPrimary } : { ...titleStyle, color: theme.colors.textPrimary }}>Panel de Administración</h1>
+      <p style={{ ...statsStyle, color: theme.colors.textPrimary }}>Total de usuarios: <strong>{users.length}</strong></p>
       
       <div style={isMobile ? mobileUsersContainerStyle : usersContainerStyle}>
         {users.map((user) => {
@@ -119,14 +121,14 @@ function AdminPage() {
           const followingExpanded = expandedFollowing[user.id];
 
           return (
-            <div key={user.id} style={isMobile ? mobileUserCardStyle : userCardStyle}>
+            <div key={user.id} style={isMobile ? { ...mobileUserCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border } : { ...userCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
               {/* Header */}
               <div style={userHeaderStyle}>
                 <div>
-                  <button onClick={() => goToProfile(user.id)} style={usernameButtonStyle}>
-                    <h3 style={usernameStyle}>{user.username}</h3>
+                  <button onClick={() => goToProfile(user.id)} style={{ ...usernameButtonStyle, color: theme.colors.link }}>
+                    <h3 style={{ ...usernameStyle, color: theme.colors.textPrimary }}>{user.username}</h3>
                   </button>
-                  <p style={emailStyle}>{user.email}</p>
+                  <p style={{ ...emailStyle, color: theme.colors.textSecondary }}>{user.email}</p>
                 </div>
                 <div style={badgesContainerStyle}>
                   {user.banned && <span style={bannedBadgeStyle}>BANEADO</span>}
@@ -137,7 +139,7 @@ function AdminPage() {
               </div>
 
               {/* Stats */}
-              <div style={statsRowStyle}>
+              <div style={{ ...statsRowStyle, color: theme.colors.textSecondary }}>
                 <span><strong>Statuses:</strong> {user.statusesCount}</span>
                 <span><strong>Verificado:</strong> {user.emailVerified ? '✓' : '✗'}</span>
                 <span><strong>Creado:</strong> {new Date(user.createdAt).toLocaleDateString()}</span>
@@ -145,16 +147,16 @@ function AdminPage() {
 
               {/* Followers */}
               <div style={followSectionStyle}>
-                <button onClick={() => toggleFollowers(user.id)} style={expandButtonStyle}>
+                <button onClick={() => toggleFollowers(user.id)} style={{ ...expandButtonStyle, color: theme.colors.link }}>
                   {followersExpanded ? '▼' : '▶'} Seguidores ({user.followersCount})
                 </button>
                 {followersExpanded && (
-                  <div style={followListStyle}>
+                  <div style={{ ...followListStyle, backgroundColor: theme.colors.backgroundSecondary, color: theme.colors.textPrimary }}>
                     {user.followers.length === 0 ? (
-                      <span style={emptyStyle}>Sin seguidores</span>
+                      <span style={{ ...emptyStyle, color: theme.colors.textTertiary }}>Sin seguidores</span>
                     ) : (
                       user.followers.map(follower => (
-                        <button key={follower.id} onClick={() => goToProfile(follower.id)} style={followItemStyle}>
+                        <button key={follower.id} onClick={() => goToProfile(follower.id)} style={{ ...followItemStyle, color: theme.colors.link }}>
                           {follower.username} ({follower.email})
                         </button>
                       ))
@@ -165,16 +167,16 @@ function AdminPage() {
 
               {/* Following */}
               <div style={followSectionStyle}>
-                <button onClick={() => toggleFollowing(user.id)} style={expandButtonStyle}>
+                <button onClick={() => toggleFollowing(user.id)} style={{ ...expandButtonStyle, color: theme.colors.link }}>
                   {followingExpanded ? '▼' : '▶'} Siguiendo ({user.followingCount})
                 </button>
                 {followingExpanded && (
-                  <div style={followListStyle}>
+                  <div style={{ ...followListStyle, backgroundColor: theme.colors.backgroundSecondary, color: theme.colors.textPrimary }}>
                     {user.following.length === 0 ? (
-                      <span style={emptyStyle}>No sigue a nadie</span>
+                      <span style={{ ...emptyStyle, color: theme.colors.textTertiary }}>No sigue a nadie</span>
                     ) : (
                       user.following.map(followed => (
-                        <button key={followed.id} onClick={() => goToProfile(followed.id)} style={followItemStyle}>
+                        <button key={followed.id} onClick={() => goToProfile(followed.id)} style={{ ...followItemStyle, color: theme.colors.link }}>
                           {followed.username} ({followed.email})
                         </button>
                       ))

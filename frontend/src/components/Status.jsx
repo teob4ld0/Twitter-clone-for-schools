@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { statusAPI, interestSignalsAPI, mediaAPI } from '../services/api';
 import ReplyList from './ReplyList';
 
@@ -14,6 +15,7 @@ function Status({
   repostedByUsername = null
 }) {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
   // Validación defensiva
@@ -503,6 +505,455 @@ function Status({
     );
   };
 
+  // Style definitions using theme colors
+  const postCardStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '1rem',
+    transition: 'box-shadow 0.2s',
+    cursor: 'pointer',
+    outline: 'none'
+  };
+
+  const postHeaderStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '1rem'
+  };
+
+  const repostBannerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    color: theme.colors.textSecondary,
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    marginBottom: '0.75rem'
+  };
+
+  const repostIconStyle = {
+    fontSize: '1rem',
+    lineHeight: 1
+  };
+
+  const repostTextStyle = {
+    lineHeight: 1
+  };
+
+  const authorInfoStyle = {
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 0
+  };
+
+  const avatarStyle = {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    flexShrink: 0
+  };
+
+  const avatarImgStyle = {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: `1px solid ${theme.colors.border}`,
+    backgroundColor: theme.colors.backgroundSecondary,
+    flexShrink: 0
+  };
+
+  const authorButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '1rem',
+    color: theme.colors.textPrimary,
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    padding: 0,
+    textAlign: 'left',
+    transition: 'color 0.2s',
+    fontFamily: 'inherit',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '100%'
+  };
+
+  const dateStyle = {
+    fontSize: '0.875rem',
+    color: theme.colors.textSecondary,
+    marginTop: '0.25rem'
+  };
+
+  const contentStyle = {
+    fontSize: '1rem',
+    lineHeight: '1.5',
+    color: theme.colors.textPrimary,
+    marginBottom: '1rem',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word'
+  };
+
+  const mediaWrapperStyle = {
+    marginTop: '0.75rem',
+    marginBottom: '1rem'
+  };
+
+  const mediaStyle = {
+    maxWidth: '100%',
+    height: 'auto',
+    borderRadius: '10px',
+    border: `1px solid ${theme.colors.border}`,
+    display: 'block'
+  };
+
+  const footerStyle = {
+    display: 'flex',
+    gap: '1.5rem',
+    paddingTop: '1rem',
+    borderTop: `1px solid ${theme.colors.border}`,
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  };
+
+  const quoteCardStyle = {
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '10px',
+    padding: '0.85rem',
+    marginBottom: '1rem',
+    backgroundColor: theme.colors.cardBackgroundHover,
+    cursor: 'pointer'
+  };
+
+  const deletedQuoteCardStyle = {
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '10px',
+    padding: '0.85rem',
+    marginBottom: '1rem',
+    backgroundColor: theme.colors.cardBackgroundHover,
+    opacity: 0.6
+  };
+
+  const deletedQuoteTextStyle = {
+    fontSize: '0.875rem',
+    fontStyle: 'italic',
+    color: theme.colors.textSecondary
+  };
+
+  const quoteHeaderStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.5rem',
+    minWidth: 0
+  };
+
+  const quoteBadgeStyle = {
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    color: theme.colors.primary,
+    flexShrink: 0
+  };
+
+  const quoteAuthorStyle = {
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    color: theme.colors.textPrimary,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    flex: 1,
+    minWidth: 0
+  };
+
+  const quoteDateStyle = {
+    fontSize: '0.75rem',
+    color: theme.colors.textSecondary,
+    marginLeft: 'auto',
+    flexShrink: 0
+  };
+
+  const quoteContentStyle = {
+    fontSize: '0.95rem',
+    color: theme.colors.textPrimary,
+    lineHeight: 1.4,
+    wordBreak: 'break-word'
+  };
+
+  const actionButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0.5rem',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s, transform 0.1s',
+    fontWeight: '500',
+    minHeight: '44px',
+    minWidth: '44px',
+    justifyContent: 'center'
+  };
+
+  const deleteButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.25rem',
+    cursor: 'pointer',
+    opacity: 0.7,
+    transition: 'opacity 0.2s',
+    minHeight: '44px',
+    minWidth: '44px',
+    padding: '0.5rem',
+    flexShrink: 0
+  };
+
+  const mentionStyle = {
+    color: theme.colors.primary,
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'color 0.2s',
+    textDecoration: 'none',
+    ':hover': {
+      textDecoration: 'underline',
+      color: theme.colors.primaryDark
+    }
+  };
+
+  const repostMenuStyle = {
+    position: 'absolute',
+    bottom: '100%',
+    left: '0',
+    marginBottom: '0.5rem',
+    backgroundColor: theme.colors.cardBackground,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    zIndex: 1000,
+    minWidth: '180px',
+    overflow: 'hidden'
+  };
+
+  const menuItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    padding: '0.75rem 1rem',
+    backgroundColor: theme.colors.cardBackground,
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: theme.colors.textPrimary,
+    transition: 'background-color 0.2s',
+    textAlign: 'left',
+    ':hover': {
+      backgroundColor: theme.colors.cardBackgroundHover
+    }
+  };
+
+  const modalOverlayStyle = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2000,
+    padding: '1rem'
+  };
+
+  const modalContentStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: '16px',
+    width: '100%',
+    maxWidth: '600px',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
+    display: 'flex',
+    flexDirection: 'column'
+  };
+
+  const modalHeaderStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.5rem',
+    borderBottom: `1px solid ${theme.colors.border}`
+  };
+
+  const modalCloseButtonStyle = {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.5rem',
+    cursor: 'pointer',
+    color: theme.colors.textSecondary,
+    padding: '0.25rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    transition: 'background-color 0.2s'
+  };
+
+  const quoteTextareaStyle = {
+    width: '100%',
+    minHeight: '120px',
+    padding: '1rem 1.5rem',
+    fontSize: '1.125rem',
+    border: 'none',
+    outline: 'none',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    lineHeight: '1.5',
+    backgroundColor: theme.colors.cardBackground,
+    color: theme.colors.textPrimary
+  };
+
+  const charCountStyle = {
+    padding: '0 1.5rem',
+    fontSize: '0.875rem',
+    color: theme.colors.textSecondary,
+    textAlign: 'right'
+  };
+
+  const quotedTweetPreviewStyle = {
+    margin: '1rem 1.5rem',
+    padding: '1rem',
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '12px',
+    backgroundColor: theme.colors.cardBackgroundHover
+  };
+
+  const previewHeaderStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.colors.textPrimary
+  };
+
+  const modalFooterStyle = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '0.75rem',
+    padding: '1rem 1.5rem',
+    borderTop: `1px solid ${theme.colors.border}`
+  };
+
+  const cancelButtonStyle = {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: 'transparent',
+    color: theme.colors.textSecondary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '24px',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s'
+  };
+
+  const submitButtonStyle = {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    border: 'none',
+    borderRadius: '24px',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'opacity 0.2s'
+  };
+
+  const mediaButtonStyle = {
+    padding: '0.5rem',
+    backgroundColor: 'transparent',
+    color: theme.colors.primary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: '50%',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '36px',
+    height: '36px',
+    transition: 'background-color 0.2s'
+  };
+
+  const uploadedMediaPreviewStyle = {
+    margin: '1rem 1.5rem',
+    position: 'relative',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: `1px solid ${theme.colors.border}`
+  };
+
+  const uploadedMediaImageStyle = {
+    width: '100%',
+    maxHeight: '300px',
+    objectFit: 'cover',
+    display: 'block'
+  };
+
+  const removeMediaButtonStyle = {
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background-color 0.2s'
+  };
+
+  const deleteModalStyle = {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: '16px',
+    padding: '2rem',
+    maxWidth: '400px',
+    width: '90%',
+    boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
+    textAlign: 'center'
+  };
+
+  const deleteConfirmButtonStyle = {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: theme.colors.error,
+    color: 'white',
+    border: 'none',
+    borderRadius: '24px',
+    fontSize: '0.95rem',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s'
+  };
+
   return (
     <article
       ref={statusRef}
@@ -544,7 +995,7 @@ function Status({
               onMouseLeave={() => setIsAuthorHovered(false)}
               style={{
                 ...authorButtonStyle,
-                color: isAuthorHovered ? '#1da1f2' : '#14171a',
+                color: isAuthorHovered ? theme.colors.primary : theme.colors.textPrimary,
                 textDecoration: isAuthorHovered ? 'underline' : 'none'
               }}
             >
@@ -626,7 +1077,7 @@ function Status({
           }}
           style={{
             ...actionButtonStyle,
-            color: isLiked ? '#e0245e' : '#657786'
+            color: isLiked ? theme.colors.error : theme.colors.textSecondary
           }}
           disabled={isLoadingLike}
         >
@@ -646,7 +1097,7 @@ function Status({
             }}
             style={{
               ...actionButtonStyle,
-              color: isReposted ? '#17bf63' : '#657786'
+              color: isReposted ? theme.colors.success : theme.colors.textSecondary
             }}
             disabled={isLoadingRepost || isLoadingQuote}
             title="Repost o Quote"
@@ -694,7 +1145,7 @@ function Status({
           }}
           style={{
             ...actionButtonStyle,
-            color: showReplies ? '#1da1f2' : '#657786'
+            color: showReplies ? theme.colors.primary : theme.colors.textSecondary
           }}
         >
           <span style={{ fontSize: '1.2rem' }}>💬</span>
@@ -731,8 +1182,8 @@ function Status({
         >
           <div style={deleteModalStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>🗑️</div>
-            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 'bold' }}>¿Eliminar publicación?</h3>
-            <p style={{ margin: '0 0 1.5rem 0', color: '#657786', fontSize: '0.95rem' }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 'bold', color: theme.colors.textPrimary }}>¿Eliminar publicación?</h3>
+            <p style={{ margin: '0 0 1.5rem 0', color: theme.colors.textSecondary, fontSize: '0.95rem' }}>
               Esta acción no se puede deshacer.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
@@ -766,7 +1217,7 @@ function Status({
         >
           <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <div style={modalHeaderStyle}>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>Citar Tweet</h3>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold', color: theme.colors.textPrimary }}>Citar Tweet</h3>
               <button
                 onClick={() => {
                   setShowQuoteModal(false);
@@ -812,12 +1263,12 @@ function Status({
             {/* Preview del tweet citado */}
             <div style={quotedTweetPreviewStyle}>
               <div style={previewHeaderStyle}>
-                <span style={{ fontWeight: 'bold' }}>@{status.author}</span>
-                <span style={{ color: '#657786', fontSize: '0.875rem', marginLeft: '0.5rem' }}>
+                <span style={{ fontWeight: 'bold', color: theme.colors.textPrimary }}>@{status.author}</span>
+                <span style={{ color: theme.colors.textSecondary, fontSize: '0.875rem', marginLeft: '0.5rem' }}>
                   {status.createdAt ? formatDate(status.createdAt) : ''}
                 </span>
               </div>
-              <div style={{ fontSize: '0.95rem', marginTop: '0.5rem' }}>
+              <div style={{ fontSize: '0.95rem', marginTop: '0.5rem', color: theme.colors.textPrimary }}>
                 {status.content}
               </div>
               {status.mediaUrl && (
@@ -880,451 +1331,5 @@ function Status({
     </article>
   );
 }
-
-const postCardStyle = {
-  backgroundColor: '#fff',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  padding: '1.5rem',
-  marginBottom: '1rem',
-  transition: 'box-shadow 0.2s',
-  cursor: 'pointer',
-  outline: 'none'
-};
-
-const postHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  marginBottom: '1rem'
-};
-
-const repostBannerStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  color: '#657786',
-  fontSize: '0.85rem',
-  fontWeight: 600,
-  marginBottom: '0.75rem'
-};
-
-const repostIconStyle = {
-  fontSize: '1rem',
-  lineHeight: 1
-};
-
-const repostTextStyle = {
-  lineHeight: 1
-};
-
-const authorInfoStyle = {
-  display: 'flex',
-  gap: '0.75rem',
-  alignItems: 'center',
-  flex: 1,
-  minWidth: 0
-};
-
-const avatarStyle = {
-  width: '48px',
-  height: '48px',
-  borderRadius: '50%',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '1.25rem',
-  fontWeight: 'bold',
-  flexShrink: 0
-};
-
-const avatarImgStyle = {
-  width: '48px',
-  height: '48px',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  border: '1px solid #e1e8ed',
-  backgroundColor: '#f5f8fa',
-  flexShrink: 0
-};
-
-const authorButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1rem',
-  color: '#14171a',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  padding: 0,
-  textAlign: 'left',
-  transition: 'color 0.2s',
-  fontFamily: 'inherit',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  maxWidth: '100%'
-};
-
-const dateStyle = {
-  fontSize: '0.875rem',
-  color: '#657786',
-  marginTop: '0.25rem'
-};
-
-const contentStyle = {
-  fontSize: '1rem',
-  lineHeight: '1.5',
-  color: '#14171a',
-  marginBottom: '1rem',
-  wordWrap: 'break-word',
-  overflowWrap: 'break-word',
-  wordBreak: 'break-word'
-};
-
-const mediaWrapperStyle = {
-  marginTop: '0.75rem',
-  marginBottom: '1rem'
-};
-
-const mediaStyle = {
-  maxWidth: '100%',
-  height: 'auto',
-  borderRadius: '10px',
-  border: '1px solid #e1e8ed',
-  display: 'block'
-};
-
-const footerStyle = {
-  display: 'flex',
-  gap: '1.5rem',
-  paddingTop: '1rem',
-  borderTop: '1px solid #e1e8ed',
-  alignItems: 'center',
-  flexWrap: 'wrap'
-};
-
-const quoteCardStyle = {
-  border: '1px solid #e1e8ed',
-  borderRadius: '10px',
-  padding: '0.85rem',
-  marginBottom: '1rem',
-  backgroundColor: '#f7f9fa',
-  cursor: 'pointer'
-};
-
-const deletedQuoteCardStyle = {
-  border: '1px solid #e1e8ed',
-  borderRadius: '10px',
-  padding: '0.85rem',
-  marginBottom: '1rem',
-  backgroundColor: '#f7f9fa',
-  opacity: 0.6
-};
-
-const deletedQuoteTextStyle = {
-  fontSize: '0.875rem',
-  fontStyle: 'italic',
-  color: '#657786'
-};
-
-const quoteHeaderStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
-  marginBottom: '0.5rem',
-  minWidth: 0
-};
-
-const quoteBadgeStyle = {
-  fontSize: '0.75rem',
-  fontWeight: 700,
-  color: '#1da1f2',
-  flexShrink: 0
-};
-
-const quoteAuthorStyle = {
-  fontSize: '0.875rem',
-  fontWeight: 600,
-  color: '#14171a',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  flex: 1,
-  minWidth: 0
-};
-
-const quoteDateStyle = {
-  fontSize: '0.75rem',
-  color: '#657786',
-  marginLeft: 'auto',
-  flexShrink: 0
-};
-
-const quoteContentStyle = {
-  fontSize: '0.95rem',
-  color: '#14171a',
-  lineHeight: 1.4,
-  wordBreak: 'break-word'
-};
-
-const actionButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '0.875rem',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  padding: '0.5rem',
-  borderRadius: '4px',
-  transition: 'background-color 0.2s, transform 0.1s',
-  fontWeight: '500',
-  minHeight: '44px',
-  minWidth: '44px',
-  justifyContent: 'center'
-};
-
-const deleteButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.25rem',
-  cursor: 'pointer',
-  opacity: 0.7,
-  transition: 'opacity 0.2s',
-  minHeight: '44px',
-  minWidth: '44px',
-  padding: '0.5rem',
-  flexShrink: 0
-};
-
-const mentionStyle = {
-  color: '#1da1f2',
-  fontWeight: '600',
-  cursor: 'pointer',
-  transition: 'color 0.2s',
-  textDecoration: 'none',
-  ':hover': {
-    textDecoration: 'underline',
-    color: '#0c7abf'
-  }
-};
-
-const repostMenuStyle = {
-  position: 'absolute',
-  bottom: '100%',
-  left: '0',
-  marginBottom: '0.5rem',
-  backgroundColor: '#fff',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-  zIndex: 1000,
-  minWidth: '180px',
-  overflow: 'hidden'
-};
-
-const menuItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  width: '100%',
-  padding: '0.75rem 1rem',
-  backgroundColor: '#fff',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '0.95rem',
-  fontWeight: '600',
-  color: '#14171a',
-  transition: 'background-color 0.2s',
-  textAlign: 'left',
-  ':hover': {
-    backgroundColor: '#f7f9fa'
-  }
-};
-
-const modalOverlayStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 2000,
-  padding: '1rem'
-};
-
-const modalContentStyle = {
-  backgroundColor: '#fff',
-  borderRadius: '16px',
-  width: '100%',
-  maxWidth: '600px',
-  maxHeight: '90vh',
-  overflow: 'auto',
-  boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
-  display: 'flex',
-  flexDirection: 'column'
-};
-
-const modalHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '1rem 1.5rem',
-  borderBottom: '1px solid #e1e8ed'
-};
-
-const modalCloseButtonStyle = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.5rem',
-  cursor: 'pointer',
-  color: '#657786',
-  padding: '0.25rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  transition: 'background-color 0.2s'
-};
-
-const quoteTextareaStyle = {
-  width: '100%',
-  minHeight: '120px',
-  padding: '1rem 1.5rem',
-  fontSize: '1.125rem',
-  border: 'none',
-  outline: 'none',
-  resize: 'vertical',
-  fontFamily: 'inherit',
-  lineHeight: '1.5'
-};
-
-const charCountStyle = {
-  padding: '0 1.5rem',
-  fontSize: '0.875rem',
-  color: '#657786',
-  textAlign: 'right'
-};
-
-const quotedTweetPreviewStyle = {
-  margin: '1rem 1.5rem',
-  padding: '1rem',
-  border: '1px solid #e1e8ed',
-  borderRadius: '12px',
-  backgroundColor: '#f7f9fa'
-};
-
-const previewHeaderStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  color: '#14171a'
-};
-
-const modalFooterStyle = {
-  display: 'flex',
-  justifyContent: 'flex-end',
-  gap: '0.75rem',
-  padding: '1rem 1.5rem',
-  borderTop: '1px solid #e1e8ed'
-};
-
-const cancelButtonStyle = {
-  padding: '0.75rem 1.5rem',
-  backgroundColor: 'transparent',
-  color: '#657786',
-  border: '1px solid #e1e8ed',
-  borderRadius: '24px',
-  fontSize: '0.95rem',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s'
-};
-
-const submitButtonStyle = {
-  padding: '0.75rem 1.5rem',
-  backgroundColor: '#1da1f2',
-  color: 'white',
-  border: 'none',
-  borderRadius: '24px',
-  fontSize: '0.95rem',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'opacity 0.2s'
-};
-
-const mediaButtonStyle = {
-  padding: '0.5rem',
-  backgroundColor: 'transparent',
-  color: '#1da1f2',
-  border: '1px solid #e1e8ed',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '36px',
-  height: '36px',
-  transition: 'background-color 0.2s'
-};
-
-const uploadedMediaPreviewStyle = {
-  margin: '1rem 1.5rem',
-  position: 'relative',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  border: '1px solid #e1e8ed'
-};
-
-const uploadedMediaImageStyle = {
-  width: '100%',
-  maxHeight: '300px',
-  objectFit: 'cover',
-  display: 'block'
-};
-
-const removeMediaButtonStyle = {
-  position: 'absolute',
-  top: '0.5rem',
-  right: '0.5rem',
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(0, 0, 0, 0.75)',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '1rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'background-color 0.2s'
-};
-
-const deleteModalStyle = {
-  backgroundColor: '#fff',
-  borderRadius: '16px',
-  padding: '2rem',
-  maxWidth: '400px',
-  width: '90%',
-  boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
-  textAlign: 'center'
-};
-
-const deleteConfirmButtonStyle = {
-  padding: '0.75rem 1.5rem',
-  backgroundColor: '#e0245e',
-  color: 'white',
-  border: 'none',
-  borderRadius: '24px',
-  fontSize: '0.95rem',
-  fontWeight: 'bold',
-  cursor: 'pointer',
-  transition: 'background-color 0.2s'
-};
 
 export default Status;
