@@ -122,6 +122,13 @@ function Layout({ children }) {
               <span style={{ fontSize: '18px' }}>{isDark ? '🌙' : '☀️'}</span>
               Configuración
             </Link>
+            <Link to="/support" style={{
+              color: theme.colors.navbarText,
+              textDecoration: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              transition: 'background-color 0.2s'
+            }}>Soporte</Link>
 
             {isAuthenticated() ? (
               <>

@@ -19,12 +19,13 @@ import {
   fetchMessages, 
   sendMessage, 
   deleteMessage as deleteMessageAction,
-  setSelectedChat 
+  setSelectedChat
 } from '../store/chatSlice';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import MessageItem from '../components/MessageItem';
 import * as ImagePicker from '../utils/imagePicker';
+import { deriveChatKey, encryptMessage } from '../services/cryptoService';
 
 export default function ChatDetailScreen({ route, navigation }) {
   const { chatId, otherUser } = route.params;
@@ -120,10 +121,23 @@ export default function ChatDetailScreen({ route, navigation }) {
     setSending(true);
     setFileError('');
     
+    // Encrypt text content before sending
+    let contentToSend = messageText.trim();
+    const myHash = selectedChat?.myPublicKeyHash;
+    const otherHash = selectedChat?.otherUser?.publicKeyHash;
+    if (myHash && otherHash && contentToSend) {
+      try {
+        const key = deriveChatKey(myHash, otherHash);
+        if (key) contentToSend = encryptMessage(key, contentToSend);
+      } catch (e) {
+        console.warn('Encryption failed, sending plaintext:', e);
+      }
+    }
+    
     try {
       await dispatch(sendMessage({ 
         chatId, 
-        content: messageText.trim(),
+        content: contentToSend,
         file: mediaFile 
       })).unwrap();
       
@@ -397,6 +411,8 @@ export default function ChatDetailScreen({ route, navigation }) {
             message={item}
             currentUserId={user?.id}
             onDelete={item.senderId === user?.id ? () => handleDeleteMessage(item.id) : undefined}
+            myHash={selectedChat?.myPublicKeyHash}
+            otherHash={selectedChat?.otherUser?.publicKeyHash}
           />
         )}
         contentContainerStyle={styles.messagesList}

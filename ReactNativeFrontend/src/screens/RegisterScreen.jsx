@@ -25,6 +25,7 @@ export default function RegisterScreen({ navigation }) {
     Email: '',
     Password: ''
   });
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -79,6 +80,11 @@ export default function RegisterScreen({ navigation }) {
     // Validar dominio del email antes de enviar
     if (!formData.Email.endsWith('@alumno.etec.um.edu.ar') && !formData.Email.endsWith('@etec.um.edu.ar')) {
       setError('Solo se permiten registros con emails @etec.um.edu.ar');
+      return;
+    }
+
+    if (!acceptedPolicy) {
+      setError('Debes aceptar la Política de Privacidad para registrarte.');
       return;
     }
 
@@ -310,6 +316,7 @@ export default function RegisterScreen({ navigation }) {
                 value={formData.Username}
                 onChangeText={(value) => handleChange('Username', value)}
                 placeholder="usuario_123"
+                placeholderTextColor={theme.colors.textTertiary}
                 autoCapitalize="none"
                 maxLength={25}
               />
@@ -325,6 +332,7 @@ export default function RegisterScreen({ navigation }) {
                 value={formData.Email}
                 onChangeText={(value) => handleChange('Email', value)}
                 placeholder="tu@email.com"
+                placeholderTextColor={theme.colors.textTertiary}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -337,14 +345,43 @@ export default function RegisterScreen({ navigation }) {
                 value={formData.Password}
                 onChangeText={(value) => handleChange('Password', value)}
                 placeholder="••••••"
+                placeholderTextColor={theme.colors.textTertiary}
                 secureTextEntry
               />
             </View>
             
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8, gap: 10 }}>
+              <TouchableOpacity
+                onPress={() => setAcceptedPolicy(!acceptedPolicy)}
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 4,
+                  borderWidth: 2,
+                  borderColor: acceptedPolicy ? theme.colors.primary : theme.colors.border,
+                  backgroundColor: acceptedPolicy ? theme.colors.primary : 'transparent',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 2,
+                }}
+              >
+                {acceptedPolicy && <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold' }}>✓</Text>}
+              </TouchableOpacity>
+              <Text style={{ flex: 1, fontSize: 13, color: theme.colors.textSecondary, lineHeight: 20 }}>
+                He leído y acepto la{' '}
+                <Text
+                  onPress={() => navigation.navigate('PrivacyPolicyAuth')}
+                  style={{ color: theme.colors.primary, textDecorationLine: 'underline', fontWeight: '600' }}
+                >
+                  Política de Privacidad
+                </Text>
+              </Text>
+            </View>
+
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[styles.button, (loading || !acceptedPolicy) && styles.buttonDisabled]}
               onPress={handleSubmit}
-              disabled={loading}
+              disabled={loading || !acceptedPolicy}
             >
               {loading ? (
                 <ActivityIndicator color={theme.colors.textOnPrimary} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,17 @@ import {
 import ImageViewer from './ImageViewer';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { isEncrypted, deriveChatKey, decryptMessage } from '../services/cryptoService';
 
-export default function MessageItem({ message, currentUserId, onDelete }) {
+export default function MessageItem({ message, currentUserId, onDelete, myHash, otherHash }) {
   const { theme } = useTheme();
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
+
+  const decryptedContent = useMemo(() => {
+    if (!message?.content || !isEncrypted(message.content) || !myHash || !otherHash) return message?.content;
+    const key = deriveChatKey(myHash, otherHash);
+    return key ? decryptMessage(key, message.content) : message.content;
+  }, [message?.content, myHash, otherHash]);
   
   if (!message) return null;
 
@@ -162,9 +169,9 @@ export default function MessageItem({ message, currentUserId, onDelete }) {
         <View style={styles.contentWrapper}>
           <View style={styles.messageContent}>
             {/* Content */}
-            {message.content ? (
+            {decryptedContent ? (
               <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>
-                {message.content}
+                {decryptedContent}
               </Text>
             ) : null}
 

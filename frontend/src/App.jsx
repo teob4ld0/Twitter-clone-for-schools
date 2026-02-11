@@ -17,6 +17,8 @@ import NotificationsPage from './pages/Notifications';
 import AdminPage from './pages/AdminPage';
 import Download from './pages/Download';
 import SettingsPage from './pages/SettingsPage';
+import SupportPage from './pages/SupportPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import SignalRProvider from './components/SignalRProvider';
 import PushNotificationProvider from './components/PushNotificationProvider';
 import InstallPrompt from './components/InstallPrompt';
@@ -122,6 +124,18 @@ function App() {
                   <ProtectedRoute>
                     <SettingsPage />
                   </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/support"
+                element={
+                  <SupportPage />
+                }
+              />
+              <Route
+                path="/privacy-policy"
+                element={
+                  <PrivacyPolicyPage />
                 }
               />
             </Routes>

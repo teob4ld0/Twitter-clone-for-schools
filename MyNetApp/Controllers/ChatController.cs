@@ -64,6 +64,7 @@ public class ChatController : ControllerBase
                 existingChat.User2Id,
                 existingChat.CreatedAt,
                 OtherUser = existingChat.User1Id == currentUserId ? existingChat.User2 : existingChat.User1,
+                MyPublicKeyHash = (existingChat.User1Id == currentUserId ? existingChat.User1 : existingChat.User2).PublicKeyHash,
                 LastMessage = existingChat.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault(),
                 UnreadCount = existingChat.Messages.Count(m => m.SenderId != currentUserId && !m.IsRead)
             };
@@ -91,6 +92,7 @@ public class ChatController : ControllerBase
             chat.User2Id,
             chat.CreatedAt,
             OtherUser = chat.User1Id == currentUserId ? chat.User2 : chat.User1,
+            MyPublicKeyHash = (chat.User1Id == currentUserId ? chat.User1 : chat.User2).PublicKeyHash,
             LastMessage = (object?)null,
             UnreadCount = 0
         };
@@ -127,6 +129,7 @@ public class ChatController : ControllerBase
                 c.User2Id,
                 c.CreatedAt,
                 OtherUser = c.User1Id == currentUserId ? c.User2 : c.User1,
+                MyPublicKeyHash = (c.User1Id == currentUserId ? c.User1 : c.User2).PublicKeyHash,
                 LastMessage = c.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault(),
                 UnreadCount = c.Messages.Count(m => m.SenderId != currentUserId && !m.IsRead),
                 IsMutual = isMutual

@@ -57,6 +57,7 @@ export const sendMessage = createAsyncThunk(
 			if (!normalizedContent && !mediaUrl) {
 				throw new Error('Content or media is required');
 			}
+
 			const response = await api.post(`/chats/${chatId}/messages`, {
 				Content: normalizedContent,
 				MediaUrl: mediaUrl

@@ -147,7 +147,7 @@ public class StatusController : ControllerBase
         int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
         var statuses = await _context.Statuses
-            .Where(s => s.ParentStatusId == null)
+            .Where(s => s.ParentStatusId == null && !s.User.Banned)
             .Include(s => s.User)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new

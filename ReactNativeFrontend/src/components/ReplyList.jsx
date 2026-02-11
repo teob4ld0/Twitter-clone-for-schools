@@ -142,27 +142,6 @@ function ReplyList({
     );
   };
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Cargando respuestas...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      </View>
-    );
-  }
-
   const styles = StyleSheet.create({
     container: {
       marginTop: 12,
@@ -207,6 +186,27 @@ function ReplyList({
       marginVertical: 4,
     },
   });
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Cargando respuestas...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </View>
+    );
+  }
 
   const containerStyle = indent > 0 
     ? [styles.container, { marginTop: 10, paddingTop: 10, borderTopWidth: 0, marginLeft: Math.min(indent, 6) * 16, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: theme.colors.borderLight }]
