@@ -193,7 +193,9 @@ export const usersAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return apiMultipart.post('/users/me/profile-picture', formData);
-  }
+  },
+
+  deleteMyAccount: () => api.delete('/users/me')
 };
 
 export const followersAPI = {

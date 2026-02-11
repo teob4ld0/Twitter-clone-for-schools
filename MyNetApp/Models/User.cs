@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace MyNetApp.Models;
 
@@ -30,4 +33,14 @@ public class User
     public string? ProfilePictureUrl { get; set; }
 
     public bool Banned { get; set; } = false;
+
+    // Legacy column – kept for DB compatibility, no longer used
+    public string? E2EEPublicKey { get; set; }
+
+    // Deterministic per-user hash for chat encryption key derivation
+    [NotMapped]
+    public string PublicKeyHash =>
+        Convert.ToHexString(
+            SHA256.HashData(Encoding.UTF8.GetBytes($"{Id}:{Email}:{CreatedAt:O}"))
+        ).ToLowerInvariant();
 }

@@ -32,6 +32,7 @@ export default function ChatsScreen({ navigation }) {
   useEffect(() => {
     if (user?.id) {
       console.log('📱 ChatsScreen: Cargando chats para usuario', user.id);
+
       dispatch(fetchChats()).then((result) => {
         if (result.error) {
           console.error('❌ Error cargando chats:', result.error);

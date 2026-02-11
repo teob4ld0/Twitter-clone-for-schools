@@ -9,6 +9,7 @@ const getErrorMessage = (error) => {
 };
 
 // Async thunks
+
 export const fetchChats = createAsyncThunk(
 	'chat/fetchChats',
 	async (_, { rejectWithValue }) => {
@@ -43,7 +44,7 @@ export const sendMessage = createAsyncThunk(
 	'chat/sendMessage',
 	async ({ chatId, content, file }, { rejectWithValue }) => {
 		try {
-			const normalizedContent = (content ?? '').trim();
+			let normalizedContent = (content ?? '').trim();
 			let mediaUrl = null;
 
 			if (file) {
@@ -57,6 +58,7 @@ export const sendMessage = createAsyncThunk(
 			if (!normalizedContent && !mediaUrl) {
 				throw new Error('Content or media is required');
 			}
+
 			const response = await api.post(`/chats/${chatId}/messages`, {
 				Content: normalizedContent,
 				MediaUrl: mediaUrl

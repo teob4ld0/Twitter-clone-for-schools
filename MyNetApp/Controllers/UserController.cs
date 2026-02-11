@@ -354,6 +354,23 @@ public class UsersController : ControllerBase
         return Ok(replies);
     }
 
+    // Self-delete: any authenticated user can delete their own account
+    [Authorize]
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteMyAccount()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var currentUserId))
+            return Unauthorized(new { message = "Invalid token" });
+
+        var user = await _context.Users.FindAsync(currentUserId);
+        if (user == null)
+            return NotFound(new { message = "User not found" });
+
+        await DeleteUserInternal(currentUserId, user);
+        return Ok(new { message = "Account deleted successfully", userId = user.Id, username = user.Username });
+    }
+
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUserById(int id)
@@ -377,6 +394,12 @@ public class UsersController : ControllerBase
             return BadRequest(new { message = "Cannot delete admin users" });
         }
 
+        await DeleteUserInternal(id, user);
+        return Ok(new { message = "User deleted successfully", userId = id, username = user.Username });
+    }
+
+    private async Task DeleteUserInternal(int id, User user)
+    {
         // 1. Eliminar notificaciones relacionadas
         var notifications = await _context.Notifications
             .Where(n => n.ActorId == id || n.TargetUserId == id)
@@ -390,25 +413,22 @@ public class UsersController : ControllerBase
         _context.PushSubscriptions.RemoveRange(pushSubscriptions);
 
         // 3. Eliminar chats y mensajes donde participa
-        // Primero obtener los IDs de chats donde participa el usuario
         var chatIds = await _context.Chats
             .Where(c => c.User1Id == id || c.User2Id == id)
             .Select(c => c.Id)
             .ToListAsync();
 
-        // Eliminar TODOS los mensajes de esos chats (no solo los del usuario)
         var messagesInChats = await _context.Messages
             .Where(m => chatIds.Contains(m.ChatId))
             .ToListAsync();
         _context.Messages.RemoveRange(messagesInChats);
 
-        // Ahora sí eliminar los chats
         var chats = await _context.Chats
             .Where(c => c.User1Id == id || c.User2Id == id)
             .ToListAsync();
         _context.Chats.RemoveRange(chats);
 
-        // 4. Eliminar los likes del usuario en statuses de otros
+        // 4. Eliminar los likes del usuario
         var userLikes = await _context.StatusLikes
             .Where(l => l.UserId == id)
             .ToListAsync();
@@ -467,10 +487,8 @@ public class UsersController : ControllerBase
 
         // 13. Finalmente eliminar el usuario
         _context.Users.Remove(user);
-        
-        await _context.SaveChangesAsync();
 
-        return Ok(new { message = "User deleted successfully", userId = id, username = user.Username });
+        await _context.SaveChangesAsync();
     }
 
     [Authorize]

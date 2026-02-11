@@ -7,6 +7,7 @@ import {
   Image,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { isEncrypted, deriveChatKey, decryptMessage } from '../services/cryptoService';
 
 export default function ChatListItem({ chat, onPress, selected, currentUserId }) {
   const { theme } = useTheme();
@@ -26,7 +27,12 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
     if (typeof chat.lastMessage === 'string') {
       messageText = chat.lastMessage;
     } else if (chat.lastMessage.content) {
-      messageText = chat.lastMessage.content;
+      let content = chat.lastMessage.content;
+      if (isEncrypted(content) && chat.myPublicKeyHash && otherUser?.publicKeyHash) {
+        const key = deriveChatKey(chat.myPublicKeyHash, otherUser.publicKeyHash);
+        if (key) content = decryptMessage(key, content);
+      }
+      messageText = content;
     } else if (chat.lastMessage.mediaUrl) {
       messageText = 'Media adjunta';
     }

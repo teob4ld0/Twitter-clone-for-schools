@@ -15,6 +15,7 @@ import {
 import ChatsList from "../components/ChatsList";
 import Message from "../components/Message";
 import { useIsMobile } from "../hooks/useMobile";
+import { deriveChatKey, encryptMessage } from "../services/cryptoService";
 
 export default function ChatsPage() {
 	const { user } = useAuth();
@@ -294,7 +295,7 @@ export default function ChatsPage() {
 		}
 	};
 
-	const handleSendMessage = () => {
+	const handleSendMessage = async () => {
 		if (!selectedChatId) return;
 		if (!messageText.trim() && !mediaFile) return;
 		if (isSending) return;
@@ -304,10 +305,23 @@ export default function ChatsPage() {
 			setFileError('El archivo es demasiado pesado. Debe ser menor a 512 MB.');
 			return;
 		}
+
+		// Encrypt text content before sending
+		let contentToSend = messageText;
+		const myHash = selectedChat?.myPublicKeyHash;
+		const otherHash = selectedChat?.otherUser?.publicKeyHash;
+		if (myHash && otherHash && contentToSend.trim()) {
+			try {
+				const key = await deriveChatKey(myHash, otherHash);
+				if (key) contentToSend = await encryptMessage(key, contentToSend);
+			} catch (e) {
+				console.warn('Encryption failed, sending plaintext:', e);
+			}
+		}
 		
 		setFileError('');
 		setIsSending(true);
-		dispatch(sendMessageAction({ chatId: selectedChatId, content: messageText, file: mediaFile }))
+		dispatch(sendMessageAction({ chatId: selectedChatId, content: contentToSend, file: mediaFile }))
 			.unwrap()
 			.then(() => {
 				setMessageText("");
@@ -435,7 +449,7 @@ export default function ChatsPage() {
 					{!selectedChat && <div style={{ color: theme.colors.textSecondary, padding: 20, textAlign: 'center' }}>Select or create a chat to start messaging.</div>}
 					{selectedChat && loading.messages && <div style={{ padding: 20, color: theme.colors.textPrimary }}>Loading messages...</div>}
 					{selectedChat && error && <div style={{ color: theme.colors.error, padding: 20 }}>Error: {error}</div>}
-					{selectedChat && !loading.messages && messages.map((m) => <div key={m.id} style={{ marginBottom: 8 }}><Message message={m} currentUserId={currentUserId} onDelete={() => handleDeleteMessage(m.id)} /></div>)}
+					{selectedChat && !loading.messages && messages.map((m) => <div key={m.id} style={{ marginBottom: 8 }}><Message message={m} currentUserId={currentUserId} onDelete={() => handleDeleteMessage(m.id)} myHash={selectedChat?.myPublicKeyHash} otherHash={selectedChat?.otherUser?.publicKeyHash} /></div>)}
 					<div ref={bottomRef} />
 				</div>
 

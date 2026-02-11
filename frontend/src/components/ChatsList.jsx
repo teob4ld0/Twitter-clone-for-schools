@@ -3,6 +3,12 @@ import { useSelector } from "react-redux";
 import { followersAPI } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from '../context/ThemeContext';
+import useDecryptedContent from "../hooks/useDecryptedContent";
+
+function LastMessagePreview({ content, myHash, otherHash }) {
+	const text = useDecryptedContent(content, myHash, otherHash);
+	return <>{text}</>;
+}
 
 export default function ChatsList({ onChatSelect, selectedChatId }) {
 	const { theme } = useTheme();
@@ -116,7 +122,7 @@ export default function ChatsList({ onChatSelect, selectedChatId }) {
 							</div>
 							{last ? (
 								<div style={{ color: theme.colors.textSecondary, fontSize: 13, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-										{last.content && String(last.content).trim().length > 0 ? last.content : (last.mediaUrl ? 'Media adjunta' : '')}
+										{last.content && String(last.content).trim().length > 0 ? <LastMessagePreview content={last.content} myHash={c.myPublicKeyHash} otherHash={c.otherUser?.publicKeyHash} /> : (last.mediaUrl ? 'Media adjunta' : '')}
 									</div>
 								) : (
 								<div style={{ color: theme.colors.textTertiary, fontSize: 13, marginTop: 4 }}>No messages yet</div>

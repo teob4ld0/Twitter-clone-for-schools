@@ -10,6 +10,7 @@ function Register() {
     Email: '',
     Password: ''
   });
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -83,6 +84,11 @@ function Register() {
     return;
   }
 
+  if (!acceptedPolicy) {
+    setError('Debes aceptar la Política de Privacidad para registrarte.');
+    return;
+  }
+
   setLoading(true);
 
   try {
@@ -152,7 +158,30 @@ function Register() {
           />
         </div>
         
-        <button type="submit" disabled={loading} style={buttonStyle}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+          <input
+            type="checkbox"
+            id="acceptPolicy"
+            checked={acceptedPolicy}
+            onChange={(e) => setAcceptedPolicy(e.target.checked)}
+            style={{ marginTop: '0.25rem', cursor: 'pointer', minWidth: '16px', minHeight: '16px' }}
+          />
+          <label htmlFor="acceptPolicy" style={{ fontSize: '0.875rem', color: '#657786', cursor: 'pointer', lineHeight: '1.4' }}>
+            He leído y acepto la{' '}
+            <span
+              onClick={(e) => { e.preventDefault(); navigate('/privacy-policy', { state: { from: '/register' } }); }}
+              style={{ color: '#1da1f2', textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              Política de Privacidad
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" disabled={loading || !acceptedPolicy} style={{
+          ...buttonStyle,
+          opacity: (!acceptedPolicy || loading) ? 0.6 : 1,
+          cursor: (!acceptedPolicy || loading) ? 'not-allowed' : 'pointer',
+        }}>
           {loading ? 'Registrando...' : 'Registrarse'}
         </button>
       </form>

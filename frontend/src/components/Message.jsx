@@ -1,6 +1,8 @@
 import React from "react";
+import useDecryptedContent from "../hooks/useDecryptedContent";
 
-export default function Message({ message, currentUserId, compact = false, onDelete }) {
+export default function Message({ message, currentUserId, compact = false, onDelete, myHash, otherHash }) {
+	const decryptedContent = useDecryptedContent(message?.content, myHash, otherHash);
 	if (!message) return null;
 	// SenderId comes directly from the message object in camelCase
 	const senderId = message.senderId;
@@ -58,7 +60,7 @@ export default function Message({ message, currentUserId, compact = false, onDel
 			<div style={containerStyle}>
 				<div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
 					<div style={{ flex: 1 }}>
-						<div>{message.content}</div>
+						<div>{decryptedContent}</div>
 						{message.mediaUrl && renderMedia(message.mediaUrl)}
 						{!compact && (
 							<div style={metaStyle}>

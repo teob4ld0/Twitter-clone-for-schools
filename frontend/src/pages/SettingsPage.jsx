@@ -1,14 +1,38 @@
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { usersAPI } from '../services/api';
 
 function SettingsPage() {
   const { theme, currentTheme, setTheme, isDark } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'ELIMINAR') return;
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      await usersAPI.deleteMyAccount();
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Error al eliminar la cuenta. Intenta de nuevo.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -479,6 +503,191 @@ function SettingsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Sección Política de Privacidad */}
+      <div style={{
+        marginTop: '24px',
+        backgroundColor: theme.colors.cardBackground,
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: theme.colors.shadowMd,
+        border: `1px solid ${theme.colors.border}`,
+      }}>
+        <h2 style={{
+          margin: '0 0 8px 0',
+          fontSize: '20px',
+          fontWeight: '700',
+          color: theme.colors.textPrimary,
+        }}>
+          Legal
+        </h2>
+        <p style={{
+          margin: '0 0 16px 0',
+          fontSize: '14px',
+          color: theme.colors.textSecondary,
+          lineHeight: '1.5',
+        }}>
+          Consulta nuestra política de privacidad para saber cómo manejamos tus datos.
+        </p>
+        <button
+          onClick={() => navigate('/privacy-policy', { state: { from: '/settings' } })}
+          style={{
+            padding: '12px 24px',
+            borderRadius: '12px',
+            border: `1px solid ${theme.colors.primary}`,
+            backgroundColor: 'transparent',
+            color: theme.colors.primary,
+            fontWeight: '600',
+            fontSize: '15px',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.colors.primary;
+            e.currentTarget.style.color = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = theme.colors.primary;
+          }}
+        >
+          📄 Política de Privacidad
+        </button>
+      </div>
+
+      {/* Sección Eliminar Cuenta */}
+      <div style={{
+        marginTop: '24px',
+        backgroundColor: theme.colors.cardBackground,
+        borderRadius: '16px',
+        padding: '24px',
+        boxShadow: theme.colors.shadowMd,
+        border: `1px solid ${theme.colors.error || '#e74c3c'}`,
+      }}>
+        <h2 style={{
+          margin: '0 0 8px 0',
+          fontSize: '20px',
+          fontWeight: '700',
+          color: theme.colors.error || '#e74c3c',
+        }}>
+          Zona de Peligro
+        </h2>
+        <p style={{
+          margin: '0 0 16px 0',
+          fontSize: '14px',
+          color: theme.colors.textSecondary,
+          lineHeight: '1.5',
+        }}>
+          Una vez que elimines tu cuenta, se borrarán todos tus datos permanentemente: publicaciones, mensajes, likes, seguidores y toda tu información. Esta acción no se puede deshacer.
+        </p>
+
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              border: `1px solid ${theme.colors.error || '#e74c3c'}`,
+              backgroundColor: 'transparent',
+              color: theme.colors.error || '#e74c3c',
+              fontWeight: '600',
+              fontSize: '15px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.colors.error || '#e74c3c';
+              e.currentTarget.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = theme.colors.error || '#e74c3c';
+            }}
+          >
+            Eliminar mi cuenta
+          </button>
+        ) : (
+          <div style={{
+            padding: '16px',
+            borderRadius: '12px',
+            backgroundColor: theme.colors.errorLight || 'rgba(231, 76, 60, 0.1)',
+            border: `1px solid ${theme.colors.error || '#e74c3c'}`,
+          }}>
+            <p style={{
+              margin: '0 0 12px 0',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: theme.colors.error || '#e74c3c',
+            }}>
+              ¿Estás seguro? Escribe <strong>ELIMINAR</strong> para confirmar:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Escribe ELIMINAR"
+              style={{
+                width: '100%',
+                maxWidth: '300px',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                border: `1px solid ${theme.colors.inputBorder}`,
+                backgroundColor: theme.colors.inputBackground,
+                color: theme.colors.textPrimary,
+                fontSize: '15px',
+                marginBottom: '12px',
+                boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'ELIMINAR' || isDeleting}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  backgroundColor: deleteConfirmText === 'ELIMINAR' ? (theme.colors.error || '#e74c3c') : (theme.colors.border || '#ccc'),
+                  color: '#ffffff',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: deleteConfirmText === 'ELIMINAR' && !isDeleting ? 'pointer' : 'not-allowed',
+                  opacity: isDeleting ? 0.7 : 1,
+                }}
+              >
+                {isDeleting ? 'Eliminando...' : 'Confirmar eliminación'}
+              </button>
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); setDeleteError(''); }}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '10px',
+                  border: `1px solid ${theme.colors.border}`,
+                  backgroundColor: 'transparent',
+                  color: theme.colors.textPrimary,
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+            {deleteError && (
+              <p style={{
+                marginTop: '12px',
+                fontSize: '14px',
+                color: theme.colors.error || '#e74c3c',
+              }}>
+                {deleteError}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <style>
