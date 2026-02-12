@@ -410,7 +410,7 @@ export default function ChatDetailScreen({ route, navigation }) {
           <MessageItem
             message={item}
             currentUserId={user?.id}
-            onDelete={item.senderId === user?.id ? () => handleDeleteMessage(item.id) : undefined}
+            onDelete={item.senderId == user?.id ? () => handleDeleteMessage(item.id) : undefined}
             myHash={selectedChat?.myPublicKeyHash}
             otherHash={selectedChat?.otherUser?.publicKeyHash}
           />
