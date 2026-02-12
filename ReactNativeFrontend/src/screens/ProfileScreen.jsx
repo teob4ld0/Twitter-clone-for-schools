@@ -15,19 +15,17 @@ import {
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from '../utils/imagePicker';
 import { useAuth } from '../context/AuthContext';
-import { useDispatch } from 'react-redux';
-import { createOrGetChat } from '../store/chatSlice';
 import { usersAPI, statusAPI, followersAPI, repliesAPI, interestSignalsAPI } from '../services/api';
 import StatusItem from '../components/StatusItem';
 import Reply from '../components/Reply';
 import FollowingButton from '../components/FollowingButton';
+import MessageButton from '../components/MessageButton';
 import { useTheme } from '../context/ThemeContext';
 
 const ProfileScreen = ({ route, navigation }) => {
   const { userId: routeUserId } = route.params || {};
   const { user: currentUser, updateUser, isAdmin } = useAuth();
   const { theme } = useTheme();
-  const dispatch = useDispatch();
   const styles = useProfileThemedStyles(theme);
 
   // Determinar el userId a mostrar
@@ -53,7 +51,7 @@ const ProfileScreen = ({ route, navigation }) => {
   const [followersCount, setFollowersCount] = useState(0);
   const [activeTab, setActiveTab] = useState('statuses');
   const [mutualFollowers, setMutualFollowers] = useState([]);
-  const [openingChat, setOpeningChat] = useState(false);
+
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
   const [avatarVersion, setAvatarVersion] = useState(0);
 
@@ -195,22 +193,7 @@ const ProfileScreen = ({ route, navigation }) => {
     navigation.navigate('StatusDetail', { statusId, replyId });
   };
 
-  const handleSendMessage = async () => {
-    const targetUserId = profileUserId;
-    if (!targetUserId || !currentUserId || targetUserId === currentUserId) return;
-    if (openingChat) return;
 
-    try {
-      setOpeningChat(true);
-      const chat = await dispatch(createOrGetChat(targetUserId)).unwrap();
-      navigation.navigate('ChatDetail', { chatId: chat.id });
-    } catch (err) {
-      console.error('Error opening chat:', err);
-      Alert.alert('Error', 'No se pudo abrir el chat');
-    } finally {
-      setOpeningChat(false);
-    }
-  };
 
   const handlePickProfilePicture = async () => {
     if (!isOwnProfile) return;
@@ -510,27 +493,16 @@ const ProfileScreen = ({ route, navigation }) => {
           </View>
 
           {/* Botones de mensaje y seguir */}
-          {currentUser?.id && currentUser.id !== profileUserId && (
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                onPress={handleSendMessage}
-                disabled={openingChat}
-                style={[
-                  styles.messageButton,
-                  openingChat && styles.messageButtonDisabled
-                ]}
-              >
-                <Text style={styles.messageButtonText}>Mensaje</Text>
-              </TouchableOpacity>
-              <View style={styles.followButtonContainer}>
-                <FollowingButton
-                  userId={profileUserId}
-                  initialIsFollowing={isFollowing}
-                  onFollowChange={handleFollowChange}
-                />
-              </View>
+          <View style={styles.actionButtons}>
+            <MessageButton userId={profileUserId} />
+            <View style={styles.followButtonContainer}>
+              <FollowingButton
+                userId={profileUserId}
+                initialIsFollowing={isFollowing}
+                onFollowChange={handleFollowChange}
+              />
             </View>
-          )}
+          </View>
 
           {/* Botón de Admin - solo visible en el propio perfil si eres admin */}
           {isOwnProfile && isAdmin && isAdmin() && (
@@ -786,24 +758,6 @@ function useProfileThemedStyles(theme) {
       gap: 8,
       marginTop: 12,
       marginBottom: 12,
-    },
-    messageButton: {
-      flex: 1,
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 9999,
-      borderWidth: 1,
-      borderColor: '#9b59b6',
-      backgroundColor: theme.colors.cardBackground,
-      alignItems: 'center',
-    },
-    messageButtonDisabled: {
-      opacity: 0.5,
-    },
-    messageButtonText: {
-      color: '#9b59b6',
-      fontSize: 15,
-      fontWeight: 'bold',
     },
     followButtonContainer: {
       flex: 1,

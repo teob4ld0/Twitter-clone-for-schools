@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usersAPI, statusAPI, followersAPI, repliesAPI, interestSignalsAPI } from '../services/api';
 import Status from '../components/Status';
 import FollowingButton from '../components/FollowingButton';
+import MessageButton from '../components/MessageButton';
 import Reply from '../components/Reply';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useDispatch } from 'react-redux';
-import { createOrGetChat } from '../store/chatSlice';
 import { useIsMobile } from '../hooks/useMobile';
 
 function UserProfile() {
@@ -15,7 +14,6 @@ function UserProfile() {
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
   const { theme } = useTheme();
-  const dispatch = useDispatch();
 
 	const profileUserId = Number.parseInt(String(userId), 10);
 	const currentUserId = currentUser?.id != null
@@ -34,7 +32,7 @@ function UserProfile() {
   const [followersCount, setFollowersCount] = useState(0);
   const [activeTab, setActiveTab] = useState('statuses');
   const [mutualFollowers, setMutualFollowers] = useState([]);
-  const [openingChat, setOpeningChat] = useState(false);
+
 
   const fileInputRef = useRef(null);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
@@ -478,22 +476,7 @@ function UserProfile() {
     }
   };
 
-  const handleSendMessage = async () => {
-		const targetUserId = profileUserId;
-		if (!targetUserId || !currentUserId || targetUserId === currentUserId) return;
-    if (openingChat) return;
 
-    try {
-      setOpeningChat(true);
-      const chat = await dispatch(createOrGetChat(targetUserId)).unwrap();
-      navigate(`/chats?chatId=${chat.id}`);
-    } catch (err) {
-      console.error('Error opening chat:', err);
-      alert('No se pudo abrir el chat');
-    } finally {
-      setOpeningChat(false);
-    }
-  };
 
   if (loading) {
     return <div style={loadingStyle}>Cargando perfil...</div>;
@@ -629,34 +612,18 @@ function UserProfile() {
             </p>
           )}
           {/* Botones de acción */}
-          {currentUser?.id && currentUser.id !== parseInt(userId) && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 12 }}>
-              <button
-                onClick={handleSendMessage}
-                disabled={openingChat}
-                style={{
-                  flex: 1,
-                  padding: isMobile ? '12px 16px' : '10px 14px',
-                  borderRadius: 9999,
-                  border: '1px solid #9b59b6',
-                  background: '#fff',
-                  color: '#9b59b6',
-                  fontWeight: 700,
-                  cursor: openingChat ? 'not-allowed' : 'pointer',
-                  fontSize: isMobile ? '16px' : '14px'
-                }}
-              >
-                Mensaje
-              </button>
-              <div style={{ flex: 1 }}>
-                <FollowingButton
-                  userId={profileUserId}
-                  initialIsFollowing={isFollowing}
-                  onFollowChange={handleFollowChange}
-                />
-              </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 12 }}>
+            <div style={{ flex: 1 }}>
+              <MessageButton userId={profileUserId} isMobile={isMobile} />
             </div>
-          )}        </div>
+            <div style={{ flex: 1 }}>
+              <FollowingButton
+                userId={profileUserId}
+                initialIsFollowing={isFollowing}
+                onFollowChange={handleFollowChange}
+              />
+            </div>
+          </div>        </div>
       </div>
 
       {/* Tabs */}

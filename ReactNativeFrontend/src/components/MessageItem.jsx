@@ -71,6 +71,7 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
       paddingHorizontal: 14,
       paddingVertical: 10,
       maxWidth: '85%',
+      position: 'relative',
     },
     ownBubble: {
       backgroundColor: theme.colors.chatMessageOwn,
@@ -135,13 +136,12 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
       color: theme.colors.textSecondary,
     },
     deleteButton: {
-      paddingTop: 2,
-      paddingLeft: 4,
-    },
-    deleteButtonText: {
-      fontSize: 16,
-      color: 'rgba(255, 255, 255, 0.7)',
-      lineHeight: 16,
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      padding: 4,
+      borderRadius: 12,
+      backgroundColor: 'rgba(0, 0, 0, 0.15)',
     },
   });
 
@@ -163,9 +163,25 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
             </View>
           )}
         </View>
-      )}
+      )}{/* Delete Button - visible icon */}
+        {isOwn && onDelete && (
+          <TouchableOpacity
+            onPress={onDelete}
+            style={styles.deleteButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Feather name="trash-2" size={14} color="rgba(255, 255, 255, 0.9)" />
+          </TouchableOpacity>
+        )}
 
-      <View style={[styles.bubble, isOwn ? styles.ownBubble : styles.otherBubble]}>
+        
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onLongPress={isOwn && onDelete ? onDelete : undefined}
+        delayLongPress={400}
+        style={[styles.bubble, isOwn ? styles.ownBubble : styles.otherBubble]}
+      >
         <View style={styles.contentWrapper}>
           <View style={styles.messageContent}>
             {/* Content */}
@@ -202,19 +218,8 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
               {isOwn ? (message.isRead ? 'Leído' : 'Enviado') : (sender?.username || 'Desconocido')}
             </Text>
           </View>
-
-          {/* Delete Button - discreto como en web */}
-          {isOwn && onDelete && (
-            <TouchableOpacity
-              onPress={onDelete}
-              style={styles.deleteButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Text style={styles.deleteButtonText}>✕</Text>
-            </TouchableOpacity>
-          )}
         </View>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }
