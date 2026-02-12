@@ -449,60 +449,6 @@ function SettingsPage() {
             }}
           />
         </div>
-
-        {/* Notificaciones de estado */}
-        <div>
-          <h3 style={{
-            margin: '0 0 12px 0',
-            fontSize: '16px',
-            fontWeight: '600',
-            color: theme.colors.textPrimary,
-          }}>
-            Notificaciones
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{
-              padding: '12px',
-              borderRadius: '8px',
-              backgroundColor: theme.colors.successLight,
-              border: `1px solid ${theme.colors.success}`,
-              color: theme.colors.success,
-              fontSize: '14px',
-            }}>
-              ✅ Acción completada exitosamente
-            </div>
-            <div style={{
-              padding: '12px',
-              borderRadius: '8px',
-              backgroundColor: theme.colors.errorLight,
-              border: `1px solid ${theme.colors.error}`,
-              color: theme.colors.error,
-              fontSize: '14px',
-            }}>
-              ❌ Ha ocurrido un error
-            </div>
-            <div style={{
-              padding: '12px',
-              borderRadius: '8px',
-              backgroundColor: theme.colors.warningLight,
-              border: `1px solid ${theme.colors.warning}`,
-              color: theme.colors.warning,
-              fontSize: '14px',
-            }}>
-              ⚠️ Advertencia: Revisa esta información
-            </div>
-            <div style={{
-              padding: '12px',
-              borderRadius: '8px',
-              backgroundColor: theme.colors.infoLight,
-              border: `1px solid ${theme.colors.info}`,
-              color: theme.colors.info,
-              fontSize: '14px',
-            }}>
-              ℹ️ Información importante
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Sección Política de Privacidad */}

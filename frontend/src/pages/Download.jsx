@@ -31,9 +31,14 @@ const Download = () => {
   }, []);
 
   const handleDownloadAPK = () => {
-    // Link directo al APK
-    const apkUrl = 'https://tu-servidor.com/mynetapp.apk'; 
-    window.location.href = apkUrl;
+    // Link directo al APK desde el API
+    const apkUrl = 'https://io.twittetec.com/api/download/apk';
+    
+    // Abrir en nueva pestaña para descargar
+    window.open(apkUrl, '_blank');
+    
+    // O usar descarga directa:
+    // window.location.href = apkUrl;
   };
 
   const handleInstallPWA = async () => {

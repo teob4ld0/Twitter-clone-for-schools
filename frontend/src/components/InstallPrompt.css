@@ -75,6 +75,17 @@
   font-size: 1.25rem;
 }
 
+.install-prompt-note {
+  margin: 0 0 16px;
+  padding: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #856404;
+  text-align: left;
+}
+
 .install-prompt-actions {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,6 +7,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import './src/i18n'; // Initialize i18n
 import { store } from './src/store/store';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -37,6 +39,7 @@ const Tab = createBottomTabNavigator();
 function Header({ navigation }) {
   const { logout } = useAuth();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const headerStyles = {
@@ -62,12 +65,12 @@ function Header({ navigation }) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Cerrar Sesión',
-      '¿Estás seguro que deseas cerrar sesión?',
+      t('auth.logout'),
+      t('auth.logoutConfirm'),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: 'Salir', 
+          text: t('common.logout'), 
           style: 'destructive',
           onPress: async () => {
             await logout();
@@ -147,12 +150,14 @@ function AppNavigator() {
     },
   };
 
+  const { t } = useTranslation();
+
   // Mostrar loading mientras se verifica la autenticación o se rehidrata el estado
   if (loading || isRehydrating) {
     return (
       <View style={loadingStyles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={loadingStyles.loadingText}>Cargando...</Text>
+        <Text style={loadingStyles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
   }
