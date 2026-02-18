@@ -15,53 +15,50 @@ const resources = {
   en: { translation: en }
 };
 
-// Función para obtener el idioma guardado o el del dispositivo
-const getInitialLanguage = async () => {
+// Detectar idioma del dispositivo de forma síncrona
+const getDeviceLanguage = () => {
   try {
-    // Intentar obtener el idioma guardado
-    const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (savedLanguage && (savedLanguage === 'es' || savedLanguage === 'en')) {
-      return savedLanguage;
-    }
-
-    // Si no hay idioma guardado, usar el del dispositivo
     const locales = RNLocalize.getLocales();
-    const deviceLanguage = locales[0]?.languageCode || 'es'; // 'es', 'en', etc.
-    
-    // Si el idioma del dispositivo es español o inglés, usarlo
-    if (deviceLanguage === 'es' || deviceLanguage === 'en') {
-      return deviceLanguage;
-    }
-    
-    // Por defecto, español
-    return 'es';
-  } catch (error) {
-    console.log('Error getting initial language:', error);
+    const deviceLanguage = locales[0]?.languageCode || 'es';
+    return (deviceLanguage === 'es' || deviceLanguage === 'en') ? deviceLanguage : 'es';
+  } catch {
     return 'es';
   }
 };
 
-// Inicializar i18next
-const initI18n = async () => {
-  const initialLanguage = await getInitialLanguage();
+// Inicializar i18next de forma SÍNCRONA para que las traducciones
+// estén disponibles inmediatamente al importar el módulo
+i18n
+  .use(initReactI18next)
+  .init({
+    compatibilityJSON: 'v3',
+    resources,
+    lng: getDeviceLanguage(),
+    fallbackLng: 'es',
+    interpolation: {
+      escapeValue: false // React Native ya escapa por defecto
+    },
+    react: {
+      useSuspense: false
+    }
+  });
 
-  i18n
-    .use(initReactI18next)
-    .init({
-      compatibilityJSON: 'v3',
-      resources,
-      lng: initialLanguage,
-      fallbackLng: 'es',
-      interpolation: {
-        escapeValue: false // React Native ya escapa por defecto
-      },
-      react: {
-        useSuspense: false
+// Cargar idioma guardado en AsyncStorage de forma asíncrona
+// (si el usuario había elegido uno diferente al del dispositivo)
+const loadSavedLanguage = async () => {
+  try {
+    const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (savedLanguage && (savedLanguage === 'es' || savedLanguage === 'en')) {
+      if (savedLanguage !== i18n.language) {
+        await i18n.changeLanguage(savedLanguage);
       }
-    });
-
-  return i18n;
+    }
+  } catch (error) {
+    console.log('Error loading saved language:', error);
+  }
 };
+
+loadSavedLanguage();
 
 // Función para cambiar el idioma y guardarlo
 export const changeLanguage = async (language) => {
@@ -86,5 +83,4 @@ export const getAvailableLanguages = () => {
   ];
 };
 
-export { initI18n };
 export default i18n;

@@ -161,7 +161,16 @@ export const pushAPI = {
 export const adminAPI = {
   getAllUsers: () => api.get('/users'),
   banUser: (userId) => api.put(`/users/${userId}/ban`, { userId }),
-  deleteUser: (userId) => api.delete(`/users/${userId}`)
+  deleteUser: (userId) => api.delete(`/users/${userId}`),
+  getDeletedStatuses: () => api.get('/status/deleted'),
+  getDeletedMessages: () => api.get('/chats/deleted-messages')
+};
+
+export const reportsAPI = {
+  create: (data) => api.post('/reports', data),
+  getAll: (params = {}) => api.get(`/reports${Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : ''}`),
+  getById: (id) => api.get(`/reports/${id}`),
+  getReasons: () => api.get('/reports/reasons')
 };
 
 export const interestSignalsAPI = {

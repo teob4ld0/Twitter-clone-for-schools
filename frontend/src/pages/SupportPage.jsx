@@ -144,6 +144,117 @@ function SupportPage() {
             </a>
           </div>
         </div>
+        {/* Política de privacidad */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '16px',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: theme.colors.backgroundSecondary,
+          border: `1px solid ${theme.colors.border}`,
+          marginBottom: '16px',
+        }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: theme.colors.primaryLight || 'rgba(29,161,242,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            flexShrink: 0,
+          }}>
+            🔒
+          </div>
+          <div>
+            <h3 style={{
+              margin: '0 0 4px 0',
+              fontSize: '17px',
+              fontWeight: '700',
+              color: theme.colors.textPrimary,
+            }}>
+              Política de privacidad
+            </h3>
+            <p style={{
+              margin: '0 0 8px 0',
+              fontSize: '14px',
+              color: theme.colors.textSecondary,
+            }}>
+              Lee nuestra política de privacidad.
+            </p>
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: theme.colors.primary || '#1da1f2',
+                fontSize: '15px',
+                fontWeight: '600',
+                textDecoration: 'none',
+              }}
+            >
+              Aclara cualquier duda sobre el manejo de tus datos "personales" aquí.
+            </a>
+          </div>
+        </div>
+
+        {/* Seguridad infantil */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '16px',
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: theme.colors.backgroundSecondary,
+          border: `1px solid ${theme.colors.border}`,
+          marginBottom: '16px',
+        }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,99,71,0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '24px',
+            flexShrink: 0,
+          }}>
+            🛡️
+          </div>
+          <div>
+            <h3 style={{
+              margin: '0 0 4px 0',
+              fontSize: '17px',
+              fontWeight: '700',
+              color: theme.colors.textPrimary,
+            }}>
+              Seguridad infantil
+            </h3>
+            <p style={{
+              margin: '0 0 8px 0',
+              fontSize: '14px',
+              color: theme.colors.textSecondary,
+            }}>
+              Nuestros estándares contra el abuso infantil.
+            </p>
+            <a
+              href="/safety-standards"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#FF6347',
+                fontSize: '15px',
+                fontWeight: '600',
+                textDecoration: 'none',
+              }}
+            >
+              Conoce nuestras medidas de protección y seguridad.
+            </a>
+          </div>
+        </div>
 
         {/* Horarios */}
         <div style={{

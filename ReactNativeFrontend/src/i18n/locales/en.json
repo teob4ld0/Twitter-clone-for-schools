@@ -1,5 +1,6 @@
 {
   "common": {
+    "language": "en",
     "yes": "Yes",
     "no": "No",
     "cancel": "Cancel",
@@ -73,6 +74,15 @@
     "share": "Share",
     "retweet": "Retweet",
     "reply": "Reply",
+    "repost": "Repost",
+    "undoRepost": "Undo Repost",
+    "quote": "Quote",
+    "quoteComment": "Quote Comment",
+    "addComment": "Add a comment...",
+    "quoteError": "Error creating quote. Try again.",
+    "uploadError": "Error uploading file. Try again.",
+    "permissionDenied": "Permission Denied",
+    "permissionPhotos": "Permission to access photos is needed.",
     "likes_zero": "{{count}} likes",
     "likes_one": "{{count}} like",
     "likes_other": "{{count}} likes",
@@ -111,7 +121,30 @@
     "following_other": "{{count}} following",
     "posts_zero": "{{count}} posts",
     "posts_one": "{{count}} post",
-    "posts_other": "{{count}} posts"
+    "posts_other": "{{count}} posts",
+    "changePhoto": "Change photo",
+    "uploading": "Uploading...",
+    "mutual": "Mutual",
+    "followsYou": "Follows you",
+    "adminPanel": "Admin Panel",
+    "status": "status",
+    "statuses": "statuses",
+    "follower": "follower",
+    "memberSince": "Member since",
+    "followedBy": "Followed by",
+    "youFollow": "you follow",
+    "tabs": {
+      "statuses": "Statuses",
+      "likes": "Likes",
+      "replies": "Replies"
+    },
+    "emptyStates": {
+      "noPosts": "This user hasn't posted anything yet.",
+      "noLikes": "This user hasn't liked anything yet.",
+      "noReplies": "This user hasn't replied to anything yet."
+    },
+    "reply": "Reply",
+    "inReplyTo": "In reply to"
   },
   "chat": {
     "title": "Chats",
@@ -131,7 +164,18 @@
     "lastSeen": "Last seen {{time}} ago",
     "now": "Now",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "startConversation": "Start the conversation with",
+    "mediaAttached": "Media attached",
+    "noMessagesYet": "No messages yet",
+    "video": "Video",
+    "read": "Read",
+    "sent": "Sent",
+    "unknown": "Unknown",
+    "userIdPlaceholder": "User ID",
+    "openChat": "Open Chat",
+    "noChatsYet": "No chats yet",
+    "enterUserIdToStart": "Enter a user ID to start a conversation"
   },
   "notifications": {
     "title": "Notifications",
@@ -154,6 +198,13 @@
       "monthsAgo": "{{count}}mo ago",
       "yearsAgo": "{{count}}y ago"
     }
+  },
+  "dates": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hours ago",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}} days ago"
   },
   "settings": {
     "title": "Settings",
@@ -193,6 +244,29 @@
     "changesSaved": "Changes saved",
     "changesError": "Error saving changes"
   },
+  "report": {
+    "report": "Report",
+    "reportPost": "Report post",
+    "reportUser": "Report user",
+    "selectReason": "Select a reason",
+    "submitted": "Report submitted",
+    "error": "Error submitting report. Try again.",
+    "selfReport": "You cannot report yourself",
+    "moreOptions": "More options",
+    "reasons": {
+      "Violence": "Violence",
+      "Pornography": "Pornography",
+      "Bullying": "Bullying / Harassment",
+      "Blackmail": "Blackmail / Extortion",
+      "Stalking": "Stalking",
+      "Abuse": "Abuse",
+      "ScholarDamage": "School property damage",
+      "DrugUse": "Drug use",
+      "AlcoholUse": "Alcohol use",
+      "SelfHarm": "Self-harm",
+      "Disrespect": "Disrespect / Rule violation"
+    }
+  },
   "admin": {
     "title": "Admin Panel",
     "users": "Users",
@@ -209,7 +283,45 @@
     "banSuccess": "User banned successfully",
     "unbanSuccess": "User unbanned successfully",
     "deleteSuccess": "User deleted successfully",
-    "actionError": "Error performing action"
+    "actionError": "Error performing action",
+    "deletedStatuses": "Deleted statuses",
+    "deletedMessages": "Deleted messages",
+    "deletedStatusesCount": "{{count}} deleted statuses",
+    "deletedMessagesCount": "{{count}} deleted messages",
+    "noDeletedStatuses": "No deleted statuses",
+    "noDeletedMessages": "No deleted messages",
+    "loadingDeletedStatuses": "Loading deleted statuses...",
+    "loadingDeletedMessages": "Loading deleted messages...",
+    "statusId": "Status #{{id}}",
+    "messageId": "Chat #{{chatId}} • Message #{{id}}",
+    "createdAt": "Created: {{date}}",
+    "deletedAt": "Deleted: {{date}}",
+    "sentAt": "Sent: {{date}}",
+    "betweenUsers": "Between users #{{user1}} ↔ #{{user2}}",
+    "replyTo": "Reply to status #{{id}}",
+    "noText": "(no text)",
+    "mediaAttachment": "📎 Media attachment",
+    "deleted": "DELETED",
+    "banned": "BANNED",
+    "student": "🎓 Student",
+    "admin": "👑 Admin",
+    "noPosts": "No posts",
+    "noUsers": "No users",
+    "noUsersFound": "No users found",
+    "searchPlaceholder": "Search by username, email or ID...",
+    "loading": "Loading users...",
+    "totalUsersCount": "Total users: {{count}}",
+    "noAdminPermission": "You don't have admin permissions",
+    "reports": "Reports",
+    "reportsTab": "🚩 Reports",
+    "reporter": "Reporter",
+    "reportedUser": "Reported user",
+    "reportedPost": "Reported post",
+    "reportReason": "Reason",
+    "reportDate": "Date",
+    "noReports": "No reports yet",
+    "totalReports": "Total: {{count}} reports",
+    "reportId": "Report #{{id}}"
   },
   "errors": {
     "networkError": "Network error",

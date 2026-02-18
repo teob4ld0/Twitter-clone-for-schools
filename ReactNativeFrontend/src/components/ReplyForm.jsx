@@ -69,7 +69,7 @@ function ReplyForm({
   };
 
   const handleSubmit = async () => {
-    if (content.trim() || mediaUri) {
+    if (content.trim()) {
       setFileError('');
       
       // Crear objeto similar a File para compatibilidad con la API
@@ -92,7 +92,7 @@ function ReplyForm({
     }
   };
 
-  const isSubmitDisabled = isLoading || (!content.trim() && !mediaUri) || content.length > 280;
+  const isSubmitDisabled = isLoading || !content.trim() || content.length > 280;
 
   const styles = StyleSheet.create({
     form: {

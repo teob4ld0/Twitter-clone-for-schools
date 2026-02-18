@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { usersAPI } from '../services/api';
@@ -101,7 +102,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const handleLanguageChange = (lang) => {
-    i18n.changeLanguage(lang);
+    changeLanguage(lang);
   };
 
   const handleDeleteAccount = async () => {

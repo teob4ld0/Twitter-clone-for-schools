@@ -10,9 +10,11 @@ import ImageViewer from './ImageViewer';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { isEncrypted, deriveChatKey, decryptMessage } from '../services/cryptoService';
+import { useTranslation } from 'react-i18next';
 
 export default function MessageItem({ message, currentUserId, onDelete, myHash, otherHash }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
   const decryptedContent = useMemo(() => {
@@ -206,7 +208,7 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
                   <View style={styles.videoPlaceholder}>
                     <Feather name="video" size={32} color={isOwn ? theme.colors.chatMessageOwnText : theme.colors.textSecondary} />
                     <Text style={[styles.videoText, isOwn ? styles.videoTextOwn : styles.videoTextOther]}>
-                      Video
+                      {t('chat.video')}
                     </Text>
                   </View>
                 ) : null}
@@ -215,11 +217,20 @@ export default function MessageItem({ message, currentUserId, onDelete, myHash, 
 
             {/* Meta Info */}
             <Text style={[styles.metaText, isOwn ? styles.ownMeta : styles.otherMeta]}>
-              {isOwn ? (message.isRead ? 'Leído' : 'Enviado') : (sender?.username || 'Desconocido')}
+              {isOwn ? (message.isRead ? t('chat.read') : t('chat.sent')) : (sender?.username || t('chat.unknown'))}
             </Text>
           </View>
         </View>
       </TouchableOpacity>
+
+      {/* Image Viewer */}
+      {isImage && (
+        <ImageViewer
+          visible={imageViewerVisible}
+          imageUrl={message.mediaUrl}
+          onClose={() => setImageViewerVisible(false)}
+        />
+      )}
     </View>
   );
 }

@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { isEncrypted, deriveChatKey, decryptMessage } from '../services/cryptoService';
+import { useTranslation } from 'react-i18next';
 
 export default function ChatListItem({ chat, onPress, selected, currentUserId }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   
   // Validaciones
   if (!chat?.id || !chat?.otherUser?.username) {
@@ -22,7 +24,7 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
   const userInitial = username.charAt(0).toUpperCase();
   
   // Mensaje
-  let messageText = 'No messages yet';
+  let messageText = t('chat.noMessagesYet');
   if (chat.lastMessage) {
     if (typeof chat.lastMessage === 'string') {
       messageText = chat.lastMessage;
@@ -34,7 +36,7 @@ export default function ChatListItem({ chat, onPress, selected, currentUserId })
       }
       messageText = content;
     } else if (chat.lastMessage.mediaUrl) {
-      messageText = 'Media adjunta';
+      messageText = t('chat.mediaAttached');
     }
   }
   messageText = String(messageText);

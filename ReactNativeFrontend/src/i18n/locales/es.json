@@ -1,5 +1,6 @@
 {
   "common": {
+    "language": "es",
     "yes": "Sí",
     "no": "No",
     "cancel": "Cancelar",
@@ -73,6 +74,15 @@
     "share": "Compartir",
     "retweet": "Retwittear",
     "reply": "Responder",
+    "repost": "Repost",
+    "undoRepost": "Deshacer Repost",
+    "quote": "Citar",
+    "quoteComment": "Citar Comentario",
+    "addComment": "Agrega un comentario...",
+    "quoteError": "Error al crear quote. Intenta de nuevo.",
+    "uploadError": "Error al subir el archivo. Intenta de nuevo.",
+    "permissionDenied": "Permiso Denegado",
+    "permissionPhotos": "Se necesita permiso para acceder a las fotos.",
     "likes_zero": "{{count}} me gusta",
     "likes_one": "{{count}} me gusta",
     "likes_other": "{{count}} me gusta",
@@ -111,7 +121,30 @@
     "following_other": "{{count}} siguiendo",
     "posts_zero": "{{count}} publicaciones",
     "posts_one": "{{count}} publicación",
-    "posts_other": "{{count}} publicaciones"
+    "posts_other": "{{count}} publicaciones",
+    "changePhoto": "Cambiar foto",
+    "uploading": "Subiendo...",
+    "mutual": "Mutual",
+    "followsYou": "Te sigue",
+    "adminPanel": "Panel de Administración",
+    "status": "estado",
+    "statuses": "estados",
+    "follower": "seguidor",
+    "memberSince": "Miembro desde",
+    "followedBy": "Seguido por",
+    "youFollow": "que sigues",
+    "tabs": {
+      "statuses": "Estados",
+      "likes": "Likes",
+      "replies": "Respuestas"
+    },
+    "emptyStates": {
+      "noPosts": "Este usuario aún no ha publicado nada.",
+      "noLikes": "Este usuario aún no le ha dado like a nada.",
+      "noReplies": "Este usuario aún no ha respondido nada."
+    },
+    "reply": "Respuesta",
+    "inReplyTo": "En respuesta a"
   },
   "chat": {
     "title": "Chats",
@@ -131,7 +164,18 @@
     "lastSeen": "Última vez hace {{time}}",
     "now": "Ahora",
     "today": "Hoy",
-    "yesterday": "Ayer"
+    "yesterday": "Ayer",
+    "startConversation": "Inicia la conversación con",
+    "mediaAttached": "Media adjunta",
+    "noMessagesYet": "No hay mensajes aún",
+    "video": "Video",
+    "read": "Leído",
+    "sent": "Enviado",
+    "unknown": "Desconocido",
+    "userIdPlaceholder": "ID de usuario",
+    "openChat": "Abrir Chat",
+    "noChatsYet": "No hay chats aún",
+    "enterUserIdToStart": "Ingresa un ID de usuario para comenzar una conversación"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -154,6 +198,13 @@
       "monthsAgo": "Hace {{count}}mes",
       "yearsAgo": "Hace {{count}}a"
     }
+  },
+  "dates": {
+    "justNow": "Justo ahora",
+    "minutesAgo": "Hace unos minutos",
+    "hoursAgo": "Hace {{count}} horas",
+    "yesterday": "Ayer",
+    "daysAgo": "Hace {{count}} días"
   },
   "settings": {
     "title": "Configuración",
@@ -193,6 +244,29 @@
     "changesSaved": "Cambios guardados",
     "changesError": "Error al guardar cambios"
   },
+  "report": {
+    "report": "Reportar",
+    "reportPost": "Reportar publicación",
+    "reportUser": "Reportar usuario",
+    "selectReason": "Selecciona un motivo",
+    "submitted": "Reporte enviado",
+    "error": "Error al enviar el reporte. Inténtalo de nuevo.",
+    "selfReport": "No puedes reportarte a ti mismo",
+    "moreOptions": "Más opciones",
+    "reasons": {
+      "Violence": "Violencia",
+      "Pornography": "Pornografía",
+      "Bullying": "Bullying / Acoso",
+      "Blackmail": "Extorsión / Chantaje",
+      "Stalking": "Acoso / Stalking",
+      "Abuse": "Abuso",
+      "ScholarDamage": "Daño a instalaciones escolares",
+      "DrugUse": "Uso de drogas",
+      "AlcoholUse": "Uso de alcohol",
+      "SelfHarm": "Autolesiones",
+      "Disrespect": "Falta de respeto / Normas escolares"
+    }
+  },
   "admin": {
     "title": "Panel de Administración",
     "users": "Usuarios",
@@ -209,7 +283,45 @@
     "banSuccess": "Usuario baneado exitosamente",
     "unbanSuccess": "Usuario desbaneado exitosamente",
     "deleteSuccess": "Usuario eliminado exitosamente",
-    "actionError": "Error al realizar la acción"
+    "actionError": "Error al realizar la acción",
+    "deletedStatuses": "Statuses eliminados",
+    "deletedMessages": "Mensajes eliminados",
+    "deletedStatusesCount": "{{count}} statuses eliminados",
+    "deletedMessagesCount": "{{count}} mensajes eliminados",
+    "noDeletedStatuses": "No hay statuses eliminados",
+    "noDeletedMessages": "No hay mensajes eliminados",
+    "loadingDeletedStatuses": "Cargando statuses eliminados...",
+    "loadingDeletedMessages": "Cargando mensajes eliminados...",
+    "statusId": "Status #{{id}}",
+    "messageId": "Chat #{{chatId}} • Mensaje #{{id}}",
+    "createdAt": "Creado: {{date}}",
+    "deletedAt": "Eliminado: {{date}}",
+    "sentAt": "Enviado: {{date}}",
+    "betweenUsers": "Entre usuarios #{{user1}} ↔ #{{user2}}",
+    "replyTo": "Respuesta a status #{{id}}",
+    "noText": "(sin texto)",
+    "mediaAttachment": "📎 Media adjunto",
+    "deleted": "ELIMINADO",
+    "banned": "BANEADO",
+    "student": "🎓 Estudiante",
+    "admin": "👑 Admin",
+    "noPosts": "Sin publicaciones",
+    "noUsers": "No hay usuarios",
+    "noUsersFound": "No se encontraron usuarios",
+    "searchPlaceholder": "Buscar por usuario, email o ID...",
+    "loading": "Cargando usuarios...",
+    "totalUsersCount": "Total usuarios: {{count}}",
+    "noAdminPermission": "No tienes permisos de administrador",
+    "reports": "Reportes",
+    "reportsTab": "🚩 Reportes",
+    "reporter": "Reportador",
+    "reportedUser": "Usuario reportado",
+    "reportedPost": "Publicación reportada",
+    "reportReason": "Motivo",
+    "reportDate": "Fecha",
+    "noReports": "No hay reportes aún",
+    "totalReports": "Total: {{count}} reportes",
+    "reportId": "Reporte #{{id}}"
   },
   "errors": {
     "networkError": "Error de conexión",

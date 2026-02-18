@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
 
 const LanguageSelector = () => {
@@ -17,7 +18,7 @@ const LanguageSelector = () => {
 
   const handleLanguageChange = async (languageCode) => {
     try {
-      await i18n.changeLanguage(languageCode);
+      await changeLanguage(languageCode);
       setSelectedLanguage(languageCode);
       setModalVisible(false);
     } catch (error) {

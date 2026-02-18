@@ -45,6 +45,7 @@ export default ({ config }) => {
     plugins: [
       "expo-font",
       "expo-web-browser",
+      "expo-localization",
       [
         "expo-notifications",
         {

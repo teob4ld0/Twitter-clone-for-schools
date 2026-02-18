@@ -26,11 +26,13 @@ import AdminScreen from './src/screens/AdminScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import PrivacyPolicyScreen from './src/screens/PrivacyPolicyScreen';
 import SupportScreen from './src/screens/SupportScreen';
+import SafetyStandardsScreen from './src/screens/SafetyStandardsScreen';
 
 // Components
 import SignalRProvider from './src/components/SignalRProvider';
 import TabBar from './src/components/TabBar';
 import PushNotificationProvider from './src/components/PushNotificationProvider';
+import MediaPermissionProvider from './src/components/MediaPermissionProvider';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,6 +100,7 @@ function Header({ navigation }) {
 // Tab Navigator para la app autenticada
 function MainTabs() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   return (
     <Tab.Navigator
@@ -109,22 +112,22 @@ function MainTabs() {
       <Tab.Screen 
         name="Feed" 
         component={FeedScreen}
-        options={{ title: 'Feed' }}
+        options={{ title: t('feed.title') }}
       />
       <Tab.Screen 
         name="Chats" 
         component={ChatsScreen}
-        options={{ title: 'Chats' }}
+        options={{ title: t('chat.title') }}
       />
       <Tab.Screen 
         name="Notifications" 
         component={NotificationsScreen}
-        options={{ title: 'Notif' }}
+        options={{ title: t('notifications.title') }}
       />
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen}
-        options={{ title: 'Perfil' }}
+        options={{ title: t('profile.title') }}
         initialParams={{ userId: user?.id }}
       />
     </Tab.Navigator>
@@ -173,6 +176,7 @@ function AppNavigator() {
     <NavigationContainer ref={navigationRef}>
       <SignalRProvider>
         <PushNotificationProvider navigation={navigationRef}>
+        <MediaPermissionProvider>
           {authenticated ? (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="MainTabs" component={MainTabs} />
@@ -233,6 +237,13 @@ function AppNavigator() {
                   headerShown: false,
                 }}
               />
+              <Stack.Screen 
+                name="SafetyStandards" 
+                component={SafetyStandardsScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
             </Stack.Navigator>
           ) : (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -247,6 +258,7 @@ function AppNavigator() {
               />
             </Stack.Navigator>
           )}
+        </MediaPermissionProvider>
         </PushNotificationProvider>
       </SignalRProvider>
     </NavigationContainer>
