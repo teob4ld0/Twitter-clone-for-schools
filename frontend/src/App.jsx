@@ -16,12 +16,15 @@ import ChatsPage from './pages/Chats';
 import NotificationsPage from './pages/Notifications';
 import AdminPage from './pages/AdminPage';
 import Download from './pages/Download';
+import MobileAppRedirect from './pages/MobileAppRedirect';
+import InstallPWA from './pages/InstallPWA';
+import ThankYouInstall from './pages/ThankYouInstall';
 import SettingsPage from './pages/SettingsPage';
 import SupportPage from './pages/SupportPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import SafetyStandardsPage from './pages/SafetyStandardsPage';
 import SignalRProvider from './components/SignalRProvider';
 import PushNotificationProvider from './components/PushNotificationProvider';
-import InstallPrompt from './components/InstallPrompt';
 
 function App() {
   return (
@@ -119,6 +122,24 @@ function App() {
                 }
               />
               <Route
+                path="/descargar-app"
+                element={
+                  <MobileAppRedirect />
+                }
+              />
+              <Route
+                path="/instalar-pwa"
+                element={
+                  <InstallPWA />
+                }
+              />
+              <Route
+                path="/gracias-por-instalar"
+                element={
+                  <ThankYouInstall />
+                }
+              />
+              <Route
                 path="/settings"
                 element={
                   <ProtectedRoute>
@@ -138,9 +159,14 @@ function App() {
                   <PrivacyPolicyPage />
                 }
               />
+              <Route
+                path="/safety-standards"
+                element={
+                  <SafetyStandardsPage />
+                }
+              />
             </Routes>
           </Layout>
-          <InstallPrompt />
           </PushNotificationProvider>
         </SignalRProvider>
       </BrowserRouter>

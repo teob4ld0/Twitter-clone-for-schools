@@ -30,5 +30,7 @@ public class Status
     public Status? QuotedStatus { get; set; }
     public ICollection<Status> Quotes { get; set; } = new List<Status>(); // Status que citan a este status
 
-
+    // Soft delete
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 }

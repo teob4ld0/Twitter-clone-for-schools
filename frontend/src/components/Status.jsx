@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { statusAPI, interestSignalsAPI, mediaAPI } from '../services/api';
+import { statusAPI, interestSignalsAPI, mediaAPI, reportsAPI } from '../services/api';
 import ReplyList from './ReplyList';
 
 function Status({
@@ -54,6 +54,17 @@ function Status({
 
   // Estado para modal de confirmación de borrado
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Estado para el menú de opciones (tres puntos)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const optionsMenuRef = useRef(null);
+
+  // Estado para el modal de reporte
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null); // 'status' | 'user'
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   // Estado para respuestas
   const [showReplies, setShowReplies] = useState(initialShowReplies);
@@ -145,6 +156,19 @@ function Status({
   // Efecto para cerrar el menú de repost/quote al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
+      if (optionsMenuRef.current && !optionsMenuRef.current.contains(event.target)) {
+        setShowOptionsMenu(false);
+      }
+    };
+    if (showOptionsMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showOptionsMenu]);
+
+  // Efecto para cerrar el menú de repost/quote al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
       if (repostMenuRef.current && !repostMenuRef.current.contains(event.target)) {
         setShowRepostMenu(false);
       }
@@ -176,6 +200,31 @@ function Status({
 
   const handleDelete = () => {
     setShowDeleteModal(true);
+  };
+
+  const handleOpenReportModal = (target) => {
+    setReportTarget(target);
+    setSelectedReason(null);
+    setReportSuccess(false);
+    setShowOptionsMenu(false);
+    setShowReportModal(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReason || isSubmittingReport) return;
+    setIsSubmittingReport(true);
+    try {
+      await reportsAPI.create({
+        statusId: reportTarget === 'status' ? status.id : null,
+        otherUserId: reportTarget === 'user' ? status.authorId : null,
+        type: selectedReason
+      });
+      setReportSuccess(true);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al enviar el reporte.');
+    } finally {
+      setIsSubmittingReport(false);
+    }
   };
 
   const confirmDelete = () => {
@@ -1005,17 +1054,94 @@ function Status({
           </div>
         </div>
 
-        {isAuthor && (
+        {/* Menú de opciones (tres puntos) */}
+        <div style={{ position: 'relative', flexShrink: 0 }} ref={optionsMenuRef}>
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete();
+              setShowOptionsMenu(!showOptionsMenu);
             }}
-            style={deleteButtonStyle}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '0.4rem 0.5rem',
+              borderRadius: '50%',
+              fontSize: '1.1rem',
+              color: theme.colors.textSecondary,
+              minHeight: '36px',
+              minWidth: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s'
+            }}
+            title="Más opciones"
+            data-no-thread="true"
           >
-            🗑️
+            ⋯
           </button>
-        )}
+
+          {showOptionsMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                backgroundColor: theme.colors.cardBackground,
+                border: `1px solid ${theme.colors.border}`,
+                borderRadius: '12px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                zIndex: 1000,
+                minWidth: '180px',
+                overflow: 'hidden'
+              }}
+              data-no-thread="true"
+            >
+              {isAuthor && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowOptionsMenu(false);
+                    handleDelete();
+                  }}
+                  style={{
+                    ...menuItemStyle,
+                    color: theme.colors.error
+                  }}
+                >
+                  <span style={{ fontSize: '1rem', marginRight: '0.5rem' }}>🗑️</span>
+                  <span>Eliminar</span>
+                </button>
+              )}
+              {!isAuthor && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenReportModal('status');
+                    }}
+                    style={menuItemStyle}
+                  >
+                    <span style={{ fontSize: '1rem', marginRight: '0.5rem' }}>🚩</span>
+                    <span>Reportar publicación</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenReportModal('user');
+                    }}
+                    style={menuItemStyle}
+                  >
+                    <span style={{ fontSize: '1rem', marginRight: '0.5rem' }}>🚩</span>
+                    <span>Reportar usuario</span>
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={contentStyle}>
@@ -1325,6 +1451,109 @@ function Status({
                 {isLoadingQuote ? 'Publicando...' : 'Citar'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Modal de reporte */}
+      {showReportModal && (
+        <div
+          style={modalOverlayStyle}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowReportModal(false); setReportSuccess(false); } }}
+        >
+          <div style={{ ...deleteModalStyle, maxWidth: '480px', textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
+            {reportSuccess ? (
+              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✅</div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: theme.colors.textPrimary }}>Reporte enviado</h3>
+                <p style={{ color: theme.colors.textSecondary, margin: '0 0 1.5rem 0' }}>
+                  Gracias. Revisaremos tu reporte a la brevedad.
+                </p>
+                <button
+                  onClick={() => { setShowReportModal(false); setReportSuccess(false); }}
+                  style={{ ...submitButtonStyle, padding: '0.75rem 2rem' }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 'bold', color: theme.colors.textPrimary }}>
+                    🚩 {reportTarget === 'status' ? 'Reportar publicación' : 'Reportar usuario'}
+                  </h3>
+                  <button
+                    onClick={() => setShowReportModal(false)}
+                    style={{ ...modalCloseButtonStyle }}
+                  >✕</button>
+                </div>
+                <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: theme.colors.textSecondary }}>
+                  Selecciona el motivo del reporte:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                  {[
+                    { id: 'Violence', label: 'Violencia' },
+                    { id: 'Pornography', label: 'Pornografía' },
+                    { id: 'Bullying', label: 'Bullying / Acoso' },
+                    { id: 'Blackmail', label: 'Extorsión / Chantaje' },
+                    { id: 'Stalking', label: 'Acoso / Stalking' },
+                    { id: 'Abuse', label: 'Abuso' },
+                    { id: 'ScholarDamage', label: 'Daño a instalaciones escolares' },
+                    { id: 'DrugUse', label: 'Uso de drogas' },
+                    { id: 'AlcoholUse', label: 'Uso de alcohol' },
+                    { id: 'SelfHarm', label: 'Autolesiones' },
+                    { id: 'Disrespect', label: 'Falta de respeto / Normas escolares' }
+                  ].map((reason) => (
+                    <button
+                      key={reason.id}
+                      onClick={() => setSelectedReason(reason.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        padding: '0.65rem 1rem',
+                        borderRadius: '10px',
+                        border: `1.5px solid ${selectedReason === reason.id ? theme.colors.primary : theme.colors.border}`,
+                        backgroundColor: selectedReason === reason.id
+                          ? `${theme.colors.primary}18`
+                          : theme.colors.cardBackground,
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        color: theme.colors.textPrimary,
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <span style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: `2px solid ${selectedReason === reason.id ? theme.colors.primary : theme.colors.border}`,
+                        backgroundColor: selectedReason === reason.id ? theme.colors.primary : 'transparent',
+                        flexShrink: 0,
+                        transition: 'all 0.15s'
+                      }} />
+                      {reason.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                  <button onClick={() => setShowReportModal(false)} style={cancelButtonStyle}>Cancelar</button>
+                  <button
+                    onClick={handleSubmitReport}
+                    disabled={!selectedReason || isSubmittingReport}
+                    style={{
+                      ...deleteConfirmButtonStyle,
+                      backgroundColor: theme.colors.primary,
+                      opacity: !selectedReason || isSubmittingReport ? 0.5 : 1,
+                      cursor: !selectedReason || isSubmittingReport ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {isSubmittingReport ? 'Enviando...' : 'Enviar reporte'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

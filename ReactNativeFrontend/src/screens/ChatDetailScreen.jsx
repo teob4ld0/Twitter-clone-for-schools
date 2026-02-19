@@ -26,10 +26,12 @@ import { useTheme } from '../context/ThemeContext';
 import MessageItem from '../components/MessageItem';
 import * as ImagePicker from '../utils/imagePicker';
 import { deriveChatKey, encryptMessage } from '../services/cryptoService';
+import { useTranslation } from 'react-i18next';
 
 export default function ChatDetailScreen({ route, navigation }) {
   const { chatId, otherUser } = route.params;
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -206,7 +208,7 @@ export default function ChatDetailScreen({ route, navigation }) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.cardBackground,
+      backgroundColor: theme.colors.background,
     },
     centerContainer: {
       flex: 1,
@@ -267,7 +269,7 @@ export default function ChatDetailScreen({ route, navigation }) {
     inputContainer: {
       borderTopWidth: 1,
       borderTopColor: theme.colors.border,
-      backgroundColor: theme.colors.cardBackground,
+      backgroundColor: theme.colors.background,
       paddingHorizontal: 12,
       paddingTop: 10,
       elevation: 10,
@@ -376,7 +378,7 @@ export default function ChatDetailScreen({ route, navigation }) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Cargando mensajes...</Text>
+        <Text style={styles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -390,7 +392,7 @@ export default function ChatDetailScreen({ route, navigation }) {
           style={styles.retryButton}
           onPress={() => dispatch(fetchMessages(chatId))}
         >
-          <Text style={styles.retryButtonText}>Reintentar</Text>
+          <Text style={styles.retryButtonText}>{t('errors.tryAgain')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -398,9 +400,9 @@ export default function ChatDetailScreen({ route, navigation }) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
-      keyboardVerticalOffset={100}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <FlatList
         ref={flatListRef}
@@ -420,7 +422,7 @@ export default function ChatDetailScreen({ route, navigation }) {
           <View style={styles.emptyContainer}>
             <Feather name="message-square" size={48} color={theme.colors.textSecondary} />
             <Text style={styles.emptyText}>
-              Inicia la conversación con @{currentOtherUser?.username}
+              {t('chat.startConversation')} @{currentOtherUser?.username}
             </Text>
           </View>
         }
@@ -481,7 +483,7 @@ export default function ChatDetailScreen({ route, navigation }) {
 
           <TextInput
             style={styles.input}
-            placeholder="Escribe un mensaje..."
+            placeholder={t('chat.typeMessage')}
             placeholderTextColor={theme.colors.textTertiary}
             value={messageText}
             onChangeText={setMessageText}

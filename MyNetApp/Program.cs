@@ -147,7 +147,6 @@ if (applyMigrationsOnStartup && !isEfDesignTime)
 
 app.UseCors("CORSPolicy");
 app.UseRouting();
- 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

@@ -1,6 +1,6 @@
 # Privacy Policy for Twittetec
 
-**Last Updated:** February 10, 2026
+**Last Updated:** February 18, 2026
 
 ## 1. Introduction
 
@@ -47,6 +47,15 @@ If you choose to sign in with Google, we collect:
 
 ### 2.6 Push Notifications (Optional)
 - **Device tokens** to send notifications via Firebase Cloud Messaging (FCM)
+
+### 2.7 Device Permissions (Mobile App)
+On mobile devices, we may request the following permissions:
+- **Camera access:** To take photos or videos directly from the app for posts or profile pictures
+- **Photo/media library access:** To select existing photos and videos from your device to share in posts, messages, or as your profile picture
+
+These permissions are optional and requested only when you perform an action that requires them (e.g., attaching media to a post). Previously, media was uploaded through the file explorer (on PC) or via Google Photos (which already had its own permissions). With the mobile app, direct device access is needed for a better user experience.
+
+You can revoke these permissions at any time through your device settings.
 
 ---
 
@@ -154,9 +163,8 @@ You have the right to:
 ## 7. Account Deletion
 
 You can request account deletion by contacting us through:
-- **Contact email:** support@twittetec.app
-- **Contact form:** https://twittetec.app/contact
-- **Website:** https://twittetec.app
+- **Contact email:** xb912f0uhbrz@brevo-mail.com
+- **Website:** https://app.twittetec.com
 
 When you delete your account:
 - Your profile will no longer be visible
@@ -190,8 +198,8 @@ The "Last Updated" date at the beginning of this policy indicates when the last 
 
 If you have questions about this Privacy Policy or how we handle your data, contact us:
 
-- **Email:** support@twittetec.app
-- **Contact website:** https://twittetec.app/contact
+- **Email:** xb912f0uhbrz@brevo-mail.com
+- **Website:** https://app.twittetec.com
 - **Support:** Available through the app settings
 
 ---

@@ -18,9 +18,11 @@ import { fetchChats, createOrGetChat, clearError } from '../store/chatSlice';
 import { useAuth } from '../context/AuthContext';
 import ChatListItem from '../components/ChatListItem';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export default function ChatsScreen({ navigation }) {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -203,7 +205,7 @@ export default function ChatsScreen({ navigation }) {
         <View style={styles.inputRow}>
           <TextInput
             style={styles.userIdInput}
-            placeholder="ID de usuario"
+            placeholder={t('chat.userIdPlaceholder')}
             placeholderTextColor={theme.colors.textTertiary}
             value={otherUserIdInput}
             onChangeText={setOtherUserIdInput}
@@ -221,7 +223,7 @@ export default function ChatsScreen({ navigation }) {
             {creatingChat ? (
               <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
             ) : (
-              <Text style={styles.createButtonText}>Abrir Chat</Text>
+              <Text style={styles.createButtonText}>{t('chat.openChat')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -259,9 +261,9 @@ export default function ChatsScreen({ navigation }) {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Feather name="message-circle" size={64} color={theme.colors.textSecondary} />
-            <Text style={styles.emptyText}>No hay chats aún</Text>
+            <Text style={styles.emptyText}>{t('chat.noChatsYet')}</Text>
             <Text style={styles.emptySubtext}>
-              Ingresa un ID de usuario para comenzar una conversación
+              {t('chat.enterUserIdToStart')}
             </Text>
           </View>
         }

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,6 +7,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import './src/i18n'; // Initialize i18n
 import { store } from './src/store/store';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -24,11 +26,13 @@ import AdminScreen from './src/screens/AdminScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import PrivacyPolicyScreen from './src/screens/PrivacyPolicyScreen';
 import SupportScreen from './src/screens/SupportScreen';
+import SafetyStandardsScreen from './src/screens/SafetyStandardsScreen';
 
 // Components
 import SignalRProvider from './src/components/SignalRProvider';
 import TabBar from './src/components/TabBar';
 import PushNotificationProvider from './src/components/PushNotificationProvider';
+import MediaPermissionProvider from './src/components/MediaPermissionProvider';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,6 +41,7 @@ const Tab = createBottomTabNavigator();
 function Header({ navigation }) {
   const { logout } = useAuth();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const headerStyles = {
@@ -62,12 +67,12 @@ function Header({ navigation }) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Cerrar Sesión',
-      '¿Estás seguro que deseas cerrar sesión?',
+      t('auth.logout'),
+      t('auth.logoutConfirm'),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: 'Salir', 
+          text: t('common.logout'), 
           style: 'destructive',
           onPress: async () => {
             await logout();
@@ -95,6 +100,7 @@ function Header({ navigation }) {
 // Tab Navigator para la app autenticada
 function MainTabs() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   return (
     <Tab.Navigator
@@ -106,22 +112,22 @@ function MainTabs() {
       <Tab.Screen 
         name="Feed" 
         component={FeedScreen}
-        options={{ title: 'Feed' }}
+        options={{ title: t('feed.title') }}
       />
       <Tab.Screen 
         name="Chats" 
         component={ChatsScreen}
-        options={{ title: 'Chats' }}
+        options={{ title: t('chat.title') }}
       />
       <Tab.Screen 
         name="Notifications" 
         component={NotificationsScreen}
-        options={{ title: 'Notif' }}
+        options={{ title: t('notifications.title') }}
       />
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen}
-        options={{ title: 'Perfil' }}
+        options={{ title: t('profile.title') }}
         initialParams={{ userId: user?.id }}
       />
     </Tab.Navigator>
@@ -147,12 +153,14 @@ function AppNavigator() {
     },
   };
 
+  const { t } = useTranslation();
+
   // Mostrar loading mientras se verifica la autenticación o se rehidrata el estado
   if (loading || isRehydrating) {
     return (
       <View style={loadingStyles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={loadingStyles.loadingText}>Cargando...</Text>
+        <Text style={loadingStyles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -168,6 +176,7 @@ function AppNavigator() {
     <NavigationContainer ref={navigationRef}>
       <SignalRProvider>
         <PushNotificationProvider navigation={navigationRef}>
+        <MediaPermissionProvider>
           {authenticated ? (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="MainTabs" component={MainTabs} />
@@ -228,6 +237,13 @@ function AppNavigator() {
                   headerShown: false,
                 }}
               />
+              <Stack.Screen 
+                name="SafetyStandards" 
+                component={SafetyStandardsScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
             </Stack.Navigator>
           ) : (
             <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -242,6 +258,7 @@ function AppNavigator() {
               />
             </Stack.Navigator>
           )}
+        </MediaPermissionProvider>
         </PushNotificationProvider>
       </SignalRProvider>
     </NavigationContainer>
