@@ -11,8 +11,9 @@ import { Feather } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-export default function ImageViewer({ visible, imageUri, onClose }) {
-  if (!imageUri) return null;
+export default function ImageViewer({ visible, imageUri, imageUrl, onClose }) {
+  const uri = imageUri || imageUrl;
+  if (!uri) return null;
 
   return (
     <Modal
@@ -33,7 +34,7 @@ export default function ImageViewer({ visible, imageUri, onClose }) {
 
         {/* Fullscreen Image */}
         <Image
-          source={{ uri: imageUri }}
+          source={{ uri: uri }}
           style={styles.image}
           resizeMode="contain"
         />

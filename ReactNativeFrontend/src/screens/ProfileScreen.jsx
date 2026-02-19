@@ -21,11 +21,13 @@ import Reply from '../components/Reply';
 import FollowingButton from '../components/FollowingButton';
 import MessageButton from '../components/MessageButton';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const ProfileScreen = ({ route, navigation }) => {
   const { userId: routeUserId } = route.params || {};
   const { user: currentUser, updateUser, isAdmin } = useAuth();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useProfileThemedStyles(theme);
 
   // Determinar el userId a mostrar
@@ -184,7 +186,7 @@ const ProfileScreen = ({ route, navigation }) => {
       }));
     } catch (err) {
       console.error('Error al eliminar la respuesta:', err);
-      Alert.alert('Error', 'No se pudo eliminar la respuesta');
+      Alert.alert(t('common.error'), t('errors.tryAgain'));
     }
   };
 
@@ -330,11 +332,11 @@ const ProfileScreen = ({ route, navigation }) => {
             <View style={styles.replyHeader}>
               <View style={styles.replyHeaderLeft}>
                 <View style={styles.replyBadge}>
-                  <Text style={styles.replyBadgeText}>💬 Respuesta</Text>
+                  <Text style={styles.replyBadgeText}>💬 {t('profile.reply')}</Text>
                 </View>
               </View>
               <Text style={styles.replyDate}>
-                {new Date(item.createdAt).toLocaleDateString('es-AR')}
+                {new Date(item.createdAt).toLocaleDateString(t('common.language') === 'en' ? 'en-US' : 'es-AR')}
               </Text>
             </View>
 
@@ -355,7 +357,7 @@ const ProfileScreen = ({ route, navigation }) => {
               style={styles.replyMeta}
             >
               <Text style={styles.replyMetaText}>
-                En respuesta a <Text style={styles.bold}>{item.parentAuthor}</Text>: "
+                {t('profile.inReplyTo')} <Text style={styles.bold}>{item.parentAuthor}</Text>: "
                 <Text style={styles.truncate} numberOfLines={2}>{item.parentContent}</Text>"
               </Text>
             </TouchableOpacity>
@@ -369,10 +371,10 @@ const ProfileScreen = ({ route, navigation }) => {
         <View style={styles.replyCard}>
           <View style={styles.replyHeader}>
             <View style={styles.replyBadge}>
-              <Text style={styles.replyBadgeText}>💬 Respuesta</Text>
+              <Text style={styles.replyBadgeText}>💬 {t('profile.reply')}</Text>
             </View>
             <Text style={styles.replyDate}>
-              {new Date(item.createdAt).toLocaleDateString('es-AR')}
+              {new Date(item.createdAt).toLocaleDateString(t('common.language') === 'en' ? 'en-US' : 'es-AR')}
             </Text>
           </View>
 
@@ -393,7 +395,7 @@ const ProfileScreen = ({ route, navigation }) => {
             style={styles.replyMeta}
           >
             <Text style={styles.replyMetaText}>
-              En respuesta a <Text style={styles.bold}>{item.parentAuthor}</Text>: "
+              {t('profile.inReplyTo')} <Text style={styles.bold}>{item.parentAuthor}</Text>: "
               {item.parentContent.substring(0, 50)}..."
             </Text>
           </TouchableOpacity>
@@ -423,13 +425,13 @@ const ProfileScreen = ({ route, navigation }) => {
     let message = '';
     switch (activeTab) {
       case 'statuses':
-        message = 'Este usuario aún no ha publicado nada.';
+        message = t('profile.emptyStates.noPosts');
         break;
       case 'likes':
-        message = 'Este usuario aún no le ha dado like a nada.';
+        message = t('profile.emptyStates.noLikes');
         break;
       case 'replies':
-        message = 'Este usuario aún no ha respondido nada.';
+        message = t('profile.emptyStates.noReplies');
         break;
     }
 
@@ -447,7 +449,7 @@ const ProfileScreen = ({ route, navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButtonHeader}>
           <Feather name="arrow-left" size={24} color={theme.colors.primary} />
-          <Text style={styles.backButtonHeaderText}>Volver</Text>
+          <Text style={styles.backButtonHeaderText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -468,7 +470,7 @@ const ProfileScreen = ({ route, navigation }) => {
               ]}
             >
               <Text style={styles.changePhotoButtonText}>
-                {uploadingProfilePicture ? 'Subiendo...' : 'Cambiar foto'}
+                {uploadingProfilePicture ? t('profile.uploading') : t('profile.changePhoto')}
               </Text>
             </TouchableOpacity>
           )}
@@ -482,12 +484,12 @@ const ProfileScreen = ({ route, navigation }) => {
             </Text>
             {isMutual && (
               <View style={styles.mutualBadge}>
-                <Text style={styles.mutualBadgeText}>↔️ Mutual</Text>
+                <Text style={styles.mutualBadgeText}>↔️ {t('profile.mutual')}</Text>
               </View>
             )}
             {!isMutual && followsYou && !isFollowing && (
               <View style={styles.followsYouBadge}>
-                <Text style={styles.followsYouBadgeText}>Te sigue</Text>
+                <Text style={styles.followsYouBadgeText}>{t('profile.followsYou')}</Text>
               </View>
             )}
           </View>
@@ -511,24 +513,24 @@ const ProfileScreen = ({ route, navigation }) => {
               style={styles.adminButton}
             >
               <MaterialIcons name="admin-panel-settings" size={20} color={theme.colors.textOnPrimary} />
-              <Text style={styles.adminButtonText}>Panel de Administración</Text>
+              <Text style={styles.adminButtonText}>{t('profile.adminPanel')}</Text>
             </TouchableOpacity>
           )}
 
           {/* Stats */}
           <Text style={styles.stats}>
-            📝 {statuses.length} {statuses.length === 1 ? 'estado' : 'estados'} •
-            👥 {followersCount} {followersCount === 1 ? 'seguidor' : 'seguidores'}
+            📝 {statuses.length} {statuses.length === 1 ? t('profile.status') : t('profile.statuses')} •
+            👥 {followersCount} {followersCount === 1 ? t('profile.follower') : t('profile.followers')}
           </Text>
 
           <Text style={styles.memberSince}>
-            Miembro desde {new Date(user.createdAt).toLocaleDateString('es-AR')}
+            {t('profile.memberSince')} {new Date(user.createdAt).toLocaleDateString(t('common.language') === 'en' ? 'en-US' : 'es-AR')}
           </Text>
 
           {/* Seguidores mutuos */}
           {mutualFollowers.length > 0 && (
             <Text style={styles.mutualFollowersText}>
-              Seguido por{' '}
+              {t('profile.followedBy')}{' '}
               {mutualFollowers.map((follower, index) => (
                 <Text key={follower.id}>
                   <Text style={styles.bold}>{follower.username}</Text>
@@ -537,7 +539,7 @@ const ProfileScreen = ({ route, navigation }) => {
                   )}
                 </Text>
               ))}
-              {' '}que sigues
+              {' '}{t('profile.youFollow')}
             </Text>
           )}
         </View>
@@ -556,7 +558,7 @@ const ProfileScreen = ({ route, navigation }) => {
             styles.tabText,
             activeTab === 'statuses' && styles.activeTabText
           ]}>
-            Estados
+            {t('profile.tabs.statuses')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -570,7 +572,7 @@ const ProfileScreen = ({ route, navigation }) => {
             styles.tabText,
             activeTab === 'likes' && styles.activeTabText
           ]}>
-            Likes
+            {t('profile.tabs.likes')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -584,7 +586,7 @@ const ProfileScreen = ({ route, navigation }) => {
             styles.tabText,
             activeTab === 'replies' && styles.activeTabText
           ]}>
-            Respuestas
+            {t('profile.tabs.replies')}
           </Text>
         </TouchableOpacity>
       </View>

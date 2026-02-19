@@ -17,8 +17,10 @@ import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from '../utils/imagePicker';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI } from '../services/api';
+import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI, reportsAPI } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import ImageViewer from './ImageViewer';
+import { useTranslation } from 'react-i18next';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -26,6 +28,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   const { user } = useAuth();
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const isAuthor = user?.username === reply.author;
 
   const styles = StyleSheet.create({
@@ -309,12 +312,25 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
 
   // Estado para el menú desplegable de repost/quote
   const [showRepostMenu, setShowRepostMenu] = useState(false);
+
+  // Estado para el modal de opciones (tres puntos)
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+
+  // Estado para el modal de reporte
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
   
   // Estado para el modal de quote
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [quoteContent, setQuoteContent] = useState('');
   const [quoteMediaUri, setQuoteMediaUri] = useState(null);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+
+  // Estado para ImageViewer
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
 
   const childrenCount = typeof reply.repliesCount === 'number' ? reply.repliesCount : 0;
 
@@ -323,16 +339,17 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'Justo ahora';
-    if (diffInMinutes < 60) return `Hace ${diffInMinutes}m`;
+    if (diffInMinutes < 1) return t('notifications.timeAgo.justNow');
+    if (diffInMinutes < 60) return t('notifications.timeAgo.minutesAgo', { count: diffInMinutes });
     
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `Hace ${diffInHours}h`;
+    if (diffInHours < 24) return t('notifications.timeAgo.hoursAgo', { count: diffInHours });
     
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `Hace ${diffInDays}d`;
+    if (diffInDays < 7) return t('notifications.timeAgo.daysAgo', { count: diffInDays });
     
-    return date.toLocaleDateString('es-ES', { 
+    const locale = t('common.language') === 'en' ? 'en-US' : 'es-ES';
+    return date.toLocaleDateString(locale, { 
       day: 'numeric', 
       month: 'short'
     });
@@ -367,6 +384,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   };
 
   const handleDelete = () => {
+    setShowOptionsModal(false);
     Alert.alert(
       'Eliminar Respuesta',
       '¿Estás seguro de que quieres eliminar esta respuesta?',
@@ -379,6 +397,26 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
         }
       ]
     );
+  };
+
+  const handleOpenReportModal = () => {
+    setShowOptionsModal(false);
+    setSelectedReason(null);
+    setReportSuccess(false);
+    setShowReportModal(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReason || isSubmittingReport) return;
+    setIsSubmittingReport(true);
+    try {
+      await reportsAPI.create({ statusId: reply.id, type: selectedReason });
+      setReportSuccess(true);
+    } catch (err) {
+      Alert.alert(t('common.error') || 'Error', err.message || t('report.error') || 'Error al enviar el reporte.');
+    } finally {
+      setIsSubmittingReport(false);
+    }
   };
 
   const renderContentWithMentions = (content) => {
@@ -477,7 +515,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   const handleMediaPick = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permiso Denegado', 'Se necesita permiso para acceder a las fotos.');
+      Alert.alert(t('feed.permissionDenied'), t('feed.permissionPhotos'));
       return;
     }
 
@@ -521,7 +559,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
           }
         } catch (uploadError) {
           console.error('❌ Error al subir media:', uploadError);
-          Alert.alert('Error', 'Error al subir el archivo. Intenta de nuevo.');
+          Alert.alert('Error', t('feed.uploadError'));
           setIsLoadingQuote(false);
           return;
         }
@@ -542,7 +580,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
       }
     } catch (error) {
       console.error('Error al crear quote:', error);
-      Alert.alert('Error', 'Error al crear quote. Intenta de nuevo.');
+      Alert.alert('Error', t('feed.quoteError'));
     } finally {
       setIsLoadingQuote(false);
     }
@@ -560,11 +598,21 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
 
     if (isVideo || isImage) {
       return (
-        <Image
-          source={{ uri: url }}
-          style={styles.media}
-          resizeMode="cover"
-        />
+        <TouchableOpacity
+          onPress={() => {
+            if (isImage) {
+              setSelectedImageUrl(url);
+              setImageViewerVisible(true);
+            }
+          }}
+          activeOpacity={isImage ? 0.8 : 1}
+        >
+          <Image
+            source={{ uri: url }}
+            style={styles.media}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
       );
     }
     return null;
@@ -591,7 +639,11 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
           </View>
         </TouchableOpacity>
 
-        <View style={styles.commentBody}>
+        <TouchableOpacity
+          style={styles.commentBody}
+          onPress={handleOpenThread}
+          activeOpacity={0.7}
+        >
           <View style={styles.commentInfo}>
             <Text style={styles.authorName}>{reply.author || 'Usuario'}</Text>
             <Text style={styles.date}>{formatDate(reply.createdAt)}</Text>
@@ -647,13 +699,15 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               <Text style={styles.actionText}>{childrenCount}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {isAuthor && (
-          <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-            <Feather name="trash-2" size={16} color={theme.colors.textSecondary} />
-          </TouchableOpacity>
-        )}
+        {/* Botón tres puntos */}
+        <TouchableOpacity
+          onPress={() => setShowOptionsModal(true)}
+          style={styles.deleteButton}
+        >
+          <Feather name="more-horizontal" size={16} color={theme.colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Modal de menú repost/quote */}
@@ -676,7 +730,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
             >
               <Feather name="repeat" size={20} color={theme.colors.primary} />
               <Text style={styles.menuItemText}>
-                {isReposted ? 'Deshacer Repost' : 'Repost'}
+                {isReposted ? t('feed.undoRepost') : t('feed.repost')}
               </Text>
             </TouchableOpacity>
             
@@ -688,7 +742,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               disabled={isLoadingQuote}
             >
               <Feather name="edit-3" size={20} color={theme.colors.primary} />
-              <Text style={styles.menuItemText}>Quote</Text>
+              <Text style={styles.menuItemText}>{t('feed.quote')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -711,7 +765,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
             >
               <Feather name="x" size={24} color={theme.colors.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Citar Comentario</Text>
+            <Text style={styles.modalTitle}>{t('feed.quoteComment')}</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -719,7 +773,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
             <TextInput
               value={quoteContent}
               onChangeText={setQuoteContent}
-              placeholder="Agrega un comentario..."
+              placeholder={t('feed.addComment')}
               placeholderTextColor={theme.colors.textSecondary}
               style={styles.quoteTextarea}
               multiline
@@ -779,7 +833,7 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               style={styles.cancelButton}
               disabled={isLoadingQuote}
             >
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -793,12 +847,179 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
               {isLoadingQuote ? (
                 <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
-                <Text style={styles.submitButtonText}>Citar</Text>
+                <Text style={styles.submitButtonText}>{t('feed.quote')}</Text>
               )}
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
+      {/* Modal de opciones (tres puntos) */}
+      <Modal
+        visible={showOptionsModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowOptionsModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowOptionsModal(false)}
+        >
+          <View style={styles.menuContainer}>
+            {isAuthor && (
+              <TouchableOpacity onPress={handleDelete} style={styles.menuItem}>
+                <Feather name="trash-2" size={20} color={theme.colors.error} />
+                <Text style={[styles.menuItemText, { color: theme.colors.error }]}>
+                  {t('common.delete') || 'Eliminar'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {!isAuthor && (
+              <TouchableOpacity onPress={handleOpenReportModal} style={styles.menuItem}>
+                <Feather name="flag" size={20} color={theme.colors.textPrimary} />
+                <Text style={styles.menuItemText}>{t('report.reportPost') || 'Reportar respuesta'}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Modal de reporte */}
+      <Modal
+        visible={showReportModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => { setShowReportModal(false); setReportSuccess(false); }}
+      >
+        <View style={[styles.menuOverlay, { justifyContent: 'flex-end' }]}>
+          <View style={{
+            backgroundColor: theme.colors.cardBackground,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 20,
+            paddingTop: 16,
+            paddingBottom: 32,
+            maxHeight: '85%'
+          }}>
+            {reportSuccess ? (
+              <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+                <Feather name="check-circle" size={48} color={theme.colors.success || '#27ae60'} />
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.textPrimary, marginTop: 12 }}>
+                  {t('report.submitted') || 'Reporte enviado'}
+                </Text>
+                <Text style={{ color: theme.colors.textSecondary, marginTop: 8, textAlign: 'center' }}>
+                  Gracias. Revisaremos tu reporte a la brevedad.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => { setShowReportModal(false); setReportSuccess(false); }}
+                  style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 12, backgroundColor: theme.colors.primary, borderRadius: 24 }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>{t('common.close') || 'Cerrar'}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text style={{ fontSize: 17, fontWeight: 'bold', color: theme.colors.textPrimary }}>
+                    🚩 {t('report.reportPost') || 'Reportar respuesta'}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowReportModal(false)}>
+                    <Feather name="x" size={22} color={theme.colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={{ color: theme.colors.textSecondary, marginBottom: 12, fontSize: 14 }}>
+                  {t('report.selectReason') || 'Selecciona el motivo del reporte:'}
+                </Text>
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {[
+                    { id: 'Violence', key: 'report.reasons.Violence', fallback: 'Violencia' },
+                    { id: 'Pornography', key: 'report.reasons.Pornography', fallback: 'Pornografía' },
+                    { id: 'Bullying', key: 'report.reasons.Bullying', fallback: 'Bullying / Acoso' },
+                    { id: 'Blackmail', key: 'report.reasons.Blackmail', fallback: 'Extorsión / Chantaje' },
+                    { id: 'Stalking', key: 'report.reasons.Stalking', fallback: 'Acoso / Stalking' },
+                    { id: 'Abuse', key: 'report.reasons.Abuse', fallback: 'Abuso' },
+                    { id: 'ScholarDamage', key: 'report.reasons.ScholarDamage', fallback: 'Daño a instalaciones escolares' },
+                    { id: 'DrugUse', key: 'report.reasons.DrugUse', fallback: 'Uso de drogas' },
+                    { id: 'AlcoholUse', key: 'report.reasons.AlcoholUse', fallback: 'Uso de alcohol' },
+                    { id: 'SelfHarm', key: 'report.reasons.SelfHarm', fallback: 'Autolesiones' },
+                    { id: 'Disrespect', key: 'report.reasons.Disrespect', fallback: 'Falta de respeto / Normas escolares' }
+                  ].map((reason) => (
+                    <TouchableOpacity
+                      key={reason.id}
+                      onPress={() => setSelectedReason(reason.id)}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingVertical: 11,
+                        paddingHorizontal: 12,
+                        borderRadius: 10,
+                        marginBottom: 6,
+                        borderWidth: 1.5,
+                        borderColor: selectedReason === reason.id ? theme.colors.primary : theme.colors.border,
+                        backgroundColor: selectedReason === reason.id
+                          ? `${theme.colors.primary}18`
+                          : theme.colors.cardBackground
+                      }}
+                    >
+                      <View style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: selectedReason === reason.id ? theme.colors.primary : theme.colors.border,
+                        backgroundColor: selectedReason === reason.id ? theme.colors.primary : 'transparent',
+                        marginRight: 10
+                      }} />
+                      <Text style={{ color: theme.colors.textPrimary, fontSize: 14 }}>
+                        {t(reason.key) || reason.fallback}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+                  <TouchableOpacity
+                    onPress={() => setShowReportModal(false)}
+                    style={{ flex: 1, paddingVertical: 12, borderRadius: 24, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center' }}
+                  >
+                    <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>{t('common.cancel') || 'Cancelar'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSubmitReport}
+                    disabled={!selectedReason || isSubmittingReport}
+                    style={{
+                      flex: 2,
+                      paddingVertical: 12,
+                      borderRadius: 24,
+                      backgroundColor: theme.colors.primary,
+                      alignItems: 'center',
+                      opacity: !selectedReason || isSubmittingReport ? 0.5 : 1
+                    }}
+                  >
+                    {isSubmittingReport ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                        {t('report.report') || 'Enviar reporte'}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Image Viewer */}
+      <ImageViewer
+        visible={imageViewerVisible}
+        imageUrl={selectedImageUrl}
+        onClose={() => {
+          setImageViewerVisible(false);
+          setSelectedImageUrl(null);
+        }}
+      />
     </View>
   );
 }

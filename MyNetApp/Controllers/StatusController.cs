@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using MyNetApp.Attributes;
 using MyNetApp.Data;
 using MyNetApp.DTOs;
 using MyNetApp.Hubs;
@@ -147,7 +148,7 @@ public class StatusController : ControllerBase
         int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
         var statuses = await _context.Statuses
-            .Where(s => s.ParentStatusId == null && !s.User.Banned)
+            .Where(s => s.ParentStatusId == null && !s.User.Banned && !s.IsDeleted)
             .Include(s => s.User)
             .OrderByDescending(s => s.CreatedAt)
             .Select(s => new
@@ -171,8 +172,8 @@ public class StatusController : ControllerBase
                     AuthorProfilePictureUrl = s.QuotedStatus.User.ProfilePictureUrl
                 } : null,
                 Likes = s.Likes.Count,
-                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null),
-                RepliesCount = s.Replies.Count,
+                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null && !q.IsDeleted),
+                RepliesCount = s.Replies.Count(r => !r.IsDeleted),
                 IsLikedByCurrentUser = currentUserId.HasValue && s.Likes.Any(l => l.UserId == currentUserId.Value),
                 IsRepostedByCurrentUser = currentUserId.HasValue && s.Reposts.Any(r => r.UserId == currentUserId.Value)
             })
@@ -189,7 +190,7 @@ public class StatusController : ControllerBase
         int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
         var status = await _context.Statuses
-            .Where(s => s.Id == statusId)
+            .Where(s => s.Id == statusId && !s.IsDeleted)
             .Select(s => new
             {
                 s.Id,
@@ -211,11 +212,12 @@ public class StatusController : ControllerBase
                     AuthorProfilePictureUrl = s.QuotedStatus.User.ProfilePictureUrl
                 } : null,
                 Likes = s.Likes.Count,
-                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null),
-                RepliesCount = s.Replies.Count,
+                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null && !q.IsDeleted),
+                RepliesCount = s.Replies.Count(r => !r.IsDeleted),
                 IsLikedByCurrentUser = currentUserId.HasValue && s.Likes.Any(l => l.UserId == currentUserId.Value),
                 IsRepostedByCurrentUser = currentUserId.HasValue && s.Reposts.Any(r => r.UserId == currentUserId.Value),
                 Replies = s.Replies
+                    .Where(c => !c.IsDeleted)
                     .OrderBy(c => c.CreatedAt)
                     .Select(c => new
                     {
@@ -238,8 +240,8 @@ public class StatusController : ControllerBase
                             AuthorProfilePictureUrl = c.QuotedStatus.User.ProfilePictureUrl
                         } : null,
                         Likes = c.Likes.Count,
-                        RepostsCount = c.Reposts.Count + c.Quotes.Count(q => q.ParentStatusId == null),
-                        RepliesCount = c.Replies.Count,
+                        RepostsCount = c.Reposts.Count + c.Quotes.Count(q => q.ParentStatusId == null && !q.IsDeleted),
+                        RepliesCount = c.Replies.Count(r => !r.IsDeleted),
                         IsLikedByCurrentUser = currentUserId.HasValue && c.Likes.Any(l => l.UserId == currentUserId.Value),
                         IsRepostedByCurrentUser = currentUserId.HasValue && c.Reposts.Any(r => r.UserId == currentUserId.Value)
                     })
@@ -260,7 +262,7 @@ public class StatusController : ControllerBase
         int? currentUserId = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
         var replies = await _context.Statuses
-            .Where(s => s.ParentStatusId == statusId)
+            .Where(s => s.ParentStatusId == statusId && !s.IsDeleted)
             .OrderBy(s => s.CreatedAt)
             .Select(s => new
             {
@@ -283,8 +285,8 @@ public class StatusController : ControllerBase
                     AuthorProfilePictureUrl = s.QuotedStatus.User.ProfilePictureUrl
                 } : null,
                 Likes = s.Likes.Count,
-                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null),
-                RepliesCount = s.Replies.Count,
+                RepostsCount = s.Reposts.Count + s.Quotes.Count(q => q.ParentStatusId == null && !q.IsDeleted),
+                RepliesCount = s.Replies.Count(r => !r.IsDeleted),
                 IsLikedByCurrentUser = currentUserId.HasValue && s.Likes.Any(l => l.UserId == currentUserId.Value),
                 IsRepostedByCurrentUser = currentUserId.HasValue && s.Reposts.Any(r => r.UserId == currentUserId.Value)
             })
@@ -377,7 +379,7 @@ public class StatusController : ControllerBase
         return Ok(new { reposted = isReposting, repostsCount });
     }
 
-    // Delete status (only owner)
+    // Soft delete status (only owner) — keeps the record for admin review
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -391,9 +393,38 @@ public class StatusController : ControllerBase
         if (status.UserId != currentUserId)
             return Forbid();
 
-        _context.Statuses.Remove(status);
+        status.IsDeleted = true;
+        status.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    // Admin-only: list all soft-deleted statuses
+    [Authorize]
+    [RequireAdmin]
+    [HttpGet("deleted")]
+    public async Task<IActionResult> GetDeletedStatuses()
+    {
+        var deletedStatuses = await _context.Statuses
+            .Where(s => s.IsDeleted)
+            .Include(s => s.User)
+            .OrderByDescending(s => s.DeletedAt)
+            .Select(s => new
+            {
+                s.Id,
+                s.Content,
+                s.MediaUrl,
+                s.CreatedAt,
+                s.DeletedAt,
+                Author = s.User.Username,
+                AuthorId = s.UserId,
+                AuthorProfilePictureUrl = s.User.ProfilePictureUrl,
+                s.ParentStatusId,
+                s.QuotedStatusId
+            })
+            .ToListAsync();
+
+        return Ok(deletedStatuses);
     }
 
     // Helpers

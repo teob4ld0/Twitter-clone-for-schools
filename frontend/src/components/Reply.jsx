@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI } from '../services/api';
+import { repliesAPI, interestSignalsAPI, statusAPI, mediaAPI, reportsAPI } from '../services/api';
 
 function Reply({ reply, onDelete, onLikeUpdate }) {
   const { user } = useAuth();
@@ -32,6 +32,16 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   // Estado para el menú desplegable de repost/quote
   const [showRepostMenu, setShowRepostMenu] = useState(false);
   const repostMenuRef = useRef(null);
+
+  // Estado para el menú de opciones (tres puntos)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const optionsMenuRef = useRef(null);
+
+  // Estado para el modal de reporte
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
   
   // Estado para el modal de quote
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -42,6 +52,19 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   const fileInputRef = useRef(null);
 
   const childrenCount = typeof reply.repliesCount === 'number' ? reply.repliesCount : 0;
+
+  // Cerrar menú opciones al clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (optionsMenuRef.current && !optionsMenuRef.current.contains(event.target)) {
+        setShowOptionsMenu(false);
+      }
+    };
+    if (showOptionsMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showOptionsMenu]);
 
   // Efecto para cerrar el menú de repost/quote al hacer clic fuera
   useState(() => {
@@ -112,6 +135,26 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
   const handleDelete = () => {
     if (window.confirm('¿Eliminar esta respuesta?')) {
       onDelete(reply.id);
+    }
+  };
+
+  const handleOpenReportModal = () => {
+    setSelectedReason(null);
+    setReportSuccess(false);
+    setShowOptionsMenu(false);
+    setShowReportModal(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReason || isSubmittingReport) return;
+    setIsSubmittingReport(true);
+    try {
+      await reportsAPI.create({ statusId: reply.id, type: selectedReason });
+      setReportSuccess(true);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al enviar el reporte.');
+    } finally {
+      setIsSubmittingReport(false);
     }
   };
 
@@ -721,11 +764,57 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
             </button>
           </div>
         </div>
-        {isAuthor && (
-          <button onClick={handleDelete} style={deleteButtonStyle} title="Eliminar">
-            🗑️
+        {/* Menú de opciones (tres puntos) */}
+        <div style={{ position: 'absolute', right: 0, top: 0 }} ref={optionsMenuRef}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowOptionsMenu(!showOptionsMenu); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '2px 6px',
+              borderRadius: '50%',
+              fontSize: '1.1rem',
+              color: theme.colors.textSecondary,
+              lineHeight: 1,
+              transition: 'background-color 0.2s'
+            }}
+          >
+            ⋯
           </button>
-        )}
+          {showOptionsMenu && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '4px',
+              backgroundColor: theme.colors.cardBackground,
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: '10px',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+              zIndex: 1000,
+              minWidth: '170px',
+              overflow: 'hidden'
+            }}>
+              {isAuthor && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowOptionsMenu(false); handleDelete(); }}
+                  style={{ ...menuItemStyle, color: theme.colors.error }}
+                >
+                  <span style={{ fontSize: '1rem', marginRight: '0.5rem' }}>🗑️</span>Eliminar
+                </button>
+              )}
+              {!isAuthor && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleOpenReportModal(); }}
+                  style={menuItemStyle}
+                >
+                  <span style={{ fontSize: '1rem', marginRight: '0.5rem' }}>🚩</span>Reportar
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal para escribir quote */}
@@ -847,6 +936,116 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
                 {isLoadingQuote ? 'Publicando...' : 'Citar'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Modal de reporte */}
+      {showReportModal && (
+        <div
+          style={modalOverlayStyle}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowReportModal(false); setReportSuccess(false); } }}
+        >
+          <div
+            style={{
+              backgroundColor: theme.colors.cardBackground,
+              borderRadius: '16px',
+              padding: '1.5rem',
+              maxWidth: '440px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+              textAlign: 'left'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reportSuccess ? (
+              <div style={{ textAlign: 'center', padding: '0.5rem 0' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✅</div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: theme.colors.textPrimary }}>Reporte enviado</h3>
+                <p style={{ color: theme.colors.textSecondary, margin: '0 0 1.5rem 0' }}>
+                  Gracias. Revisaremos tu reporte a la brevedad.
+                </p>
+                <button
+                  onClick={() => { setShowReportModal(false); setReportSuccess(false); }}
+                  style={{ ...submitButtonStyle, padding: '0.75rem 2rem' }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold', color: theme.colors.textPrimary }}>
+                    🚩 Reportar comentario
+                  </h3>
+                  <button onClick={() => setShowReportModal(false)} style={modalCloseButtonStyle}>✕</button>
+                </div>
+                <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: theme.colors.textSecondary }}>
+                  Selecciona el motivo del reporte:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' }}>
+                  {[
+                    { id: 'Violence', label: 'Violencia' },
+                    { id: 'Pornography', label: 'Pornografía' },
+                    { id: 'Bullying', label: 'Bullying / Acoso' },
+                    { id: 'Blackmail', label: 'Extorsión / Chantaje' },
+                    { id: 'Stalking', label: 'Acoso / Stalking' },
+                    { id: 'Abuse', label: 'Abuso' },
+                    { id: 'ScholarDamage', label: 'Daño a instalaciones escolares' },
+                    { id: 'DrugUse', label: 'Uso de drogas' },
+                    { id: 'AlcoholUse', label: 'Uso de alcohol' },
+                    { id: 'SelfHarm', label: 'Autolesiones' },
+                    { id: 'Disrespect', label: 'Falta de respeto / Normas escolares' }
+                  ].map((reason) => (
+                    <button
+                      key={reason.id}
+                      onClick={() => setSelectedReason(reason.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        padding: '0.55rem 0.85rem',
+                        borderRadius: '8px',
+                        border: `1.5px solid ${selectedReason === reason.id ? theme.colors.primary : theme.colors.border}`,
+                        backgroundColor: selectedReason === reason.id
+                          ? `${theme.colors.primary}18`
+                          : theme.colors.cardBackground,
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        color: theme.colors.textPrimary,
+                        textAlign: 'left',
+                        fontFamily: 'inherit',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <span style={{
+                        width: '14px',
+                        height: '14px',
+                        borderRadius: '50%',
+                        border: `2px solid ${selectedReason === reason.id ? theme.colors.primary : theme.colors.border}`,
+                        backgroundColor: selectedReason === reason.id ? theme.colors.primary : 'transparent',
+                        flexShrink: 0,
+                        transition: 'all 0.15s'
+                      }} />
+                      {reason.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                  <button onClick={() => setShowReportModal(false)} style={cancelButtonStyle}>Cancelar</button>
+                  <button
+                    onClick={handleSubmitReport}
+                    disabled={!selectedReason || isSubmittingReport}
+                    style={{
+                      ...submitButtonStyle,
+                      opacity: !selectedReason || isSubmittingReport ? 0.5 : 1,
+                      cursor: !selectedReason || isSubmittingReport ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {isSubmittingReport ? 'Enviando...' : 'Enviar reporte'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyNetApp.Data;
 
@@ -11,9 +12,11 @@ using MyNetApp.Data;
 namespace MyNetApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218190400_SoftDelete")]
+    partial class SoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -267,42 +270,6 @@ namespace MyNetApp.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PushSubscriptions");
-                });
-
-            modelBuilder.Entity("MyNetApp.Models.Report", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("OtherUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OtherUserId");
-
-                    b.HasIndex("StatusId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("CreatedAt", "Type");
-
-                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("MyNetApp.Models.Repost", b =>
@@ -574,31 +541,6 @@ namespace MyNetApp.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MyNetApp.Models.Report", b =>
-                {
-                    b.HasOne("MyNetApp.Models.User", "OtherUser")
-                        .WithMany()
-                        .HasForeignKey("OtherUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("MyNetApp.Models.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("MyNetApp.Models.User", "Reporter")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OtherUser");
-
-                    b.Navigation("Reporter");
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("MyNetApp.Models.Repost", b =>

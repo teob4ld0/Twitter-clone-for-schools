@@ -104,7 +104,7 @@ export default function PrivacyPolicyScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.lastUpdated}>
-          <B>Última actualización:</B> 10 de febrero de 2026
+          <B>Última actualización:</B> 18 de febrero de 2026
         </Text>
 
         <Hr />
@@ -156,6 +156,15 @@ export default function PrivacyPolicyScreen({ navigation }) {
 
         <H3>2.6 Notificaciones Push (Opcional)</H3>
         <Li><B>Tokens de dispositivo</B> para enviar notificaciones vía Firebase Cloud Messaging (FCM)</Li>
+
+        <H3>2.7 Permisos del Dispositivo (App Móvil)</H3>
+        <P>En dispositivos móviles, podemos solicitar los siguientes permisos:</P>
+        <Li><B>Acceso a la cámara:</B> Para tomar fotos o videos directamente desde la app para publicaciones o foto de perfil</Li>
+        <Li><B>Acceso a la galería/medios:</B> Para seleccionar fotos y videos existentes en tu dispositivo para compartir en publicaciones, mensajes o como foto de perfil</Li>
+        <P>
+          Estos permisos son opcionales y se solicitan únicamente cuando realizas una acción que los requiere (por ejemplo, adjuntar medios a una publicación). Anteriormente, los medios se subían a través del explorador de archivos (en PC) o desde Google Fotos (que ya contaba con sus propios permisos). Con la app móvil, se necesita acceso directo al dispositivo para una mejor experiencia de usuario.
+        </P>
+        <P>Puedes revocar estos permisos en cualquier momento desde la configuración de tu dispositivo.</P>
 
         <Hr />
 
@@ -257,9 +266,8 @@ export default function PrivacyPolicyScreen({ navigation }) {
 
         <H2>7. Eliminación de Cuenta</H2>
         <P>Puedes solicitar la eliminación de tu cuenta contactándonos a través de:</P>
-        <Li><B>Email de contacto:</B> support@twittetec.app</Li>
-        <Li><B>Formulario de contacto:</B> https://twittetec.app/contact</Li>
-        <Li><B>Sitio web:</B> https://twittetec.app</Li>
+        <Li><B>Email de contacto:</B> xb912f0uhbrz@brevo-mail.com</Li>
+        <Li><B>Sitio web:</B> https://app.twittetec.com</Li>
         <P>Cuando eliminas tu cuenta:</P>
         <Li>Tu perfil dejará de ser visible</Li>
         <Li>Tus datos personales (email, contraseña) serán eliminados</Li>
@@ -291,8 +299,8 @@ export default function PrivacyPolicyScreen({ navigation }) {
 
         <H2>10. Contacto</H2>
         <P>Si tienes preguntas sobre esta Política de Privacidad o cómo manejamos tus datos, contáctanos:</P>
-        <Li><B>Email:</B> support@twittetec.app</Li>
-        <Li><B>Sitio web de contacto:</B> https://twittetec.app/contact</Li>
+        <Li><B>Email:</B> xb912f0uhbrz@brevo-mail.com</Li>
+        <Li><B>Sitio web:</B> https://app.twittetec.com</Li>
         <Li><B>Soporte:</B> Disponible a través de la configuración de la app</Li>
 
         <Hr />

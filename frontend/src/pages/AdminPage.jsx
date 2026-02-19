@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminAPI } from '../services/api';
+import { adminAPI, reportsAPI } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
 function AdminPage() {
@@ -12,6 +12,13 @@ function AdminPage() {
   const [expandedFollowers, setExpandedFollowers] = useState({});
   const [expandedFollowing, setExpandedFollowing] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
+  const [activeTab, setActiveTab] = useState('users');
+  const [deletedStatuses, setDeletedStatuses] = useState([]);
+  const [deletedMessages, setDeletedMessages] = useState([]);
+  const [deletedLoading, setDeletedLoading] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportsTotalCount, setReportsTotalCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +50,53 @@ function AdminPage() {
       setLoading(false);
     }
   };
+
+  const loadDeletedStatuses = async () => {
+    try {
+      setDeletedLoading(true);
+      const response = await adminAPI.getDeletedStatuses();
+      setDeletedStatuses(response.data);
+    } catch (err) {
+      console.error('Error loading deleted statuses:', err);
+    } finally {
+      setDeletedLoading(false);
+    }
+  };
+
+  const loadDeletedMessages = async () => {
+    try {
+      setDeletedLoading(true);
+      const response = await adminAPI.getDeletedMessages();
+      setDeletedMessages(response.data);
+    } catch (err) {
+      console.error('Error loading deleted messages:', err);
+    } finally {
+      setDeletedLoading(false);
+    }
+  };
+
+  const loadReports = async () => {
+    try {
+      setReportsLoading(true);
+      const response = await reportsAPI.getAll({ pageSize: 100 });
+      setReports(response.data.data || []);
+      setReportsTotalCount(response.data.total || 0);
+    } catch (err) {
+      console.error('Error loading reports:', err);
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'deletedStatuses' && deletedStatuses.length === 0) {
+      loadDeletedStatuses();
+    } else if (activeTab === 'deletedMessages' && deletedMessages.length === 0) {
+      loadDeletedMessages();
+    } else if (activeTab === 'reports' && reports.length === 0) {
+      loadReports();
+    }
+  }, [activeTab]);
 
   const toggleFollowers = (userId) => {
     setExpandedFollowers(prev => ({
@@ -112,6 +166,128 @@ function AdminPage() {
   return (
     <div style={isMobile ? { ...mobileContainerStyle, backgroundColor: theme.colors.background, color: theme.colors.textPrimary } : { ...containerStyle, backgroundColor: theme.colors.background, color: theme.colors.textPrimary }}>
       <h1 style={isMobile ? { ...mobileTitleStyle, color: theme.colors.textPrimary } : { ...titleStyle, color: theme.colors.textPrimary }}>Panel de Administración</h1>
+
+      {/* Tabs */}
+      <div style={tabBarStyle}>
+        <button
+          onClick={() => setActiveTab('users')}
+          style={activeTab === 'users' ? { ...tabStyle, ...activeTabStyle, borderColor: theme.colors.primary, color: theme.colors.primary } : { ...tabStyle, color: theme.colors.textSecondary }}
+        >
+          👥 Usuarios ({users.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('deletedStatuses')}
+          style={activeTab === 'deletedStatuses' ? { ...tabStyle, ...activeTabStyle, borderColor: theme.colors.primary, color: theme.colors.primary } : { ...tabStyle, color: theme.colors.textSecondary }}
+        >
+          🗑️ Statuses eliminados
+        </button>
+        <button
+          onClick={() => setActiveTab('deletedMessages')}
+          style={activeTab === 'deletedMessages' ? { ...tabStyle, ...activeTabStyle, borderColor: theme.colors.primary, color: theme.colors.primary } : { ...tabStyle, color: theme.colors.textSecondary }}
+        >
+          💬 Mensajes eliminados
+        </button>
+        <button
+          onClick={() => setActiveTab('reports')}
+          style={activeTab === 'reports' ? { ...tabStyle, ...activeTabStyle, borderColor: theme.colors.primary, color: theme.colors.primary } : { ...tabStyle, color: theme.colors.textSecondary }}
+        >
+          🚩 Reportes {reportsTotalCount > 0 ? `(${reportsTotalCount})` : ''}
+        </button>
+      </div>
+
+      {/* Tab: Deleted Statuses */}
+      {activeTab === 'deletedStatuses' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p style={{ ...statsStyle, color: theme.colors.textPrimary, margin: 0 }}>
+              Total: <strong>{deletedStatuses.length}</strong> statuses eliminados
+            </p>
+            <button onClick={loadDeletedStatuses} style={{ ...banButtonStyle, fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+              🔄 Refrescar
+            </button>
+          </div>
+          {deletedLoading ? (
+            <div style={{ color: theme.colors.textSecondary }}>Cargando...</div>
+          ) : deletedStatuses.length === 0 ? (
+            <div style={{ color: theme.colors.textSecondary, fontStyle: 'italic' }}>No hay statuses eliminados</div>
+          ) : (
+            <div style={isMobile ? mobileUsersContainerStyle : usersContainerStyle}>
+              {deletedStatuses.map((status) => (
+                <div key={status.id} style={isMobile ? { ...mobileUserCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border } : { ...userCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
+                  <div style={userHeaderStyle}>
+                    <div>
+                      <button onClick={() => goToProfile(status.authorId)} style={{ ...usernameButtonStyle, color: theme.colors.link }}>
+                        <h3 style={{ ...usernameStyle, color: theme.colors.textPrimary, fontSize: '1rem' }}>@{status.author}</h3>
+                      </button>
+                      <p style={{ ...emailStyle, color: theme.colors.textSecondary }}>ID del status: {status.id}</p>
+                    </div>
+                    <span style={{ ...bannedBadgeStyle, backgroundColor: '#95a5a6' }}>ELIMINADO</span>
+                  </div>
+                  <p style={{ color: theme.colors.textPrimary, marginBottom: '0.5rem', whiteSpace: 'pre-wrap' }}>{status.content}</p>
+                  {status.mediaUrl && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <a href={status.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ color: theme.colors.link, fontSize: '0.85rem' }}>📎 Ver media adjunto</a>
+                    </div>
+                  )}
+                  <div style={{ ...statsRowStyle, color: theme.colors.textSecondary }}>
+                    <span><strong>Creado:</strong> {new Date(status.createdAt).toLocaleString()}</span>
+                    <span><strong>Eliminado:</strong> {new Date(status.deletedAt).toLocaleString()}</span>
+                    {status.parentStatusId && <span><strong>Respuesta a:</strong> #{status.parentStatusId}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Deleted Messages */}
+      {activeTab === 'deletedMessages' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p style={{ ...statsStyle, color: theme.colors.textPrimary, margin: 0 }}>
+              Total: <strong>{deletedMessages.length}</strong> mensajes eliminados
+            </p>
+            <button onClick={loadDeletedMessages} style={{ ...banButtonStyle, fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+              🔄 Refrescar
+            </button>
+          </div>
+          {deletedLoading ? (
+            <div style={{ color: theme.colors.textSecondary }}>Cargando...</div>
+          ) : deletedMessages.length === 0 ? (
+            <div style={{ color: theme.colors.textSecondary, fontStyle: 'italic' }}>No hay mensajes eliminados</div>
+          ) : (
+            <div style={isMobile ? mobileUsersContainerStyle : usersContainerStyle}>
+              {deletedMessages.map((msg) => (
+                <div key={msg.id} style={isMobile ? { ...mobileUserCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border } : { ...userCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}>
+                  <div style={userHeaderStyle}>
+                    <div>
+                      <h3 style={{ ...usernameStyle, color: theme.colors.textPrimary, fontSize: '1rem', margin: 0 }}>@{msg.senderUsername}</h3>
+                      <p style={{ ...emailStyle, color: theme.colors.textSecondary }}>Chat #{msg.chatId} • Mensaje #{msg.id}</p>
+                    </div>
+                    <span style={{ ...bannedBadgeStyle, backgroundColor: '#95a5a6' }}>ELIMINADO</span>
+                  </div>
+                  <p style={{ color: theme.colors.textPrimary, marginBottom: '0.5rem', whiteSpace: 'pre-wrap' }}>{msg.content || '(sin texto)'}</p>
+                  {msg.mediaUrl && (
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ color: theme.colors.link, fontSize: '0.85rem' }}>📎 Ver media adjunto</a>
+                    </div>
+                  )}
+                  <div style={{ ...statsRowStyle, color: theme.colors.textSecondary }}>
+                    <span><strong>Enviado:</strong> {new Date(msg.createdAt).toLocaleString()}</span>
+                    <span><strong>Eliminado:</strong> {new Date(msg.deletedAt).toLocaleString()}</span>
+                    <span><strong>Entre usuarios:</strong> #{msg.chatUser1Id} ↔ #{msg.chatUser2Id}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Users (original) */}
+      {activeTab === 'users' && (
+        <div>
       <p style={{ ...statsStyle, color: theme.colors.textPrimary }}>Total de usuarios: <strong>{users.length}</strong></p>
       
       <div style={isMobile ? mobileUsersContainerStyle : usersContainerStyle}>
@@ -208,6 +384,102 @@ function AdminPage() {
           );
         })}
       </div>
+        </div>
+      )}
+      {/* Tab: Reports */}
+      {activeTab === 'reports' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p style={{ ...statsStyle, color: theme.colors.textPrimary, margin: 0 }}>
+              Total: <strong>{reportsTotalCount}</strong> reportes
+            </p>
+            <button onClick={loadReports} style={{ ...banButtonStyle, fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+              🔄 Refrescar
+            </button>
+          </div>
+          {reportsLoading ? (
+            <div style={{ color: theme.colors.textSecondary }}>Cargando reportes...</div>
+          ) : reports.length === 0 ? (
+            <div style={{ color: theme.colors.textSecondary, fontStyle: 'italic' }}>No hay reportes aún</div>
+          ) : (
+            <div style={isMobile ? mobileUsersContainerStyle : usersContainerStyle}>
+              {reports.map((report) => (
+                <div
+                  key={report.id}
+                  style={isMobile
+                    ? { ...mobileUserCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }
+                    : { ...userCardStyle, backgroundColor: theme.colors.cardBackground, borderColor: theme.colors.border }}
+                >
+                  {/* Header */}
+                  <div style={userHeaderStyle}>
+                    <div>
+                      <span style={{ ...bannedBadgeStyle, backgroundColor: '#e67e22', fontSize: '0.8rem' }}>
+                        🚩 {report.type}
+                      </span>
+                      <p style={{ ...emailStyle, color: theme.colors.textSecondary, marginTop: '0.35rem' }}>
+                        Reporte #{report.id}
+                      </p>
+                    </div>
+                    <span style={{ ...emailStyle, color: theme.colors.textSecondary, fontSize: '0.8rem' }}>
+                      {new Date(report.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Reportador */}
+                  <div style={{ ...statsRowStyle, color: theme.colors.textSecondary, marginBottom: '0.5rem' }}>
+                    <span>
+                      <strong>Reportador:</strong>{' '}
+                      <button
+                        onClick={() => goToProfile(report.reporter.id)}
+                        style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}
+                      >
+                        @{report.reporter.username}
+                      </button>
+                      <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem' }}>({report.reporter.email})</span>
+                    </span>
+                  </div>
+
+                  {/* Contenido reportado */}
+                  {report.reportedUser && (
+                    <div style={{ ...statsRowStyle, color: theme.colors.textSecondary }}>
+                      <span>
+                        <strong>Usuario reportado:</strong>{' '}
+                        <button
+                          onClick={() => goToProfile(report.reportedUser.id)}
+                          style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}
+                        >
+                          @{report.reportedUser.username}
+                        </button>
+                        <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem' }}>({report.reportedUser.email})</span>
+                      </span>
+                    </div>
+                  )}
+                  {report.statusId && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <strong style={{ color: theme.colors.textSecondary, fontSize: '0.875rem' }}>
+                        Publicación reportada (ID #{report.statusId}):
+                      </strong>
+                      {report.statusContent && (
+                        <p style={{
+                          margin: '0.35rem 0 0 0',
+                          padding: '0.65rem 0.85rem',
+                          backgroundColor: theme.colors.backgroundSecondary || theme.colors.cardBackgroundHover,
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          color: theme.colors.textPrimary,
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                          {report.statusContent}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -431,6 +703,30 @@ const errorStyle = {
   backgroundColor: '#fee',
   color: '#c00',
   borderRadius: '4px'
+};
+
+const tabBarStyle = {
+  display: 'flex',
+  gap: '0',
+  marginBottom: '1.5rem',
+  borderBottom: '2px solid #e1e8ed'
+};
+
+const tabStyle = {
+  background: 'none',
+  border: 'none',
+  borderBottom: '2px solid transparent',
+  padding: '0.75rem 1.25rem',
+  cursor: 'pointer',
+  fontSize: '0.95rem',
+  fontWeight: '500',
+  marginBottom: '-2px',
+  transition: 'all 0.2s'
+};
+
+const activeTabStyle = {
+  borderBottom: '2px solid currentColor',
+  fontWeight: '600'
 };
 
 export default AdminPage;

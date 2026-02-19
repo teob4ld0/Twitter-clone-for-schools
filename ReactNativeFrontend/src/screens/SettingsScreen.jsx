@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { usersAPI } from '../services/api';
 
 export default function SettingsScreen({ navigation }) {
+  const { t, i18n } = useTranslation();
   const { theme, themeMode, setTheme } = useTheme();
   const { logout } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -98,15 +101,20 @@ export default function SettingsScreen({ navigation }) {
     setTheme(mode);
   };
 
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+  };
+
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'ELIMINAR') return;
+    const confirmWord = i18n.language === 'es' ? 'ELIMINAR' : 'DELETE';
+    if (deleteConfirmText !== confirmWord) return;
     setIsDeleting(true);
     setDeleteError('');
     try {
       await usersAPI.deleteMyAccount();
       await logout();
     } catch (err) {
-      setDeleteError(err.message || 'Error al eliminar la cuenta. Intenta de nuevo.');
+      setDeleteError(t('settings.deleteAccountError'));
     } finally {
       setIsDeleting(false);
     }
@@ -118,12 +126,12 @@ export default function SettingsScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color={theme.colors.textOnPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Configuración</Text>
+        <Text style={styles.headerTitle}>{t('settings.title')}</Text>
       </View>
       
       <ScrollView>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Apariencia</Text>
+          <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
           
           <TouchableOpacity
             style={[styles.themeOption, themeMode === 'light' && styles.themeOptionActive]}
@@ -134,8 +142,8 @@ export default function SettingsScreen({ navigation }) {
                 <Feather name="sun" size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.themeInfo}>
-                <Text style={styles.themeTitle}>Tema Claro</Text>
-                <Text style={styles.themeDescription}>Colores brillantes y claros</Text>
+                <Text style={styles.themeTitle}>{t('settings.lightTheme')}</Text>
+                <Text style={styles.themeDescription}>{t('settings.lightThemeDesc')}</Text>
               </View>
             </View>
             {themeMode === 'light' && (
@@ -157,8 +165,8 @@ export default function SettingsScreen({ navigation }) {
                 <Feather name="moon" size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.themeInfo}>
-                <Text style={styles.themeTitle}>Tema Oscuro</Text>
-                <Text style={styles.themeDescription}>Colores oscuros para reducir la fatiga visual</Text>
+                <Text style={styles.themeTitle}>{t('settings.darkTheme')}</Text>
+                <Text style={styles.themeDescription}>{t('settings.darkThemeDesc')}</Text>
               </View>
             </View>
             {themeMode === 'dark' && (
@@ -172,9 +180,60 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* Sección Idioma */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+          
+          <TouchableOpacity
+            style={[styles.themeOption, i18n.language === 'es' && styles.themeOptionActive]}
+            onPress={() => handleLanguageChange('es')}
+          >
+            <View style={styles.themeOptionLeft}>
+              <View style={styles.themeIconContainer}>
+                <Text style={{ fontSize: 20 }}>🇪🇸</Text>
+              </View>
+              <View style={styles.themeInfo}>
+                <Text style={styles.themeTitle}>Español</Text>
+                <Text style={styles.themeDescription}>Spanish</Text>
+              </View>
+            </View>
+            {i18n.language === 'es' && (
+              <Feather 
+                name="check-circle" 
+                size={24} 
+                color={theme.colors.primary} 
+                style={styles.checkIcon}
+              />
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.themeOption, i18n.language === 'en' && styles.themeOptionActive]}
+            onPress={() => handleLanguageChange('en')}
+          >
+            <View style={styles.themeOptionLeft}>
+              <View style={styles.themeIconContainer}>
+                <Text style={{ fontSize: 20 }}>🇺🇸</Text>
+              </View>
+              <View style={styles.themeInfo}>
+                <Text style={styles.themeTitle}>English</Text>
+                <Text style={styles.themeDescription}>Inglés</Text>
+              </View>
+            </View>
+            {i18n.language === 'en' && (
+              <Feather 
+                name="check-circle" 
+                size={24} 
+                color={theme.colors.primary} 
+                style={styles.checkIcon}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+
         {/* Sección Legal */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Legal</Text>
+          <Text style={styles.sectionTitle}>{t('settings.legal')}</Text>
           
           <TouchableOpacity
             style={styles.themeOption}
@@ -185,8 +244,8 @@ export default function SettingsScreen({ navigation }) {
                 <Feather name="file-text" size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.themeInfo}>
-                <Text style={styles.themeTitle}>Política de Privacidad</Text>
-                <Text style={styles.themeDescription}>Consulta cómo manejamos tus datos</Text>
+                <Text style={styles.themeTitle}>{t('settings.privacyPolicy')}</Text>
+                <Text style={styles.themeDescription}>{t('settings.privacyPolicyDesc')}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
@@ -201,8 +260,8 @@ export default function SettingsScreen({ navigation }) {
                 <Feather name="help-circle" size={20} color={theme.colors.primary} />
               </View>
               <View style={styles.themeInfo}>
-                <Text style={styles.themeTitle}>Soporte</Text>
-                <Text style={styles.themeDescription}>Contacta a nuestro equipo de ayuda</Text>
+                <Text style={styles.themeTitle}>{t('settings.support')}</Text>
+                <Text style={styles.themeDescription}>{t('settings.supportDesc')}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={20} color={theme.colors.textSecondary} />
@@ -211,10 +270,10 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Sección Zona de Peligro */}
         <View style={[styles.section, { marginBottom: 40 }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.error || '#e74c3c' }]}>Zona de Peligro</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.error || '#e74c3c' }]}>{t('settings.dangerZone')}</Text>
           
           <Text style={{ fontSize: 14, color: theme.colors.textSecondary, lineHeight: 20, marginBottom: 16 }}>
-            Una vez que elimines tu cuenta, se borrarán todos tus datos permanentemente: publicaciones, mensajes, likes, seguidores y toda tu información. Esta acción no se puede deshacer.
+            {t('settings.deleteAccountWarning')}
           </Text>
 
           {!showDeleteConfirm ? (
@@ -227,8 +286,8 @@ export default function SettingsScreen({ navigation }) {
                   <Feather name="trash-2" size={20} color={theme.colors.error || '#e74c3c'} />
                 </View>
                 <View style={styles.themeInfo}>
-                  <Text style={[styles.themeTitle, { color: theme.colors.error || '#e74c3c' }]}>Eliminar mi cuenta</Text>
-                  <Text style={styles.themeDescription}>Acción irreversible</Text>
+                  <Text style={[styles.themeTitle, { color: theme.colors.error || '#e74c3c' }]}>{t('settings.deleteAccount')}</Text>
+                  <Text style={styles.themeDescription}>{t('settings.deleteAccountIrreversible')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -241,12 +300,12 @@ export default function SettingsScreen({ navigation }) {
               borderColor: theme.colors.error || '#e74c3c',
             }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: theme.colors.error || '#e74c3c', marginBottom: 12 }}>
-                ¿Estás seguro? Escribe ELIMINAR para confirmar:
+                {t('settings.deleteAccountConfirm')}
               </Text>
               <TextInput
                 value={deleteConfirmText}
                 onChangeText={setDeleteConfirmText}
-                placeholder="Escribe ELIMINAR"
+                placeholder={t('settings.deleteAccountPlaceholder')}
                 placeholderTextColor={theme.colors.textSecondary}
                 autoCapitalize="characters"
                 style={{
@@ -263,12 +322,12 @@ export default function SettingsScreen({ navigation }) {
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 <TouchableOpacity
                   onPress={handleDeleteAccount}
-                  disabled={deleteConfirmText !== 'ELIMINAR' || isDeleting}
+                  disabled={deleteConfirmText !== (i18n.language === 'es' ? 'ELIMINAR' : 'DELETE') || isDeleting}
                   style={{
                     flex: 1,
                     padding: 12,
                     borderRadius: 10,
-                    backgroundColor: deleteConfirmText === 'ELIMINAR' ? (theme.colors.error || '#e74c3c') : (theme.colors.border || '#ccc'),
+                    backgroundColor: deleteConfirmText === (i18n.language === 'es' ? 'ELIMINAR' : 'DELETE') ? (theme.colors.error || '#e74c3c') : (theme.colors.border || '#ccc'),
                     alignItems: 'center',
                     opacity: isDeleting ? 0.7 : 1,
                   }}
@@ -276,7 +335,7 @@ export default function SettingsScreen({ navigation }) {
                   {isDeleting ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Confirmar</Text>
+                    <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>{t('common.confirm')}</Text>
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -290,7 +349,7 @@ export default function SettingsScreen({ navigation }) {
                     alignItems: 'center',
                   }}
                 >
-                  <Text style={{ color: theme.colors.textPrimary, fontWeight: '600', fontSize: 14 }}>Cancelar</Text>
+                  <Text style={{ color: theme.colors.textPrimary, fontWeight: '600', fontSize: 14 }}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
               </View>
               {deleteError ? (

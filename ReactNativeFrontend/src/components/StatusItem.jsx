@@ -18,10 +18,11 @@ import * as ImagePicker from '../utils/imagePicker';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { statusAPI, interestSignalsAPI, mediaAPI } from '../services/api';
+import { statusAPI, interestSignalsAPI, mediaAPI, reportsAPI } from '../services/api';
 import ReplyList from './ReplyList';
 import ImageViewer from './ImageViewer';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -37,6 +38,7 @@ function StatusItem({
   const { user } = useAuth();
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useThemedStyles(theme);
 
   // Validación defensiva
@@ -75,6 +77,16 @@ function StatusItem({
 
   // Estado para modal de confirmación de borrado
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Estado para el modal de opciones (tres puntos)
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+
+  // Estado para el modal de reporte
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null); // 'status' | 'user'
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   // Estado para respuestas
   const [showReplies, setShowReplies] = useState(initialShowReplies);
@@ -143,11 +155,12 @@ function StatusItem({
     const now = new Date();
     const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return 'Hace unos minutos';
-    if (diffInHours < 24) return `Hace ${diffInHours} horas`;
-    if (diffInHours < 48) return 'Ayer';
+    if (diffInHours < 1) return t('dates.minutesAgo', { count: Math.max(1, Math.floor(diffInHours * 60)) });
+    if (diffInHours < 24) return t('dates.hoursAgo', { count: diffInHours });
+    if (diffInHours < 48) return t('dates.yesterday');
 
-    return date.toLocaleDateString('es-ES', {
+    const locale = t('common.language') === 'en' ? 'en-US' : 'es-ES';
+    return date.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
@@ -155,7 +168,33 @@ function StatusItem({
   };
 
   const handleDelete = () => {
+    setShowOptionsModal(false);
     setShowDeleteModal(true);
+  };
+
+  const handleOpenReportModal = (target) => {
+    setShowOptionsModal(false);
+    setReportTarget(target);
+    setSelectedReason(null);
+    setReportSuccess(false);
+    setShowReportModal(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!selectedReason || isSubmittingReport) return;
+    setIsSubmittingReport(true);
+    try {
+      await reportsAPI.create({
+        statusId: reportTarget === 'status' ? status.id : null,
+        otherUserId: reportTarget === 'user' ? status.authorId : null,
+        type: selectedReason
+      });
+      setReportSuccess(true);
+    } catch (err) {
+      Alert.alert(t('common.error'), err.message || t('report.error'));
+    } finally {
+      setIsSubmittingReport(false);
+    }
   };
 
   const confirmDelete = () => {
@@ -526,17 +565,16 @@ function StatusItem({
           </View>
         </View>
 
-        {isAuthor && (
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-            style={styles.deleteButton}
-          >
-            <Feather name="trash-2" size={18} color={theme.colors.textSecondary} />
-          </TouchableOpacity>
-        )}
+        {/* Botón de tres puntos - opciones */}
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            setShowOptionsModal(true);
+          }}
+          style={styles.deleteButton}
+        >
+          <Feather name="more-horizontal" size={18} color={theme.colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -870,6 +908,181 @@ function StatusItem({
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Modal de opciones (tres puntos) */}
+      <Modal
+        visible={showOptionsModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowOptionsModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowOptionsModal(false)}
+        >
+          <View style={styles.repostMenu}>
+            {isAuthor && (
+              <>
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  style={styles.menuItem}
+                >
+                  <Feather name="trash-2" size={20} color={theme.colors.error} />
+                  <Text style={[styles.menuItemText, { color: theme.colors.error }]}>
+                    {t('common.delete') || 'Eliminar'}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {!isAuthor && (
+              <>
+                <TouchableOpacity
+                  onPress={() => handleOpenReportModal('status')}
+                  style={styles.menuItem}
+                >
+                  <Feather name="flag" size={20} color={theme.colors.textPrimary} />
+                  <Text style={styles.menuItemText}>{t('report.reportPost') || 'Reportar publicación'}</Text>
+                </TouchableOpacity>
+                <View style={styles.menuDivider} />
+                <TouchableOpacity
+                  onPress={() => handleOpenReportModal('user')}
+                  style={styles.menuItem}
+                >
+                  <Feather name="flag" size={20} color={theme.colors.textPrimary} />
+                  <Text style={styles.menuItemText}>{t('report.reportUser') || 'Reportar usuario'}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Modal de reporte */}
+      <Modal
+        visible={showReportModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => { setShowReportModal(false); setReportSuccess(false); }}
+      >
+        <View style={[styles.menuOverlay, { justifyContent: 'flex-end' }]}>
+          <View style={{
+            backgroundColor: theme.colors.cardBackground,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 20,
+            paddingTop: 16,
+            paddingBottom: 32,
+            maxHeight: '85%'
+          }}>
+            {reportSuccess ? (
+              <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+                <Feather name="check-circle" size={48} color={theme.colors.success || '#27ae60'} />
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.textPrimary, marginTop: 12 }}>
+                  {t('report.submitted') || 'Reporte enviado'}
+                </Text>
+                <Text style={{ color: theme.colors.textSecondary, marginTop: 8, textAlign: 'center' }}>
+                  Gracias. Revisaremos tu reporte a la brevedad.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => { setShowReportModal(false); setReportSuccess(false); }}
+                  style={{ marginTop: 20, paddingHorizontal: 32, paddingVertical: 12, backgroundColor: theme.colors.primary, borderRadius: 24 }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>{t('common.close') || 'Cerrar'}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text style={{ fontSize: 17, fontWeight: 'bold', color: theme.colors.textPrimary }}>
+                    🚩 {reportTarget === 'status' ? (t('report.reportPost') || 'Reportar publicación') : (t('report.reportUser') || 'Reportar usuario')}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowReportModal(false)}>
+                    <Feather name="x" size={22} color={theme.colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={{ color: theme.colors.textSecondary, marginBottom: 12, fontSize: 14 }}>
+                  {t('report.selectReason') || 'Selecciona el motivo del reporte:'}
+                </Text>
+                <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                  {[
+                    { id: 'Violence', key: 'report.reasons.Violence', fallback: 'Violencia' },
+                    { id: 'Pornography', key: 'report.reasons.Pornography', fallback: 'Pornografía' },
+                    { id: 'Bullying', key: 'report.reasons.Bullying', fallback: 'Bullying / Acoso' },
+                    { id: 'Blackmail', key: 'report.reasons.Blackmail', fallback: 'Extorsión / Chantaje' },
+                    { id: 'Stalking', key: 'report.reasons.Stalking', fallback: 'Acoso / Stalking' },
+                    { id: 'Abuse', key: 'report.reasons.Abuse', fallback: 'Abuso' },
+                    { id: 'ScholarDamage', key: 'report.reasons.ScholarDamage', fallback: 'Daño a instalaciones escolares' },
+                    { id: 'DrugUse', key: 'report.reasons.DrugUse', fallback: 'Uso de drogas' },
+                    { id: 'AlcoholUse', key: 'report.reasons.AlcoholUse', fallback: 'Uso de alcohol' },
+                    { id: 'SelfHarm', key: 'report.reasons.SelfHarm', fallback: 'Autolesiones' },
+                    { id: 'Disrespect', key: 'report.reasons.Disrespect', fallback: 'Falta de respeto / Normas escolares' }
+                  ].map((reason) => (
+                    <TouchableOpacity
+                      key={reason.id}
+                      onPress={() => setSelectedReason(reason.id)}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingVertical: 11,
+                        paddingHorizontal: 12,
+                        borderRadius: 10,
+                        marginBottom: 6,
+                        borderWidth: 1.5,
+                        borderColor: selectedReason === reason.id ? theme.colors.primary : theme.colors.border,
+                        backgroundColor: selectedReason === reason.id
+                          ? `${theme.colors.primary}18`
+                          : theme.colors.cardBackground
+                      }}
+                    >
+                      <View style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: selectedReason === reason.id ? theme.colors.primary : theme.colors.border,
+                        backgroundColor: selectedReason === reason.id ? theme.colors.primary : 'transparent',
+                        marginRight: 10
+                      }} />
+                      <Text style={{ color: theme.colors.textPrimary, fontSize: 14 }}>
+                        {t(reason.key) || reason.fallback}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+                  <TouchableOpacity
+                    onPress={() => setShowReportModal(false)}
+                    style={{ flex: 1, paddingVertical: 12, borderRadius: 24, borderWidth: 1, borderColor: theme.colors.border, alignItems: 'center' }}
+                  >
+                    <Text style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>{t('common.cancel') || 'Cancelar'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSubmitReport}
+                    disabled={!selectedReason || isSubmittingReport}
+                    style={{
+                      flex: 2,
+                      paddingVertical: 12,
+                      borderRadius: 24,
+                      backgroundColor: theme.colors.primary,
+                      alignItems: 'center',
+                      opacity: !selectedReason || isSubmittingReport ? 0.5 : 1
+                    }}
+                  >
+                    {isSubmittingReport ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                        Enviar reporte
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
       </Modal>
 
       {/* Image Viewer for fullscreen display */}

@@ -10,14 +10,17 @@ import {
   TextInput,
   RefreshControl,
   ScrollView,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { adminAPI } from '../services/api';
+import { useTranslation } from 'react-i18next';
+import { adminAPI, reportsAPI } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
 const AdminScreen = ({ navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useAdminThemedStyles(theme);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -26,6 +29,13 @@ const AdminScreen = ({ navigation }) => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
+  const [activeTab, setActiveTab] = useState('users');
+  const [deletedStatuses, setDeletedStatuses] = useState([]);
+  const [deletedMessages, setDeletedMessages] = useState([]);
+  const [deletedLoading, setDeletedLoading] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportsTotalCount, setReportsTotalCount] = useState(0);
 
   useEffect(() => {
     loadUsers();
@@ -75,28 +85,70 @@ const AdminScreen = ({ navigation }) => {
     setFilteredUsers(filtered);
   };
 
+  const loadDeletedStatuses = async () => {
+    try {
+      setDeletedLoading(true);
+      const response = await adminAPI.getDeletedStatuses();
+      setDeletedStatuses(response.data);
+    } catch (err) {
+      console.error('Error loading deleted statuses:', err);
+    } finally {
+      setDeletedLoading(false);
+    }
+  };
+
+  const loadDeletedMessages = async () => {
+    try {
+      setDeletedLoading(true);
+      const response = await adminAPI.getDeletedMessages();
+      setDeletedMessages(response.data);
+    } catch (err) {
+      console.error('Error loading deleted messages:', err);
+    } finally {
+      setDeletedLoading(false);
+    }
+  };
+
+  const loadReports = async () => {
+    try {
+      setReportsLoading(true);
+      const response = await reportsAPI.getAll({ pageSize: 100 });
+      setReports(response.data.data || []);
+      setReportsTotalCount(response.data.total || 0);
+    } catch (err) {
+      console.error('Error loading reports:', err);
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'deletedStatuses' && deletedStatuses.length === 0) {
+      loadDeletedStatuses();
+    } else if (activeTab === 'deletedMessages' && deletedMessages.length === 0) {
+      loadDeletedMessages();
+    } else if (activeTab === 'reports' && reports.length === 0) {
+      loadReports();
+    }
+  }, [activeTab]);
+
   const handleBanUser = async (userId, username, isBanned) => {
-    const action = isBanned ? 'desbanear' : 'banear';
-    
     Alert.alert(
-      `${action.charAt(0).toUpperCase() + action.slice(1)} Usuario`,
-      `¿Estás seguro de que deseas ${action} a ${username}?`,
+      isBanned ? t('admin.unbanUser') : t('admin.banUser'),
+      `¿Estás seguro de que deseas ${isBanned ? t('admin.unbanUser').toLowerCase() : t('admin.banUser').toLowerCase()} a ${username}?`,
       [
+        { text: t('common.cancel') || 'Cancelar', style: 'cancel' },
         {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Confirmar',
+          text: t('common.confirm') || 'Confirmar',
           style: 'destructive',
           onPress: async () => {
             try {
               setActionLoading(userId);
               await adminAPI.banUser(userId);
               await loadUsers();
-              Alert.alert('Éxito', `Usuario ${isBanned ? 'desbaneado' : 'baneado'} correctamente`);
+              Alert.alert('✓', isBanned ? t('admin.unbanSuccess') : t('admin.banSuccess'));
             } catch (err) {
-              Alert.alert('Error', err.message || `Error al ${action} usuario`);
+              Alert.alert('Error', err.message || t('admin.actionError'));
               console.error('Error:', err);
             } finally {
               setActionLoading(null);
@@ -109,24 +161,21 @@ const AdminScreen = ({ navigation }) => {
 
   const handleDeleteUser = async (userId, username) => {
     Alert.alert(
-      '⚠️ ELIMINAR USUARIO',
-      `¿Estás COMPLETAMENTE seguro de que deseas ELIMINAR PERMANENTEMENTE a ${username}?\n\nEsta acción NO se puede deshacer.`,
+      `⚠️ ${t('admin.deleteUser').toUpperCase()}`,
+      `${t('admin.deleteUserConfirm').replace('este usuario', username)}\n\nEsta acción NO se puede deshacer.`,
       [
+        { text: t('common.cancel') || 'Cancelar', style: 'cancel' },
         {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'ELIMINAR',
+          text: t('admin.deleteUser').toUpperCase(),
           style: 'destructive',
           onPress: async () => {
             try {
               setActionLoading(userId);
               await adminAPI.deleteUser(userId);
               await loadUsers();
-              Alert.alert('Éxito', 'Usuario eliminado correctamente');
+              Alert.alert('✓', t('admin.deleteSuccess'));
             } catch (err) {
-              Alert.alert('Error', err.message || 'Error al eliminar usuario');
+              Alert.alert('Error', err.message || t('admin.actionError'));
               console.error('Error:', err);
             } finally {
               setActionLoading(null);
@@ -172,12 +221,12 @@ const AdminScreen = ({ navigation }) => {
             <View style={styles.usernameRow}>
               <Text style={styles.username}>{item.username}</Text>
               {item.banned && <View style={styles.bannedBadge}>
-                <Text style={styles.bannedText}>BANEADO</Text>
+                <Text style={styles.bannedText}>{t('admin.banned')}</Text>
               </View>}
             </View>
             <Text style={styles.email}>{item.email}</Text>
             <Text style={styles.userMeta}>ID: {item.id}</Text>
-            <Text style={styles.userMeta}>Creado: {formatDate(item.createdAt)}</Text>
+            <Text style={styles.userMeta}>{t('admin.createdAt', { date: formatDate(item.createdAt) })}</Text>
           </View>
         </View>
 
@@ -201,7 +250,7 @@ const AdminScreen = ({ navigation }) => {
         <View style={styles.badgeContainer}>
           <View style={isStudent ? styles.studentBadge : styles.adminBadge}>
             <Text style={styles.badgeText}>
-              {isStudent ? '🎓 Estudiante' : '👑 Admin'}
+              {isStudent ? t('admin.student') : t('admin.admin')}
             </Text>
           </View>
         </View>
@@ -224,7 +273,7 @@ const AdminScreen = ({ navigation }) => {
                     color={theme.colors.textOnPrimary}
                   />
                   <Text style={styles.actionButtonText}>
-                    {item.banned ? 'Desbanear' : 'Banear'}
+                    {item.banned ? t('admin.unbanUser') : t('admin.banUser')}
                   </Text>
                 </>
               )}
@@ -240,7 +289,7 @@ const AdminScreen = ({ navigation }) => {
               ) : (
                 <>
                   <Feather name="trash-2" size={16} color={theme.colors.textOnPrimary} />
-                  <Text style={styles.actionButtonText}>Eliminar</Text>
+                  <Text style={styles.actionButtonText}>{t('admin.deleteUser')}</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -250,11 +299,169 @@ const AdminScreen = ({ navigation }) => {
     );
   };
 
+  const renderDeletedStatus = ({ item }) => (
+    <View style={styles.userCard}>
+      <View style={styles.userHeader}>
+        <View style={styles.avatarContainer}>
+          {item.authorProfilePictureUrl ? (
+            <Image source={{ uri: item.authorProfilePictureUrl }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>{item.author?.charAt(0).toUpperCase() || '?'}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.userInfo}>
+          <View style={styles.usernameRow}>
+            <Text style={styles.username}>@{item.author}</Text>
+            <View style={[styles.bannedBadge, { backgroundColor: '#95a5a6' }]}>
+              <Text style={styles.bannedText}>{t('admin.deleted')}</Text>
+            </View>
+          </View>
+          <Text style={styles.userMeta}>{t('admin.statusId', { id: item.id })}</Text>
+        </View>
+      </View>
+      <Text style={{ color: theme.colors.textPrimary, marginBottom: 8 }}>{item.content}</Text>
+      {item.mediaUrl && (
+          <Text style={{ color: theme.colors.primary, fontSize: 13, marginBottom: 8 }}>{t('admin.mediaAttachment')}</Text>
+      )}
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
+          <Feather name="clock" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{t('admin.createdAt', { date: formatDate(item.createdAt) })}</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Feather name="trash-2" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{t('admin.deletedAt', { date: formatDate(item.deletedAt) })}</Text>
+        </View>
+      </View>
+      {item.parentStatusId && (
+        <Text style={{ color: theme.colors.textSecondary, fontSize: 12, marginTop: 4 }}>
+          {t('admin.replyTo', { id: item.parentStatusId })}
+        </Text>
+      )}
+    </View>
+  );
+
+  const renderDeletedMessage = ({ item }) => (
+    <View style={styles.userCard}>
+      <View style={styles.userHeader}>
+        <View style={styles.avatarContainer}>
+          {item.senderProfilePictureUrl ? (
+            <Image source={{ uri: item.senderProfilePictureUrl }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>{item.senderUsername?.charAt(0).toUpperCase() || '?'}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.userInfo}>
+          <View style={styles.usernameRow}>
+            <Text style={styles.username}>@{item.senderUsername}</Text>
+            <View style={[styles.bannedBadge, { backgroundColor: '#95a5a6' }]}>
+              <Text style={styles.bannedText}>{t('admin.deleted')}</Text>
+            </View>
+          </View>
+          <Text style={styles.userMeta}>{t('admin.messageId', { chatId: item.chatId, id: item.id })}</Text>
+        </View>
+      </View>
+      <Text style={{ color: theme.colors.textPrimary, marginBottom: 8 }}>{item.content || t('admin.noText')}</Text>
+      {item.mediaUrl && (
+        <Text style={{ color: theme.colors.primary, fontSize: 13, marginBottom: 8 }}>{t('admin.mediaAttachment')}</Text>
+      )}
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
+          <Feather name="clock" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{t('admin.sentAt', { date: formatDate(item.createdAt) })}</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Feather name="trash-2" size={12} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{t('admin.deletedAt', { date: formatDate(item.deletedAt) })}</Text>
+        </View>
+      </View>
+      <Text style={{ color: theme.colors.textSecondary, fontSize: 12, marginTop: 4 }}>
+        {t('admin.betweenUsers', { user1: item.chatUser1Id, user2: item.chatUser2Id })}
+      </Text>
+    </View>
+  );
+
+  const renderReportItem = ({ item }) => (
+    <View style={styles.userCard}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <Text style={{ fontSize: 12, color: theme.colors.textSecondary }}>
+          {t('admin.reportId', { id: item.id }) || `Reporte #${item.id}`}
+        </Text>
+        <View style={{
+          backgroundColor: `${theme.colors.error}22`,
+          borderRadius: 8,
+          paddingHorizontal: 8,
+          paddingVertical: 3,
+          borderWidth: 1,
+          borderColor: `${theme.colors.error}55`
+        }}>
+          <Text style={{ fontSize: 11, color: theme.colors.error, fontWeight: 'bold' }}>
+            {item.type}
+          </Text>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+        <Feather name="user" size={13} color={theme.colors.textSecondary} style={{ marginRight: 4 }} />
+        <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+          {t('admin.reporter') || 'Reportado por'}:{' '}
+          <Text style={{ color: theme.colors.textPrimary, fontWeight: '600' }}>
+            @{item.reporter?.username}
+          </Text>
+        </Text>
+      </View>
+
+      {item.reportedUser && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+          <Feather name="alert-circle" size={13} color={theme.colors.warning} style={{ marginRight: 4 }} />
+          <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+            {t('admin.reportedUser') || 'Usuario reportado'}:{' '}
+            <Text style={{ color: theme.colors.textPrimary, fontWeight: '600' }}>
+              @{item.reportedUser?.username}
+            </Text>
+          </Text>
+        </View>
+      )}
+
+      {item.statusId && (
+        <View style={{ marginBottom: 4 }}>
+          <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
+            {t('admin.reportedPost') || 'Publicación reportada'} (#{item.statusId}):
+          </Text>
+          {item.statusContent && (
+            <View style={{
+              backgroundColor: theme.colors.backgroundSecondary,
+              borderRadius: 8,
+              padding: 8,
+              borderWidth: 1,
+              borderColor: theme.colors.border
+            }}>
+              <Text style={{ fontSize: 13, color: theme.colors.textPrimary }} numberOfLines={3}>
+                {item.statusContent}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+        <Feather name="clock" size={12} color={theme.colors.textSecondary} style={{ marginRight: 4 }} />
+        <Text style={{ fontSize: 12, color: theme.colors.textSecondary }}>
+          {formatDate(item.createdAt)}
+        </Text>
+      </View>
+    </View>
+  );
+
   if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Cargando usuarios...</Text>
+        <Text style={styles.loadingText}>{t('admin.loading')}</Text>
       </View>
     );
   }
@@ -265,7 +472,7 @@ const AdminScreen = ({ navigation }) => {
         <Feather name="alert-circle" size={48} color={theme.colors.error} />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={loadUsers}>
-          <Text style={styles.retryButtonText}>Reintentar</Text>
+          <Text style={styles.retryButtonText}>{t('errors.tryAgain')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -275,16 +482,55 @@ const AdminScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Panel Admin</Text>
-        <Text style={styles.subtitle}>Total usuarios: {users.length}</Text>
+        <Text style={styles.title}>{t('admin.title')}</Text>
+        <Text style={styles.subtitle}>{t('admin.totalUsersCount', { count: users.length })}</Text>
       </View>
 
+      {/* Tabs */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'users' && styles.activeTab]}
+          onPress={() => setActiveTab('users')}
+        >
+          <Text style={[styles.tabText, activeTab === 'users' && { color: theme.colors.primary }]}>
+            👥 {t('admin.users')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'deletedStatuses' && styles.activeTab]}
+          onPress={() => setActiveTab('deletedStatuses')}
+        >
+          <Text style={[styles.tabText, activeTab === 'deletedStatuses' && { color: theme.colors.primary }]}>
+            🗑️ {t('admin.deletedStatuses')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'deletedMessages' && styles.activeTab]}
+          onPress={() => setActiveTab('deletedMessages')}
+        >
+          <Text style={[styles.tabText, activeTab === 'deletedMessages' && { color: theme.colors.primary }]}>
+            💬 {t('admin.deletedMessages')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'reports' && styles.activeTab]}
+          onPress={() => setActiveTab('reports')}
+        >
+          <Text style={[styles.tabText, activeTab === 'reports' && { color: theme.colors.primary }]}>
+            🚩 {t('admin.reportsTab') || 'Reportes'}{reportsTotalCount > 0 ? ` (${reportsTotalCount})` : ''}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Tab: Users */}
+      {activeTab === 'users' && (
+        <>
       {/* Buscador */}
       <View style={styles.searchContainer}>
         <Feather name="search" size={20} color={theme.colors.textSecondary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar por usuario, email o ID..."
+          placeholder={t('admin.searchPlaceholder')}
           placeholderTextColor={theme.colors.textTertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -314,11 +560,106 @@ const AdminScreen = ({ navigation }) => {
           <View style={styles.emptyContainer}>
             <Feather name="users" size={48} color={theme.colors.textSecondary} />
             <Text style={styles.emptyText}>
-              {searchQuery ? 'No se encontraron usuarios' : 'No hay usuarios'}
+              {searchQuery ? t('admin.noUsersFound') : t('admin.noUsers')}
             </Text>
           </View>
         }
       />
+        </>
+      )}
+
+      {/* Tab: Deleted Statuses */}
+      {activeTab === 'deletedStatuses' && (
+        deletedLoading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>{t('admin.loadingDeletedStatuses')}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={deletedStatuses}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderDeletedStatus}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={loadDeletedStatuses} tintColor={theme.colors.primary} colors={[theme.colors.primary]} />
+            }
+            ListHeaderComponent={
+              <Text style={[styles.subtitle, { padding: 16, paddingBottom: 8 }]}>
+                {t('admin.deletedStatusesCount', { count: deletedStatuses.length })}
+              </Text>
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Feather name="check-circle" size={48} color={theme.colors.textSecondary} />
+                <Text style={styles.emptyText}>{t('admin.noDeletedStatuses')}</Text>
+              </View>
+            }
+          />
+        )
+      )}
+
+      {/* Tab: Deleted Messages */}
+      {activeTab === 'deletedMessages' && (
+        deletedLoading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>{t('admin.loadingDeletedMessages')}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={deletedMessages}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderDeletedMessage}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={loadDeletedMessages} tintColor={theme.colors.primary} colors={[theme.colors.primary]} />
+            }
+            ListHeaderComponent={
+              <Text style={[styles.subtitle, { padding: 16, paddingBottom: 8 }]}>
+                {t('admin.deletedMessagesCount', { count: deletedMessages.length })}
+              </Text>
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Feather name="check-circle" size={48} color={theme.colors.textSecondary} />
+                <Text style={styles.emptyText}>{t('admin.noDeletedMessages')}</Text>
+              </View>
+            }
+          />
+        )
+      )}
+
+      {/* Tab: Reports */}
+      {activeTab === 'reports' && (
+        reportsLoading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={styles.loadingText}>{t('admin.loading')}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={reports}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderReportItem}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={loadReports} tintColor={theme.colors.primary} colors={[theme.colors.primary]} />
+            }
+            ListHeaderComponent={
+              <Text style={[styles.subtitle, { padding: 16, paddingBottom: 8 }]}>
+                {t('admin.totalReports', { count: reportsTotalCount }) || `Total: ${reportsTotalCount} reportes`}
+              </Text>
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Feather name="check-circle" size={48} color={theme.colors.textSecondary} />
+                <Text style={styles.emptyText}>{t('admin.noReports') || 'No hay reportes'}</Text>
+              </View>
+            }
+          />
+        )
+      )}
     </View>
   );
 };
@@ -328,6 +669,27 @@ function useAdminThemedStyles(theme) {
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    tabBar: {
+      flexDirection: 'row',
+      borderBottomWidth: 2,
+      borderBottomColor: theme.colors.border,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 12,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+      marginBottom: -2,
+    },
+    activeTab: {
+      borderBottomColor: theme.colors.primary,
+    },
+    tabText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: theme.colors.textSecondary,
     },
     centerContainer: {
       flex: 1,
