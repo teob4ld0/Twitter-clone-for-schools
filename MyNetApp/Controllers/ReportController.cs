@@ -93,6 +93,7 @@ public class ReportController : ControllerBase
             .Include(r => r.Reporter)
             .Include(r => r.OtherUser)
             .Include(r => r.Status)
+                .ThenInclude(s => s.User)
             .AsQueryable();
 
         if (type != null)
@@ -114,11 +115,14 @@ public class ReportController : ControllerBase
             {
                 r.Id,
                 r.CreatedAt,
-                Reporter = new { r.Reporter.Id, r.Reporter.Username, r.Reporter.Email },
+                Reporter = new { r.Reporter.Id, r.Reporter.Username, r.Reporter.Email, r.Reporter.ProfilePictureUrl },
                 r.StatusId,
                 StatusContent = r.Status != null ? r.Status.Content : null,
+                StatusAuthor = r.Status != null
+                    ? new { r.Status.User.Id, r.Status.User.Username, r.Status.User.ProfilePictureUrl }
+                    : (object?)null,
                 ReportedUser = r.OtherUser != null
-                    ? new { r.OtherUser.Id, r.OtherUser.Username, r.OtherUser.Email }
+                    ? new { r.OtherUser.Id, r.OtherUser.Username, r.OtherUser.Email, r.OtherUser.ProfilePictureUrl }
                     : (object?)null,
                 Type = r.Type.ToString(),
                 TypeId = (int)r.Type
@@ -143,6 +147,7 @@ public class ReportController : ControllerBase
             .Include(r => r.Reporter)
             .Include(r => r.OtherUser)
             .Include(r => r.Status)
+                .ThenInclude(s => s.User)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (report == null)
@@ -152,11 +157,14 @@ public class ReportController : ControllerBase
         {
             report.Id,
             report.CreatedAt,
-            Reporter = new { report.Reporter.Id, report.Reporter.Username, report.Reporter.Email },
+            Reporter = new { report.Reporter.Id, report.Reporter.Username, report.Reporter.Email, report.Reporter.ProfilePictureUrl },
             report.StatusId,
             StatusContent = report.Status?.Content,
+            StatusAuthor = report.Status != null
+                ? new { report.Status.User.Id, report.Status.User.Username, report.Status.User.ProfilePictureUrl }
+                : (object?)null,
             ReportedUser = report.OtherUser != null
-                ? new { report.OtherUser.Id, report.OtherUser.Username, report.OtherUser.Email }
+                ? new { report.OtherUser.Id, report.OtherUser.Username, report.OtherUser.Email, report.OtherUser.ProfilePictureUrl }
                 : (object?)null,
             Type = report.Type.ToString(),
             TypeId = (int)report.Type

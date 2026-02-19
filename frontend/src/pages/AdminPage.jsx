@@ -426,51 +426,78 @@ function AdminPage() {
                   </div>
 
                   {/* Reportador */}
-                  <div style={{ ...statsRowStyle, color: theme.colors.textSecondary, marginBottom: '0.5rem' }}>
-                    <span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    {report.reporter.profilePictureUrl
+                      ? <img src={report.reporter.profilePictureUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      : <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: theme.colors.primary + '33', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.75rem', fontWeight: 'bold', color: theme.colors.primary }}>{report.reporter.username?.[0]?.toUpperCase()}</div>
+                    }
+                    <span style={{ fontSize: '0.875rem', color: theme.colors.textSecondary }}>
                       <strong>Reportador:</strong>{' '}
-                      <button
-                        onClick={() => goToProfile(report.reporter.id)}
-                        style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}
-                      >
+                      <button onClick={() => goToProfile(report.reporter.id)} style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}>
                         @{report.reporter.username}
                       </button>
-                      <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem' }}>({report.reporter.email})</span>
+                      <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem', color: theme.colors.textSecondary }}>({report.reporter.email})</span>
                     </span>
                   </div>
 
                   {/* Contenido reportado */}
                   {report.reportedUser && (
-                    <div style={{ ...statsRowStyle, color: theme.colors.textSecondary }}>
-                      <span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      {report.reportedUser.profilePictureUrl
+                        ? <img src={report.reportedUser.profilePictureUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        : <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#e67e2233', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.75rem', fontWeight: 'bold', color: '#e67e22' }}>{report.reportedUser.username?.[0]?.toUpperCase()}</div>
+                      }
+                      <span style={{ fontSize: '0.875rem', color: theme.colors.textSecondary }}>
                         <strong>Usuario reportado:</strong>{' '}
-                        <button
-                          onClick={() => goToProfile(report.reportedUser.id)}
-                          style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}
-                        >
+                        <button onClick={() => goToProfile(report.reportedUser.id)} style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.9rem' }}>
                           @{report.reportedUser.username}
                         </button>
-                        <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem' }}>({report.reportedUser.email})</span>
+                        <span style={{ fontSize: '0.8rem', marginLeft: '0.25rem', color: theme.colors.textSecondary }}>({report.reportedUser.email})</span>
                       </span>
                     </div>
                   )}
                   {report.statusId && (
                     <div style={{ marginTop: '0.5rem' }}>
-                      <strong style={{ color: theme.colors.textSecondary, fontSize: '0.875rem' }}>
-                        Publicación reportada (ID #{report.statusId}):
-                      </strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
+                        <strong style={{ color: theme.colors.textSecondary, fontSize: '0.875rem' }}>
+                          Publicación reportada:
+                        </strong>
+                        {report.statusAuthor && (
+                          <button
+                            onClick={() => goToProfile(report.statusAuthor.id)}
+                            style={{ ...usernameButtonStyle, color: theme.colors.link, fontSize: '0.85rem' }}
+                          >
+                            @{report.statusAuthor.username}
+                          </button>
+                        )}
+                      </div>
                       {report.statusContent && (
-                        <p style={{
-                          margin: '0.35rem 0 0 0',
-                          padding: '0.65rem 0.85rem',
-                          backgroundColor: theme.colors.backgroundSecondary || theme.colors.cardBackgroundHover,
-                          borderRadius: '8px',
-                          fontSize: '0.875rem',
-                          color: theme.colors.textPrimary,
-                          whiteSpace: 'pre-wrap'
-                        }}>
+                        <button
+                          onClick={() => navigate(`/status/${report.statusId}`)}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            textAlign: 'left',
+                            margin: 0,
+                            padding: '0.65rem 0.85rem',
+                            backgroundColor: theme.colors.backgroundSecondary || theme.colors.cardBackgroundHover,
+                            borderRadius: '8px',
+                            fontSize: '0.875rem',
+                            color: theme.colors.textPrimary,
+                            whiteSpace: 'pre-wrap',
+                            border: `1px solid ${theme.colors.border}`,
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            transition: 'opacity 0.15s'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
+                          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                        >
                           {report.statusContent}
-                        </p>
+                          <span style={{ display: 'block', fontSize: '0.75rem', color: theme.colors.link, marginTop: '0.35rem' }}>
+                            Ver publicación →
+                          </span>
+                        </button>
                       )}
                     </div>
                   )}

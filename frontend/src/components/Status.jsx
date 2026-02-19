@@ -1491,17 +1491,17 @@ function Status({
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.25rem' }}>
                   {[
-                    { id: 'Violence', label: 'Violencia' },
-                    { id: 'Pornography', label: 'Pornografía' },
-                    { id: 'Bullying', label: 'Bullying / Acoso' },
-                    { id: 'Blackmail', label: 'Extorsión / Chantaje' },
-                    { id: 'Stalking', label: 'Acoso / Stalking' },
-                    { id: 'Abuse', label: 'Abuso' },
-                    { id: 'ScholarDamage', label: 'Daño a instalaciones escolares' },
-                    { id: 'DrugUse', label: 'Uso de drogas' },
-                    { id: 'AlcoholUse', label: 'Uso de alcohol' },
-                    { id: 'SelfHarm', label: 'Autolesiones' },
-                    { id: 'Disrespect', label: 'Falta de respeto / Normas escolares' }
+                    { id: 1, label: 'Violencia' },
+                    { id: 2, label: 'Pornografía' },
+                    { id: 3, label: 'Bullying / Acoso' },
+                    { id: 4, label: 'Extorsión / Chantaje' },
+                    { id: 5, label: 'Acoso / Stalking' },
+                    { id: 6, label: 'Abuso' },
+                    { id: 7, label: 'Daño a instalaciones escolares' },
+                    { id: 8, label: 'Uso de drogas' },
+                    { id: 9, label: 'Uso de alcohol' },
+                    { id: 10, label: 'Autolesiones' },
+                    { id: 11, label: 'Falta de respeto / Normas escolares' }
                   ].map((reason) => (
                     <button
                       key={reason.id}

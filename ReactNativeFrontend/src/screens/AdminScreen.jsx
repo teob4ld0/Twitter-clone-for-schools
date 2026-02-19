@@ -405,45 +405,79 @@ const AdminScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-        <Feather name="user" size={13} color={theme.colors.textSecondary} style={{ marginRight: 4 }} />
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}
+        onPress={() => navigation.navigate('Profile', { userId: item.reporter?.id })}
+        activeOpacity={0.7}
+      >
+        {item.reporter?.profilePictureUrl
+          ? <Image source={{ uri: item.reporter.profilePictureUrl }} style={{ width: 26, height: 26, borderRadius: 13, marginRight: 6 }} />
+          : <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: theme.colors.primary + '33', alignItems: 'center', justifyContent: 'center', marginRight: 6 }}>
+              <Text style={{ fontSize: 11, fontWeight: 'bold', color: theme.colors.primary }}>{item.reporter?.username?.[0]?.toUpperCase()}</Text>
+            </View>
+        }
         <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
           {t('admin.reporter') || 'Reportado por'}:{' '}
-          <Text style={{ color: theme.colors.textPrimary, fontWeight: '600' }}>
+          <Text style={{ color: theme.colors.link, fontWeight: '600' }}>
             @{item.reporter?.username}
           </Text>
         </Text>
-      </View>
+      </TouchableOpacity>
 
       {item.reportedUser && (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-          <Feather name="alert-circle" size={13} color={theme.colors.warning} style={{ marginRight: 4 }} />
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}
+          onPress={() => navigation.navigate('Profile', { userId: item.reportedUser.id })}
+          activeOpacity={0.7}
+        >
+          {item.reportedUser?.profilePictureUrl
+            ? <Image source={{ uri: item.reportedUser.profilePictureUrl }} style={{ width: 26, height: 26, borderRadius: 13, marginRight: 6 }} />
+            : <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#e67e2233', alignItems: 'center', justifyContent: 'center', marginRight: 6 }}>
+                <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#e67e22' }}>{item.reportedUser.username?.[0]?.toUpperCase()}</Text>
+              </View>
+          }
           <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
             {t('admin.reportedUser') || 'Usuario reportado'}:{' '}
-            <Text style={{ color: theme.colors.textPrimary, fontWeight: '600' }}>
+            <Text style={{ color: theme.colors.link, fontWeight: '600' }}>
               @{item.reportedUser?.username}
             </Text>
           </Text>
-        </View>
+        </TouchableOpacity>
       )}
 
       {item.statusId && (
         <View style={{ marginBottom: 4 }}>
-          <Text style={{ fontSize: 13, color: theme.colors.textSecondary, marginBottom: 4 }}>
-            {t('admin.reportedPost') || 'Publicación reportada'} (#{item.statusId}):
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4, gap: 4 }}>
+            <Text style={{ fontSize: 13, color: theme.colors.textSecondary }}>
+              {t('admin.reportedPost') || 'Publicación reportada'}:
+            </Text>
+            {item.statusAuthor && (
+              <TouchableOpacity onPress={() => navigation.navigate('Profile', { userId: item.statusAuthor.id })}>
+                <Text style={{ fontSize: 13, color: theme.colors.link, fontWeight: '600' }}>
+                  @{item.statusAuthor.username}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
           {item.statusContent && (
-            <View style={{
-              backgroundColor: theme.colors.backgroundSecondary,
-              borderRadius: 8,
-              padding: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.border
-            }}>
-              <Text style={{ fontSize: 13, color: theme.colors.textPrimary }} numberOfLines={3}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('StatusDetail', { statusId: item.statusId })}
+              style={{
+                backgroundColor: theme.colors.backgroundSecondary || theme.colors.cardBackground,
+                borderRadius: 8,
+                padding: 10,
+                borderWidth: 1,
+                borderColor: theme.colors.primary + '55'
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 13, color: theme.colors.textPrimary }} numberOfLines={4}>
                 {item.statusContent}
               </Text>
-            </View>
+              <Text style={{ fontSize: 11, color: theme.colors.link, marginTop: 4 }}>
+                Ver publicación →
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       )}

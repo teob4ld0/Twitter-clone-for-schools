@@ -17,6 +17,25 @@
   },
   "item": [
     {
+      "name": "Health",
+      "item": [
+        {
+          "name": "AllGood (health check)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/allgood",
+              "host": ["{{base_url}}"],
+              "path": ["allgood"]
+            },
+            "description": "GET /allgood - Health check público, no requiere auth"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Authentication",
       "item": [
         {
@@ -224,6 +243,34 @@
             "description": "GET /api/auth/verify-email - Verificar email del usuario"
           },
           "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('jwt_token', '');",
+                  "  pm.collectionVariables.set('jwt_token', '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "POST /api/auth/logout - Cierra sesión: elimina todas las suscripciones push y tokens Expo del usuario (requiere auth). El test script limpia jwt_token automáticamente."
+          },
+          "response": []
         }
       ]
     },
@@ -358,6 +405,20 @@
               "path": ["api", "users", "{{user_id}}", "ban"]
             },
             "description": "PUT /api/users/{id}/ban - Banear/desbanear usuario (requiere auth, no alumnos)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete My Account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "DELETE /api/users/me - El propio usuario elimina su cuenta (requiere auth)"
           },
           "response": []
         }
@@ -548,6 +609,20 @@
               "path": ["api", "status", "{{status_id}}"]
             },
             "description": "DELETE /api/status/{id} - Eliminar status (requiere auth, solo dueño)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deleted Statuses (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status/deleted",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status", "deleted"]
+            },
+            "description": "GET /api/status/deleted - Listar todos los statuses borrados (soft-delete). Solo admin."
           },
           "response": []
         }
@@ -781,6 +856,20 @@
               "path": ["api", "chats", "{{chat_id}}"]
             },
             "description": "DELETE /api/chats/{id} - Eliminar chat (requiere auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deleted Messages (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/deleted-messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "deleted-messages"]
+            },
+            "description": "GET /api/chats/deleted-messages - Listar todos los mensajes borrados (soft-delete). Solo admin."
           },
           "response": []
         }
@@ -1171,6 +1260,141 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Create Report (stores report_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const jsonData = pm.response.json();",
+                  "  if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('report_id', String(jsonData.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusId\": {{status_id}},\n  \"otherUserId\": null,\n  \"type\": 11\n}\n// type: 1=Violence, 2=Pornography, 3=Bullying, 4=Blackmail, 5=Stalking, 6=Abuse,\n//        7=ScholarDamage, 8=DrugUse, 9=AlcoholUse, 10=SelfHarm, 11=Disrespect"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reports",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "POST /api/reports - Crear un reporte de status o usuario (requiere auth). Enviar solo statusId o solo otherUserId, nunca ambos. Tipos: 1=Violence, 2=Pornography, 3=Bullying, 4=Blackmail, 5=Stalking, 6=Abuse, 7=ScholarDamage, 8=DrugUse, 9=AlcoholUse, 10=SelfHarm, 11=Disrespect"
+          },
+          "response": []
+        },
+        {
+          "name": "Report User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statusId\": null,\n  \"otherUserId\": {{other_user_id}},\n  \"type\": 3\n}\n// type: 1=Violence, 2=Pornography, 3=Bullying, 4=Blackmail, 5=Stalking, 6=Abuse,\n//        7=ScholarDamage, 8=DrugUse, 9=AlcoholUse, 10=SelfHarm, 11=Disrespect"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reports",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "POST /api/reports - Reportar a un usuario (requiere auth). Usar otherUserId, dejar statusId en null."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Reports (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reports?page=1&pageSize=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports"],
+              "query": [
+                { "key": "type", "value": "", "description": "Filtrar por tipo (1-11). Dejar vacío para todos.", "disabled": true },
+                { "key": "reportedUserId", "value": "", "description": "Filtrar por usuario reportado.", "disabled": true },
+                { "key": "reporterUserId", "value": "", "description": "Filtrar por usuario que reportó.", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "50" }
+              ]
+            },
+            "description": "GET /api/reports - Obtener todos los reportes con paginación. Solo admin. Filtros opcionales: type, reportedUserId, reporterUserId."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Report By Id (admin only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reports/{{report_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports", "{{report_id}}"]
+            },
+            "description": "GET /api/reports/{id} - Obtener un reporte específico. Solo admin."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Download",
+      "item": [
+        {
+          "name": "Get APK Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/download/info",
+              "host": ["{{base_url}}"],
+              "path": ["api", "download", "info"]
+            },
+            "description": "GET /api/download/info - Verificar si el APK está disponible y obtener metadata (nombre, tamaño, fecha). Público."
+          },
+          "response": []
+        },
+        {
+          "name": "Download APK",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/download/apk",
+              "host": ["{{base_url}}"],
+              "path": ["api", "download", "apk"]
+            },
+            "description": "GET /api/download/apk - Descargar Twittetec.apk. Devuelve el archivo binario. Público."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1276,6 +1500,11 @@
     },
     {
       "key": "verification_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "report_id",
       "value": "",
       "type": "string"
     }

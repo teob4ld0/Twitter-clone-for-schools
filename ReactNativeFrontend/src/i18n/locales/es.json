@@ -312,7 +312,6 @@
     "loading": "Cargando usuarios...",
     "totalUsersCount": "Total usuarios: {{count}}",
     "noAdminPermission": "No tienes permisos de administrador",
-    "reports": "Reportes",
     "reportsTab": "🚩 Reportes",
     "reporter": "Reportador",
     "reportedUser": "Usuario reportado",
