@@ -150,6 +150,38 @@ export default function SupportScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Política de privacidad */}
+        <View style={styles.card}>
+          <View style={[styles.iconContainer, { backgroundColor: (theme.colors.primaryLight || 'rgba(29,161,242,0.1)') }]}>
+            <Text style={{ fontSize: 24 }}>🔒</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Política de privacidad</Text>
+            <Text style={styles.cardDescription}>Lee nuestra política de privacidad.</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+              <Text style={[styles.cardLink, { color: theme.colors.primary }]}>
+                Aclara cualquier duda sobre el manejo de tus datos "personales" aquí.
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Estándares de seguridad infantil */}
+        <View style={styles.card}>
+          <View style={[styles.iconContainer, { backgroundColor: '#FF634720' }]}>
+            <Text style={{ fontSize: 24 }}>🛡️</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>Seguridad infantil</Text>
+            <Text style={styles.cardDescription}>Nuestros estándares contra el abuso infantil.</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SafetyStandards')}>
+              <Text style={[styles.cardLink, { color: '#FF6347' }]}>
+                Conoce nuestras medidas de protección y seguridad.
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Info */}
         <View style={styles.infoCard}>
           <Text style={{ fontSize: 20, minWidth: 24 }}>ℹ️</Text>

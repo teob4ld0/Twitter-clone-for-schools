@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using MyNetApp.Attributes;
 using MyNetApp.Data;
 using MyNetApp.DTOs;
 using MyNetApp.Hubs;
@@ -52,7 +53,7 @@ public class ChatController : ControllerBase
             .Where(c => c.User1Id == user1Id && c.User2Id == user2Id)
             .Include(c => c.User1)
             .Include(c => c.User2)
-            .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+            .Include(c => c.Messages.Where(m => !m.IsDeleted).OrderByDescending(m => m.CreatedAt).Take(1))
             .FirstOrDefaultAsync();
 
         if (existingChat != null)
@@ -111,7 +112,7 @@ public class ChatController : ControllerBase
             .Where(c => c.User1Id == currentUserId || c.User2Id == currentUserId)
             .Include(c => c.User1)
             .Include(c => c.User2)
-            .Include(c => c.Messages.OrderByDescending(m => m.CreatedAt).Take(1))
+            .Include(c => c.Messages.Where(m => !m.IsDeleted).OrderByDescending(m => m.CreatedAt).Take(1))
             .ToListAsync();
 
         var result = chats.Select(c =>
@@ -264,7 +265,7 @@ public class ChatController : ControllerBase
             return Forbid();
 
         var messages = await _context.Messages
-            .Where(m => m.ChatId == chatId)
+            .Where(m => m.ChatId == chatId && !m.IsDeleted)
             .Include(m => m.Sender)
             .OrderBy(m => m.CreatedAt)
             .ToListAsync();
@@ -310,7 +311,7 @@ public class ChatController : ControllerBase
 
         var message = await _context.Messages
             .Include(m => m.Sender)
-            .FirstOrDefaultAsync(m => m.Id == messageId && m.ChatId == chatId);
+            .FirstOrDefaultAsync(m => m.Id == messageId && m.ChatId == chatId && !m.IsDeleted);
 
         if (message == null)
             return NotFound();
@@ -392,7 +393,9 @@ public class ChatController : ControllerBase
         if (message.SenderId != currentUserId)
             return Forbid();
 
-        _context.Messages.Remove(message);
+        // Soft delete — mark as deleted instead of removing
+        message.IsDeleted = true;
+        message.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         // Determinar el destinatario
@@ -413,5 +416,35 @@ public class ChatController : ControllerBase
             .SendAsync("ChatUpdated", chatId);
 
         return NoContent();
+    }
+
+    // Admin-only: list all soft-deleted messages
+    [Authorize]
+    [RequireAdmin]
+    [HttpGet("deleted-messages")]
+    public async Task<IActionResult> GetDeletedMessages()
+    {
+        var deletedMessages = await _context.Messages
+            .Where(m => m.IsDeleted)
+            .Include(m => m.Sender)
+            .Include(m => m.Chat)
+            .OrderByDescending(m => m.DeletedAt)
+            .Select(m => new
+            {
+                m.Id,
+                m.ChatId,
+                m.SenderId,
+                SenderUsername = m.Sender.Username,
+                SenderProfilePictureUrl = m.Sender.ProfilePictureUrl,
+                m.Content,
+                m.MediaUrl,
+                m.CreatedAt,
+                m.DeletedAt,
+                ChatUser1Id = m.Chat.User1Id,
+                ChatUser2Id = m.Chat.User2Id
+            })
+            .ToListAsync();
+
+        return Ok(deletedMessages);
     }
 }

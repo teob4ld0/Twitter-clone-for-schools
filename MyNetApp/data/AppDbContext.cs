@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<PushSubscription> PushSubscriptions { get; set; }
     public DbSet<ExpoPushToken> ExpoPushTokens { get; set; }
     public DbSet<InterestSignal> InterestSignals { get; set; }
+    public DbSet<Report> Reports { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -176,5 +177,28 @@ public class AppDbContext : DbContext
         
         modelBuilder.Entity<InterestSignal>()
             .HasIndex(i => new { i.UserId, i.StatusId, i.SignalType });
+
+        // Report configuration
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Reporter)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.OtherUser)
+            .WithMany()
+            .HasForeignKey(r => r.OtherUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.Status)
+            .WithMany()
+            .HasForeignKey(r => r.StatusId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Index for admin queries
+        modelBuilder.Entity<Report>()
+            .HasIndex(r => new { r.CreatedAt, r.Type });
     }
 }

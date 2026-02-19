@@ -1,8 +1,8 @@
-{
+﻿{
   "info": {
     "_postman_id": "mynetapp-complete-collection",
     "name": "MyNetApp API - COMPLETE",
-    "description": "Colección COMPLETA de todos los endpoints de MyNetApp (Auth, Users, Status, Followers, Chats, Notifications, Media, Push, InterestSignals). Usa {{base_url}} y almacena JWT en {{jwt_token}}.",
+    "description": "Coleccion COMPLETA de todos los endpoints de MyNetApp (Auth, Users, Status, Followers, Chats, Notifications, Media, Push, InterestSignals, Reports, Download). Usa {{base_url}} y almacena JWT en {{jwt_token}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,25 +16,6 @@
     ]
   },
   "item": [
-    {
-      "name": "Health",
-      "item": [
-        {
-          "name": "AllGood (health check)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/allgood",
-              "host": ["{{base_url}}"],
-              "path": ["allgood"]
-            },
-            "description": "GET /allgood - Health check público, devuelve 200 OK con 'allgood'"
-          },
-          "response": []
-        }
-      ]
-    },
     {
       "name": "Authentication",
       "item": [
@@ -243,34 +224,6 @@
             "description": "GET /api/auth/verify-email - Verificar email del usuario"
           },
           "response": []
-        },
-        {
-          "name": "Logout",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  pm.environment.set('jwt_token', '');",
-                  "  pm.collectionVariables.set('jwt_token', '');",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/auth/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "logout"]
-            },
-            "description": "POST /api/auth/logout - Cerrar sesión: elimina todas las suscripciones push y tokens Expo del usuario (requiere auth)"
-          },
-          "response": []
         }
       ]
     },
@@ -405,20 +358,6 @@
               "path": ["api", "users", "{{user_id}}", "ban"]
             },
             "description": "PUT /api/users/{id}/ban - Banear/desbanear usuario (requiere auth, no alumnos)"
-          },
-          "response": []
-        },
-        {
-          "name": "Delete My Account",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/users/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "users", "me"]
-            },
-            "description": "DELETE /api/users/me - Eliminar la propia cuenta (requiere auth)"
           },
           "response": []
         }

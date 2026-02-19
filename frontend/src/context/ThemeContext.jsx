@@ -14,6 +14,9 @@ const lightTheme = {
     backgroundSecondary: '#f5f8fa',
     backgroundTertiary: '#e1e8ed',
     backgroundHover: '#f7f9fa',
+
+    //El feedsito
+    titleStyle: '#000000',
     
     // Texto
     textPrimary: '#0f1419',
@@ -127,6 +130,9 @@ const darkTheme = {
     backgroundSecondary: '#16181c',
     backgroundTertiary: '#202327',
     backgroundHover: '#1c1f23',
+
+    //El feedsito
+    titleStyle: '#ffffff',
     
     // Texto
     textPrimary: '#e7e9ea',

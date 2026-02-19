@@ -117,6 +117,24 @@ function Login() {
           </span>
         </button>
       </div>
+
+      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e1e8ed' }}>
+        <p style={{ fontSize: '0.9rem', color: '#657786', marginBottom: '0.75rem', textAlign: 'center' }}>
+          ¿Prefieres usar nuestra app móvil?
+        </p>
+        <button 
+          type="button" 
+          onClick={() => navigate('/descargar-app')} 
+          style={mobileAppButtonStyle}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+            </svg>
+            <span>Descargar App Móvil</span>
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -175,6 +193,19 @@ const googleButtonStyle = {
   fontWeight: '500',
   transition: 'all 0.2s ease',
   boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
+};
+
+const mobileAppButtonStyle = {
+  padding: '0.75rem',
+  fontSize: '1rem',
+  backgroundColor: '#1da1f2',
+  color: 'white',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  width: '100%',
+  fontWeight: '500',
+  transition: 'all 0.2s ease'
 };
 
 export default Login;

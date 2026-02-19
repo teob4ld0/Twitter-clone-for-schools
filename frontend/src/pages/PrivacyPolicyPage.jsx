@@ -101,7 +101,7 @@ function PrivacyPolicyPage() {
           fontSize: '13px',
           color: theme.colors.textSecondary,
         }}>
-          <strong>Última actualización:</strong> 10 de febrero de 2026
+          <strong>Última actualización:</strong> 18 de febrero de 2026
         </p>
 
         <hr style={hrStyle} />
@@ -170,6 +170,17 @@ function PrivacyPolicyPage() {
           <ul style={ulStyle}>
             <li><strong>Tokens de dispositivo</strong> para enviar notificaciones vía Firebase Cloud Messaging (FCM)</li>
           </ul>
+
+          <h3 style={h3Style}>2.7 Permisos del Dispositivo (App Móvil)</h3>
+          <p style={pStyle}>En dispositivos móviles, podemos solicitar los siguientes permisos:</p>
+          <ul style={ulStyle}>
+            <li><strong>Acceso a la cámara:</strong> Para tomar fotos o videos directamente desde la app para publicaciones o foto de perfil</li>
+            <li><strong>Acceso a la galería/medios:</strong> Para seleccionar fotos y videos existentes en tu dispositivo para compartir en publicaciones, mensajes o como foto de perfil</li>
+          </ul>
+          <p style={pStyle}>
+            Estos permisos son opcionales y se solicitan únicamente cuando realizas una acción que los requiere (por ejemplo, adjuntar medios a una publicación). Anteriormente, los medios se subían a través del explorador de archivos (en PC) o desde Google Fotos (que ya contaba con sus propios permisos). Con la app móvil, se necesita acceso directo al dispositivo para una mejor experiencia de usuario.
+          </p>
+          <p style={pStyle}>Puedes revocar estos permisos en cualquier momento desde la configuración de tu dispositivo.</p>
         </div>
 
         <hr style={hrStyle} />
@@ -315,9 +326,8 @@ function PrivacyPolicyPage() {
           <h2 style={h2Style}>7. Eliminación de Cuenta</h2>
           <p style={pStyle}>Puedes solicitar la eliminación de tu cuenta contactándonos a través de:</p>
           <ul style={ulStyle}>
-            <li><strong>Email de contacto:</strong> support@twittetec.app</li>
-            <li><strong>Formulario de contacto:</strong> https://twittetec.app/contact</li>
-            <li><strong>Sitio web:</strong> https://twittetec.app</li>
+            <li><strong>Email de contacto:</strong> xb912f0uhbrz@brevo-mail.com</li>
+            <li><strong>Sitio web:</strong> https://app.twittetec.com</li>
           </ul>
           <p style={pStyle}>Cuando eliminas tu cuenta:</p>
           <ul style={ulStyle}>
@@ -364,8 +374,8 @@ function PrivacyPolicyPage() {
           <h2 style={h2Style}>10. Contacto</h2>
           <p style={pStyle}>Si tienes preguntas sobre esta Política de Privacidad o cómo manejamos tus datos, contáctanos:</p>
           <ul style={ulStyle}>
-            <li><strong>Email:</strong> support@twittetec.app</li>
-            <li><strong>Sitio web de contacto:</strong> https://twittetec.app/contact</li>
+            <li><strong>Email:</strong> xb912f0uhbrz@brevo-mail.com</li>
+            <li><strong>Sitio web:</strong> https://app.twittetec.com</li>
             <li><strong>Soporte:</strong> Disponible a través de la configuración de la app</li>
           </ul>
         </div>

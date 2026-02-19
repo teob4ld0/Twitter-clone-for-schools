@@ -26,4 +26,5 @@ EXPOSE 8081
 
 COPY --from=build /https /https
 COPY --from=build /app/publish ./
+COPY --from=build /src/downloads ./downloads
 ENTRYPOINT ["dotnet", "MyNetApp.dll"]
