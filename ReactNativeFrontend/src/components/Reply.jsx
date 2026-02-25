@@ -933,17 +933,17 @@ function Reply({ reply, onDelete, onLikeUpdate }) {
                 </Text>
                 <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
                   {[
-                    { id: 'Violence', key: 'report.reasons.Violence', fallback: 'Violencia' },
-                    { id: 'Pornography', key: 'report.reasons.Pornography', fallback: 'Pornografía' },
-                    { id: 'Bullying', key: 'report.reasons.Bullying', fallback: 'Bullying / Acoso' },
-                    { id: 'Blackmail', key: 'report.reasons.Blackmail', fallback: 'Extorsión / Chantaje' },
-                    { id: 'Stalking', key: 'report.reasons.Stalking', fallback: 'Acoso / Stalking' },
-                    { id: 'Abuse', key: 'report.reasons.Abuse', fallback: 'Abuso' },
-                    { id: 'ScholarDamage', key: 'report.reasons.ScholarDamage', fallback: 'Daño a instalaciones escolares' },
-                    { id: 'DrugUse', key: 'report.reasons.DrugUse', fallback: 'Uso de drogas' },
-                    { id: 'AlcoholUse', key: 'report.reasons.AlcoholUse', fallback: 'Uso de alcohol' },
-                    { id: 'SelfHarm', key: 'report.reasons.SelfHarm', fallback: 'Autolesiones' },
-                    { id: 'Disrespect', key: 'report.reasons.Disrespect', fallback: 'Falta de respeto / Normas escolares' }
+                    { id: 1, key: 'report.reasons.Violence', fallback: 'Violencia' },
+                    { id: 2, key: 'report.reasons.Pornography', fallback: 'Pornografía' },
+                    { id: 3, key: 'report.reasons.Bullying', fallback: 'Bullying / Acoso' },
+                    { id: 4, key: 'report.reasons.Blackmail', fallback: 'Extorsión / Chantaje' },
+                    { id: 5, key: 'report.reasons.Stalking', fallback: 'Acoso / Stalking' },
+                    { id: 6, key: 'report.reasons.Abuse', fallback: 'Abuso' },
+                    { id: 7, key: 'report.reasons.ScholarDamage', fallback: 'Daño a instalaciones escolares' },
+                    { id: 8, key: 'report.reasons.DrugUse', fallback: 'Uso de drogas' },
+                    { id: 9, key: 'report.reasons.AlcoholUse', fallback: 'Uso de alcohol' },
+                    { id: 10, key: 'report.reasons.SelfHarm', fallback: 'Autolesiones' },
+                    { id: 11, key: 'report.reasons.Disrespect', fallback: 'Falta de respeto / Normas escolares' }
                   ].map((reason) => (
                     <TouchableOpacity
                       key={reason.id}
